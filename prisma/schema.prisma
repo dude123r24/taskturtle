@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── NextAuth.js Models ─────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+
+  accounts   Account[]
+  sessions   Session[]
+  tasks      Task[]
+  timeSlots  TimeSlot[]
+  dailyPlans DailyPlan[]
+  settings   UserSettings?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Application Models ─────────────────────────────────────────────
+
+model Task {
+  id               String             @id @default(cuid())
+  userId           String
+  title            String
+  description      String?
+  quadrant         EisenhowerQuadrant
+  horizon          TaskHorizon        @default(LONG_TERM)
+  status           TaskStatus         @default(TODO)
+  estimatedMinutes Int?
+  actualMinutes    Int?
+  dueDate          DateTime?
+  calendarEventId  String?
+  sortOrder        Int                @default(0)
+
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  estimateLogs   TimeEstimateLog[]
+  dailyPlanTasks DailyPlanTask[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, quadrant])
+  @@index([userId, horizon])
+}
+
+model TimeSlot {
+  id         String   @id @default(cuid())
+  userId     String
+  label      String
+  startTime  String   // HH:mm format
+  endTime    String   // HH:mm format
+  daysOfWeek Int[]    // 0=Sun ... 6=Sat
+  color      String   @default("#4A90D9")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model DailyPlan {
+  id     String          @id @default(cuid())
+  userId String
+  date   DateTime        @db.Date
+  tasks  DailyPlanTask[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+model DailyPlanTask {
+  id            String @id @default(cuid())
+  dailyPlanId   String
+  taskId        String
+  timeSlotStart String?
+  timeSlotEnd   String?
+  sortOrder     Int    @default(0)
+
+  dailyPlan DailyPlan @relation(fields: [dailyPlanId], references: [id], onDelete: Cascade)
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([dailyPlanId, taskId])
+}
+
+model TimeEstimateLog {
+  id                 String @id @default(cuid())
+  taskId             String
+  oldEstimateMinutes Int
+  newEstimateMinutes Int
+  reason             String?
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model UserSettings {
+  id                  String  @id @default(cuid())
+  userId              String  @unique
+  maxDailyTasks       Int     @default(8)
+  maxWeeklyTasks      Int     @default(25)
+  maxDailyMinutes     Int     @default(480)
+  defaultView         String  @default("matrix")
+  calendarSyncEnabled Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────
+
+enum EisenhowerQuadrant {
+  DO_FIRST  // Urgent + Important
+  SCHEDULE  // Not Urgent + Important
+  DELEGATE  // Urgent + Not Important
+  ELIMINATE // Not Urgent + Not Important
+}
+
+enum TaskHorizon {
+  SHORT_TERM
+  LONG_TERM
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  ARCHIVED
+}
