@@ -26,6 +26,7 @@ import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { useTaskStore } from '@/store/taskStore';
 import QuickAddDialog from '@/components/tasks/QuickAddDialog';
 
@@ -36,6 +37,7 @@ const navItems = [
     { label: 'Tasks', href: '/tasks', icon: <ChecklistIcon /> },
     { label: 'Planner', href: '/planner', icon: <ViewTimelineIcon /> },
     { label: 'Calendar', href: '/calendar', icon: <CalendarMonthIcon /> },
+    { label: 'AI Assistant', href: '/chat', icon: <SmartToyIcon /> },
     { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
 ];
 
