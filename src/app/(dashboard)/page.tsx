@@ -17,7 +17,10 @@ import TaskCard from '@/components/tasks/TaskCard';
 
 interface CalendarEvent {
     id: string;
+    calendarName: string;
+    calendarColor: string;
     summary: string;
+    isDuplicate: boolean;
     start?: { dateTime?: string; date?: string };
     end?: { dateTime?: string; date?: string };
 }
@@ -60,7 +63,7 @@ export default function DashboardPage() {
     const fetchCalendarEvents = async () => {
         try {
             const today = new Date().toISOString().split('T')[0];
-            const res = await fetch(`/api/calendar/events?date=${today}`);
+            const res = await fetch(`/api/calendar/events?date=${today}&hideDuplicates=true`);
             if (res.ok) {
                 const data = await res.json();
                 if (Array.isArray(data)) setCalendarEvents(data);
@@ -206,20 +209,26 @@ export default function DashboardPage() {
                                         sx={{
                                             p: 1.5,
                                             borderRadius: 2,
-                                            bgcolor: 'rgba(30, 136, 229, 0.08)',
-                                            border: '1px solid rgba(30, 136, 229, 0.15)',
+                                            bgcolor: `${event.calendarColor || '#1E88E5'}11`,
+                                            border: `1px solid ${event.calendarColor || '#1E88E5'}33`,
+                                            borderLeft: `3px solid ${event.calendarColor || '#1E88E5'}`,
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: 1,
                                         }}
                                     >
                                         <CalendarTodayIcon
-                                            sx={{ fontSize: '1rem', color: 'info.main' }}
+                                            sx={{ fontSize: '1rem', color: event.calendarColor || 'info.main' }}
                                         />
                                         <Box sx={{ flex: 1, minWidth: 0 }}>
                                             <Typography variant="body2" fontWeight={500} noWrap>
                                                 {event.summary}
                                             </Typography>
+                                            {event.calendarName && (
+                                                <Typography variant="caption" color="text.secondary">
+                                                    {event.calendarName}
+                                                </Typography>
+                                            )}
                                         </Box>
                                         <Typography variant="caption" color="text.secondary">
                                             {formatEventTime(event)}

@@ -18,10 +18,13 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 interface CalendarEvent {
     id: string;
+    calendarName: string;
+    calendarColor: string;
     summary: string;
+    isDuplicate: boolean;
+    description?: string;
     start?: { dateTime?: string; date?: string };
     end?: { dateTime?: string; date?: string };
-    description?: string;
 }
 
 export default function CalendarPage() {
@@ -38,7 +41,7 @@ export default function CalendarPage() {
     const fetchEvents = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch(`/api/calendar/events?date=${selectedDate}`);
+            const res = await fetch(`/api/calendar/events?date=${selectedDate}&hideDuplicates=true`);
             if (res.ok) {
                 const data = await res.json();
                 setEvents(Array.isArray(data) ? data : []);
@@ -147,9 +150,9 @@ export default function CalendarPage() {
                                             key={event.id}
                                             sx={{
                                                 mb: 0.5,
-                                                background: 'rgba(30, 136, 229, 0.1)',
-                                                border: '1px solid rgba(30, 136, 229, 0.2)',
-                                                borderLeft: '3px solid #1E88E5',
+                                                background: `${event.calendarColor || '#1E88E5'}15`,
+                                                border: `1px solid ${event.calendarColor || '#1E88E5'}33`,
+                                                borderLeft: `3px solid ${event.calendarColor || '#1E88E5'}`,
                                             }}
                                         >
                                             <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
@@ -161,6 +164,11 @@ export default function CalendarPage() {
                                                         {event.description && (
                                                             <Typography variant="caption" color="text.secondary">
                                                                 {event.description.substring(0, 80)}
+                                                            </Typography>
+                                                        )}
+                                                        {event.calendarName && (
+                                                            <Typography variant="caption" sx={{ color: event.calendarColor || 'text.secondary' }}>
+                                                                📅 {event.calendarName}
                                                             </Typography>
                                                         )}
                                                     </Box>

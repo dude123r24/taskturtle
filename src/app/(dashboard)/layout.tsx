@@ -141,7 +141,8 @@ export default function DashboardLayout({
                     flex: 1,
                     display: 'flex',
                     flexDirection: 'column',
-                    width: { md: `calc(100% - ${DRAWER_WIDTH}px)` },
+                    ml: { md: `${DRAWER_WIDTH}px` },
+                    width: { xs: '100%', md: `calc(100% - ${DRAWER_WIDTH}px)` },
                 }}
             >
                 <AppBar

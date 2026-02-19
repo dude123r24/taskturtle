@@ -16,12 +16,13 @@ model User {
   emailVerified DateTime?
   image         String?
 
-  accounts   Account[]
-  sessions   Session[]
-  tasks      Task[]
-  timeSlots  TimeSlot[]
-  dailyPlans DailyPlan[]
-  settings   UserSettings?
+  accounts         Account[]
+  sessions         Session[]
+  tasks            Task[]
+  timeSlots        TimeSlot[]
+  dailyPlans       DailyPlan[]
+  settings         UserSettings?
+  calendarAccounts CalendarAccount[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -158,6 +159,48 @@ model UserSettings {
   calendarSyncEnabled Boolean @default(true)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Multi-Calendar Models ──────────────────────────────────────────
+
+model CalendarAccount {
+  id              String  @id @default(cuid())
+  userId          String
+  googleEmail     String  // e.g. work@gmail.com, personal@gmail.com
+  calendarId      String  @default("primary") // Which calendar in this account
+  calendarName    String  // Display name, e.g. "Work", "Personal"
+  color           String  @default("#4285F4")
+  accessToken     String  @db.Text
+  refreshToken    String? @db.Text
+  tokenExpiresAt  Int?    // Unix timestamp
+  enabled         Boolean @default(true)
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  syncedEvents SyncedEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, googleEmail, calendarId])
+  @@index([userId])
+}
+
+model SyncedEvent {
+  id                String @id @default(cuid())
+  calendarAccountId String
+  googleEventId     String // The event ID from Google Calendar
+  eventFingerprint  String // hash of (summary + startTime + endTime) for cross-calendar dedup
+  summary           String
+  startTime         DateTime
+  endTime           DateTime
+
+  calendarAccount CalendarAccount @relation(fields: [calendarAccountId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([calendarAccountId, googleEventId])
+  @@index([calendarAccountId])
+  @@index([eventFingerprint])
 }
 
 // ─── Enums ──────────────────────────────────────────────────────────
