@@ -117,6 +117,53 @@ export default function DashboardPage() {
         });
     };
 
+    const handleDropToToday = async (taskId: string) => {
+        // Optimistic UI update
+        const taskToAdd = tasks.find((t) => t.id === taskId);
+        if (!taskToAdd) return;
+
+        if (!todayTasks.find((t) => t.id === taskId)) {
+            setTodayTasks((prev) => [...prev, taskToAdd]);
+        }
+
+        // Save to DB
+        try {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const updatedTasks = [...todayTasks.filter((t) => t.id !== taskId), taskToAdd].map((t) => ({
+                taskId: t.id,
+            }));
+            await fetch('/api/planning/daily', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: todayStr, tasks: updatedTasks }),
+            });
+            fetchTodayPlan();
+        } catch (e) {
+            console.error('Failed to update today plan', e);
+        }
+    };
+
+    const handleRemoveFromToday = async (taskId: string) => {
+        // Optimistic UI update
+        setTodayTasks((prev) => prev.filter((t) => t.id !== taskId));
+
+        // Save to DB
+        try {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const updatedTasks = todayTasks.filter((t) => t.id !== taskId).map((t) => ({
+                taskId: t.id,
+            }));
+            await fetch('/api/planning/daily', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: todayStr, tasks: updatedTasks }),
+            });
+            fetchTodayPlan();
+        } catch (e) {
+            console.error('Failed to remove from today plan', e);
+        }
+    };
+
     if (isLoading) {
         return (
             <Stack spacing={3}>
@@ -208,57 +255,24 @@ export default function DashboardPage() {
                     {/* Eisenhower Matrix */}
                     <Box sx={{ mb: 4 }}>
                         <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-                            Eisenhower Matrix
+                            Eisenhower Matrix & Today
                         </Typography>
-                        <EisenhowerMatrix tasks={tasks} />
+                        <EisenhowerMatrix
+                            tasks={tasks}
+                            todayTasks={todayTasks}
+                            onDropToToday={handleDropToToday}
+                            onRemoveFromToday={handleRemoveFromToday}
+                        />
                     </Box>
 
-
-
-                    {/* Bottom row: Today's Focus + Calendar */}
+                    {/* Bottom row: Calendar */}
                     <Box
                         sx={{
                             display: 'grid',
-                            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                            gridTemplateColumns: { xs: '1fr', md: '1fr' },
                             gap: 2,
                         }}
                     >
-                        {/* Today's Focus */}
-                        <Card
-                            sx={{
-                                background: 'rgba(26, 25, 41, 0.6)',
-                                border: '1px solid rgba(255,255,255,0.06)',
-                            }}
-                        >
-                            <CardContent>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                                    <Typography variant="h6" fontWeight={600}>
-                                        📋 Today&apos;s Focus
-                                    </Typography>
-                                    <Chip
-                                        label={`${todayTasks.length} tasks`}
-                                        size="small"
-                                        color={overload?.isOverloaded ? 'warning' : 'default'}
-                                    />
-                                </Stack>
-                                <Stack spacing={1}>
-                                    {todayTasks.length === 0 ? (
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            sx={{ textAlign: 'center', py: 4, fontStyle: 'italic' }}
-                                        >
-                                            No tasks planned for today. Visit the Planner to set up your day.
-                                        </Typography>
-                                    ) : (
-                                        todayTasks.map((task) => (
-                                            <TaskCard key={task.id} task={task} compact />
-                                        ))
-                                    )}
-                                </Stack>
-                            </CardContent>
-                        </Card>
-
                         {/* Calendar Events */}
                         <Card
                             sx={{

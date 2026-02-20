@@ -7,6 +7,8 @@ import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import {
     DndContext,
     DragOverlay,
@@ -25,6 +27,9 @@ import DraggableTaskCard from './DraggableTaskCard';
 
 interface EisenhowerMatrixProps {
     tasks: Task[];
+    todayTasks?: Task[];
+    onDropToToday?: (taskId: string) => void;
+    onRemoveFromToday?: (taskId: string) => void;
 }
 
 const quadrantOrder = ['DO_FIRST', 'SCHEDULE', 'DELEGATE', 'ELIMINATE'] as const;
@@ -125,6 +130,65 @@ function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }
     );
 }
 
+function TodayQuadrant({ tasks }: { tasks: Task[] }) {
+    const { setNodeRef, isOver } = useDroppable({
+        id: 'TODAY_PLAN',
+    });
+
+    // Sort by importance: DO_FIRST > SCHEDULE > DELEGATE > ELIMINATE
+    const sortedTasks = [...tasks].sort((a, b) => {
+        const order = { 'DO_FIRST': 0, 'SCHEDULE': 1, 'DELEGATE': 2, 'ELIMINATE': 3 };
+        return order[a.quadrant as keyof typeof order] - order[b.quadrant as keyof typeof order];
+    });
+
+    return (
+        <Box
+            ref={setNodeRef}
+            sx={{
+                p: 2,
+                borderRadius: 3,
+                border: isOver ? `2px dashed #6C63FF` : `1px solid rgba(108, 99, 255, 0.2)`,
+                background: isOver
+                    ? `rgba(108, 99, 255, 0.1)`
+                    : `linear-gradient(135deg, rgba(108, 99, 255, 0.05), transparent)`,
+                height: 250,
+                overflowY: 'auto',
+                transition: 'all 0.2s',
+                mb: 4,
+            }}
+        >
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#6C63FF', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FormatListBulletedIcon fontSize="small" /> Today's Focus
+                </Typography>
+                <Chip
+                    label={tasks.length}
+                    size="small"
+                    sx={{ bgcolor: `rgba(108, 99, 255, 0.2)`, color: '#6C63FF', fontWeight: 600, fontSize: '0.75rem' }}
+                />
+            </Stack>
+
+            {sortedTasks.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3, fontStyle: 'italic', opacity: 0.5 }}>
+                    Drop tasks here to focus on them today
+                </Typography>
+            ) : (
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
+                        gap: 2,
+                    }}
+                >
+                    {sortedTasks.map((task) => (
+                        <DraggableTaskCard key={task.id} task={task} compact disableSwipe />
+                    ))}
+                </Box>
+            )}
+        </Box>
+    );
+}
+
 function DroppableAction({
     id,
     icon: Icon,
@@ -183,7 +247,7 @@ function DroppableAction({
     );
 }
 
-export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
+export default function EisenhowerMatrix({ tasks, todayTasks = [], onDropToToday, onRemoveFromToday }: EisenhowerMatrixProps) {
     const { patchTask } = useTaskStore();
     const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -207,10 +271,15 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
 
             if (overId === 'ARCHIVE_ACTION') {
                 patchTask(active.id as string, { status: 'ARCHIVED' });
+                if (onRemoveFromToday) onRemoveFromToday(active.id as string);
             } else if (overId === 'DONE_ACTION') {
                 patchTask(active.id as string, { status: 'DONE' });
+                if (onRemoveFromToday) onRemoveFromToday(active.id as string);
+            } else if (overId === 'TODAY_PLAN') {
+                if (onDropToToday) onDropToToday(active.id as string);
             } else if (quadrantOrder.includes(overId as any)) {
                 patchTask(active.id as string, { quadrant: overId as any });
+                if (onRemoveFromToday) onRemoveFromToday(active.id as string);
             }
         }
         setActiveId(null);
@@ -221,6 +290,8 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <Box sx={{ position: 'relative' }}>
+                <TodayQuadrant tasks={todayTasks} />
+
                 <Box
                     sx={{
                         display: 'grid',
@@ -234,7 +305,7 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
                             key={quadrant}
                             quadrant={quadrant}
                             tasks={tasks.filter(
-                                (t) => t.quadrant === quadrant && t.status !== 'ARCHIVED' && t.status !== 'DONE'
+                                (t) => t.quadrant === quadrant && t.status !== 'ARCHIVED' && t.status !== 'DONE' && !todayTasks.some(today => today.id === t.id)
                             )}
                         />
                     ))}
