@@ -63,7 +63,9 @@ function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }
                 background: isOver
                     ? `${q.color}11`
                     : `linear-gradient(135deg, ${q.color}08, transparent)`,
-                height: 350,
+                height: { xs: 300, md: 'calc(45vh - 100px)' },
+                minHeight: 250,
+                maxHeight: 500,
                 overflowY: 'auto',
                 transition: 'all 0.2s',
                 cursor: 'pointer',
@@ -151,7 +153,9 @@ function TodayQuadrant({ tasks }: { tasks: Task[] }) {
                 background: isOver
                     ? `rgba(108, 99, 255, 0.1)`
                     : `linear-gradient(135deg, rgba(108, 99, 255, 0.05), transparent)`,
-                height: 250,
+                height: { xs: 250, md: 'calc(30vh - 50px)' },
+                minHeight: 180,
+                maxHeight: 350,
                 overflowY: 'auto',
                 transition: 'all 0.2s',
                 mb: 4,
