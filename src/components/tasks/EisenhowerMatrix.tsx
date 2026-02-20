@@ -106,7 +106,7 @@ function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }
                 />
             </Stack>
 
-            <Stack spacing={2} sx={{ minHeight: 100 }}>
+            <Stack spacing={1} sx={{ minHeight: 100 }}>
                 {tasks.length === 0 ? (
                     <Typography
                         variant="body2"
@@ -177,7 +177,7 @@ function TodayQuadrant({ tasks }: { tasks: Task[] }) {
                     sx={{
                         display: 'grid',
                         gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
-                        gap: 2,
+                        gap: 1,
                     }}
                 >
                     {sortedTasks.map((task) => (

@@ -54,25 +54,33 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                 },
             }}
         >
-            <CardContent sx={{ p: compact ? 1.5 : 2, '&:last-child': { pb: compact ? 1.5 : 2 } }}>
-                <Stack direction="row" spacing={1} alignItems="flex-start">
+            <CardContent sx={{ p: compact ? 0.75 : 1.5, '&:last-child': { pb: compact ? 0.75 : 1.5 }, display: 'flex', alignItems: compact ? 'center' : 'flex-start' }}>
+                <Stack direction="row" spacing={0.5} alignItems={compact ? "center" : "flex-start"} sx={{ flex: 1, minWidth: 0 }}>
                     <Tooltip title={isDone ? 'Mark as to do' : 'Mark as done'}>
                         <IconButton
                             size="small"
                             onClick={toggleDone}
-                            sx={{ mt: -0.5, color: isDone ? 'success.main' : 'text.secondary' }}
+                            sx={{ p: compact ? 0.25 : 0.5, mt: compact ? 0 : -0.25, color: isDone ? 'success.main' : 'text.secondary' }}
                         >
-                            {isDone ? <CheckCircleIcon /> : <CheckCircleOutlineIcon />}
+                            {isDone ? (
+                                <CheckCircleIcon sx={{ fontSize: compact ? '1.1rem' : '1.25rem' }} />
+                            ) : (
+                                <CheckCircleOutlineIcon sx={{ fontSize: compact ? '1.1rem' : '1.25rem' }} />
+                            )}
                         </IconButton>
                     </Tooltip>
 
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ flex: 1, minWidth: 0, display: compact ? 'flex' : 'block', alignItems: 'center', gap: 1 }}>
                         <Typography
                             variant={compact ? 'body2' : 'body1'}
+                            noWrap
                             sx={{
-                                fontWeight: 500,
+                                fontWeight: compact ? 500 : 600,
+                                fontSize: compact ? '0.8rem' : '0.9rem',
                                 textDecoration: isDone ? 'line-through' : 'none',
                                 color: isDone ? 'text.secondary' : 'text.primary',
+                                flex: compact ? 1 : 'unset',
+                                lineHeight: compact ? 1.2 : 1.5,
                             }}
                         >
                             {task.title}
@@ -82,46 +90,58 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                             <Typography
                                 variant="caption"
                                 color="text.secondary"
-                                sx={{ mt: 0.5, display: 'block' }}
+                                noWrap
+                                sx={{ mt: 0.25, display: 'block', fontSize: '0.7rem' }}
                             >
                                 {task.description}
                             </Typography>
                         )}
 
-                        <Stack direction="row" spacing={0.5} sx={{ mt: 1 }} flexWrap="wrap">
-                            <Chip
-                                label={HORIZON_LABELS[task.horizon]}
-                                size="small"
-                                variant="outlined"
-                                sx={{ fontSize: '0.65rem', height: 20 }}
-                            />
-                            {task.estimatedMinutes && (
-                                <Chip
-                                    icon={<AccessTimeIcon sx={{ fontSize: '0.8rem !important' }} />}
-                                    label={formatMinutes(task.estimatedMinutes)}
-                                    size="small"
-                                    variant="outlined"
-                                    sx={{ fontSize: '0.65rem', height: 20 }}
-                                />
+                        <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{ mt: compact ? 0 : 0.75 }}
+                            alignItems="center"
+                            flexWrap="nowrap"
+                        >
+                            {!compact && (
+                                <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', fontWeight: 600 }}>
+                                    {HORIZON_LABELS[task.horizon]}
+                                </Typography>
                             )}
+
+                            {task.estimatedMinutes && (
+                                <Stack direction="row" alignItems="center" spacing={0.25} sx={{ color: 'text.secondary' }}>
+                                    <AccessTimeIcon sx={{ fontSize: '0.75rem' }} />
+                                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 500 }}>
+                                        {formatMinutes(task.estimatedMinutes)}
+                                    </Typography>
+                                </Stack>
+                            )}
+
                             {task.actualMinutes !== null && task.actualMinutes !== undefined && task.estimatedMinutes && (
-                                <Chip
-                                    icon={
-                                        task.actualMinutes > task.estimatedMinutes
-                                            ? <TrendingUpIcon sx={{ fontSize: '0.8rem !important', color: 'error.main' }} />
-                                            : <TrendingDownIcon sx={{ fontSize: '0.8rem !important', color: 'success.main' }} />
+                                <Stack
+                                    direction="row"
+                                    alignItems="center"
+                                    spacing={0.25}
+                                    sx={{
+                                        color: task.actualMinutes > task.estimatedMinutes ? 'error.main' : 'success.main'
+                                    }}
+                                >
+                                    {task.actualMinutes > task.estimatedMinutes
+                                        ? <TrendingUpIcon sx={{ fontSize: '0.75rem' }} />
+                                        : <TrendingDownIcon sx={{ fontSize: '0.75rem' }} />
                                     }
-                                    label={formatMinutes(task.actualMinutes)}
-                                    size="small"
-                                    variant="outlined"
-                                    sx={{ fontSize: '0.65rem', height: 20 }}
-                                />
+                                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600 }}>
+                                        {formatMinutes(task.actualMinutes)}
+                                    </Typography>
+                                </Stack>
                             )}
                         </Stack>
                     </Box>
 
                     {!compact && (
-                        <Stack direction="row" spacing={0}>
+                        <Stack direction="row" spacing={0} sx={{ ml: 1 }}>
                             <Tooltip title="Edit">
                                 <IconButton
                                     size="small"
@@ -129,9 +149,9 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                                         e.stopPropagation();
                                         setEditingTask(task);
                                     }}
-                                    sx={{ color: 'text.secondary' }}
+                                    sx={{ color: 'text.secondary', p: 0.5 }}
                                 >
-                                    <EditIcon fontSize="small" />
+                                    <EditIcon sx={{ fontSize: '1rem' }} />
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Delete">
@@ -141,9 +161,9 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                                         e.stopPropagation();
                                         deleteTask(task.id);
                                     }}
-                                    sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
+                                    sx={{ color: 'text.secondary', p: 0.5, '&:hover': { color: 'error.main' } }}
                                 >
-                                    <DeleteOutlineIcon fontSize="small" />
+                                    <DeleteOutlineIcon sx={{ fontSize: '1rem' }} />
                                 </IconButton>
                             </Tooltip>
                         </Stack>
