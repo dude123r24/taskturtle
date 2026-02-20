@@ -34,9 +34,12 @@ function RecycleBinDialog({ open, onClose }: { open: boolean; onClose: () => voi
     };
 
     const handlePermanentDelete = async (task: Task) => {
-        if (confirm(`Are you sure you want to permanently delete "${task.title}"? This cannot be undone.`)) {
-            await deleteTask(task.id);
-        }
+        await deleteTask(task.id);
+    };
+
+    const handleEmptyBin = async () => {
+        // Run deletions concurrently
+        await Promise.all(archivedTasks.map(t => deleteTask(t.id)));
     };
 
     return (
@@ -53,8 +56,20 @@ function RecycleBinDialog({ open, onClose }: { open: boolean; onClose: () => voi
                 },
             }}
         >
-            <DialogTitle sx={{ fontWeight: 600, color: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <DeleteIcon /> Recycle Bin
+            <DialogTitle sx={{ fontWeight: 600, color: 'error.main', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <DeleteIcon /> Recycle Bin
+                </Box>
+                {archivedTasks.length > 0 && (
+                    <Button
+                        size="small"
+                        color="error"
+                        variant="outlined"
+                        onClick={handleEmptyBin}
+                    >
+                        Empty Bin
+                    </Button>
+                )}
             </DialogTitle>
             <DialogContent>
                 {archivedTasks.length === 0 ? (
