@@ -58,7 +58,8 @@ function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }
                 background: isOver
                     ? `${q.color}11`
                     : `linear-gradient(135deg, ${q.color}08, transparent)`,
-                minHeight: 200,
+                height: 350,
+                overflowY: 'auto',
                 transition: 'all 0.2s',
                 cursor: 'pointer',
                 '&:hover': {
