@@ -9,10 +9,12 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Allow root (Landing Page), login, auth endpoints, and static files through
+    // Allow root (Landing Page), public pages, auth endpoints, and static files through
     if (
         pathname === '/' ||
         pathname === '/login' ||
+        pathname === '/privacy' ||
+        pathname === '/terms' ||
         pathname.startsWith('/api/auth') ||
         pathname.startsWith('/_next') ||
         pathname === '/favicon.ico'
