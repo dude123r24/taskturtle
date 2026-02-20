@@ -7,6 +7,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import Link from 'next/link';
 
 export default function LoginPage() {
     return (
@@ -111,9 +112,27 @@ export default function LoginPage() {
                             Sign in with Google
                         </Button>
 
-                        <Typography variant="caption" color="text.secondary" textAlign="center">
-                            Works with your corporate Google account &amp; security key
-                        </Typography>
+
+
+                        <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 2 }}>
+                            <Link href="/privacy" style={{ textDecoration: 'none' }}>
+                                <Typography
+                                    variant="caption"
+                                    sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary', textDecoration: 'underline' } }}
+                                >
+                                    Privacy Policy
+                                </Typography>
+                            </Link>
+                            <Typography variant="caption" color="text.secondary">•</Typography>
+                            <Link href="/terms" style={{ textDecoration: 'none' }}>
+                                <Typography
+                                    variant="caption"
+                                    sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary', textDecoration: 'underline' } }}
+                                >
+                                    Terms of Service
+                                </Typography>
+                            </Link>
+                        </Stack>
                     </Stack>
                 </CardContent>
             </Card>
