@@ -8,7 +8,6 @@ import Chip from '@mui/material/Chip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import {
     DndContext,
     DragOverlay,

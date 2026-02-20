@@ -159,7 +159,7 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                                     size="small"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        deleteTask(task.id);
+                                        patchTask(task.id, { status: 'ARCHIVED' });
                                     }}
                                     sx={{ color: 'text.secondary', p: 0.5, '&:hover': { color: 'error.main' } }}
                                 >

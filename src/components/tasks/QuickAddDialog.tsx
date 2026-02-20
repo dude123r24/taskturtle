@@ -88,9 +88,9 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
 
     const handleDelete = async () => {
         if (!editingTask) return;
-        if (confirm('Are you sure you want to delete this task?')) {
+        if (confirm('Are you sure you want to move this task to the Recycle Bin? (You can restore it later)')) {
             setIsSubmitting(true);
-            await deleteTask(editingTask.id);
+            await patchTask(editingTask.id, { status: 'ARCHIVED' });
             setIsSubmitting(false);
             handleClose();
         }
