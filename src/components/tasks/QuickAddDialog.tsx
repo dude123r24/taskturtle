@@ -10,6 +10,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useTaskStore, type EisenhowerQuadrant, type TaskStatus } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
 
@@ -25,7 +26,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
-    const { createTask, patchTask, editingTask, setEditingTask, draftQuadrant } = useTaskStore();
+    const { createTask, patchTask, deleteTask, editingTask, setEditingTask, draftQuadrant } = useTaskStore();
     const [title, setTitle] = useState('');
     const [quadrant, setQuadrant] = useState<EisenhowerQuadrant>('SCHEDULE');
     const [status, setStatus] = useState<TaskStatus>('TODO');
@@ -83,6 +84,16 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
 
         setIsSubmitting(false);
         handleClose();
+    };
+
+    const handleDelete = async () => {
+        if (!editingTask) return;
+        if (confirm('Are you sure you want to delete this task?')) {
+            setIsSubmitting(true);
+            await deleteTask(editingTask.id);
+            setIsSubmitting(false);
+            handleClose();
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -197,19 +208,33 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                     />
                 </Stack>
             </DialogContent>
-            <DialogActions sx={{ px: 3, pb: 2 }}>
-                <Button onClick={handleClose} color="inherit">
-                    Cancel
-                </Button>
-                <Button
-                    onClick={handleSubmit}
-                    variant="contained"
-                    disabled={!title.trim() || isSubmitting}
-                >
-                    {isSubmitting
-                        ? isEditing ? 'Saving...' : 'Adding...'
-                        : isEditing ? 'Save Changes' : 'Add Task'}
-                </Button>
+            <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
+                <Box>
+                    {isEditing && (
+                        <Button
+                            onClick={handleDelete}
+                            color="error"
+                            disabled={isSubmitting}
+                            startIcon={<DeleteIcon />}
+                        >
+                            Delete
+                        </Button>
+                    )}
+                </Box>
+                <Stack direction="row" spacing={1}>
+                    <Button onClick={handleClose} color="inherit" disabled={isSubmitting}>
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSubmit}
+                        variant="contained"
+                        disabled={!title.trim() || isSubmitting}
+                    >
+                        {isSubmitting
+                            ? isEditing ? 'Saving...' : 'Adding...'
+                            : isEditing ? 'Save Changes' : 'Add Task'}
+                    </Button>
+                </Stack>
             </DialogActions>
         </Dialog>
     );
