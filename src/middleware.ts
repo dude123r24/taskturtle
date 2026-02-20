@@ -9,12 +9,13 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Allow auth endpoints, static files, and login page through
+    // Allow root (Landing Page), login, auth endpoints, and static files through
     if (
+        pathname === '/' ||
+        pathname === '/login' ||
         pathname.startsWith('/api/auth') ||
         pathname.startsWith('/_next') ||
-        pathname === '/favicon.ico' ||
-        pathname === '/login'
+        pathname === '/favicon.ico'
     ) {
         return NextResponse.next();
     }
@@ -34,6 +35,12 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
+    // If user is already authenticated and trying to access login page, redirect to dashboard
+    if (pathname === '/login') {
+        const dashboardUrl = new URL('/dashboard', request.url);
+        return NextResponse.redirect(dashboardUrl);
+    }
+
     return NextResponse.next();
 }
 
@@ -45,8 +52,7 @@ export const config = {
          * - _next/static (static files)
          * - _next/image (image optimization)
          * - favicon.ico
-         * - login page
          */
-        '/((?!api/auth|_next/static|_next/image|favicon.ico|login).*)',
+        '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
     ],
 };

@@ -4,11 +4,11 @@ import crypto from 'crypto';
 
 // ─── OAuth Client Factory ────────────────────────────────────────────
 
-function createOAuth2Client() {
+function createOAuth2Client(redirectUri?: string) {
     return new google.auth.OAuth2(
         process.env.AUTH_GOOGLE_ID,
         process.env.AUTH_GOOGLE_SECRET,
-        `${process.env.NEXTAUTH_URL}/api/auth/callback/google`
+        redirectUri || `${process.env.NEXTAUTH_URL}/api/auth/callback/google`
     );
 }
 
@@ -268,7 +268,8 @@ export async function deleteCalendarEvent(
  * Generate the OAuth URL for adding a new calendar account.
  */
 export function getCalendarAuthUrl(state: string): string {
-    const oauth2Client = createOAuth2Client();
+    const callbackUrl = `${process.env.NEXTAUTH_URL}/api/calendar/callback`;
+    const oauth2Client = createOAuth2Client(callbackUrl);
     return oauth2Client.generateAuthUrl({
         access_type: 'offline',
         prompt: 'consent',
@@ -291,7 +292,8 @@ export async function exchangeCodeForCalendarAccount(
     calendarName: string,
     color: string
 ) {
-    const oauth2Client = createOAuth2Client();
+    const callbackUrl = `${process.env.NEXTAUTH_URL}/api/calendar/callback`;
+    const oauth2Client = createOAuth2Client(callbackUrl);
     const { tokens } = await oauth2Client.getToken(code);
 
     // Get user info to determine the Google email

@@ -28,8 +28,10 @@ export default function TasksPage() {
 
     const filteredTasks = tasks.filter((t) => {
         // Status filter
+        // 0=Active, 1=Done, 2=Archived, 3=All
         if (statusTab === 0 && (t.status === 'DONE' || t.status === 'ARCHIVED')) return false;
         if (statusTab === 1 && t.status !== 'DONE') return false;
+        if (statusTab === 2 && t.status !== 'ARCHIVED') return false;
 
         // Quadrant filter
         if (quadrantFilter !== 'ALL' && t.quadrant !== quadrantFilter) return false;
@@ -125,6 +127,7 @@ export default function TasksPage() {
             >
                 <Tab label={`Active (${tasks.filter((t) => t.status !== 'DONE' && t.status !== 'ARCHIVED').length})`} />
                 <Tab label={`Done (${tasks.filter((t) => t.status === 'DONE').length})`} />
+                <Tab label={`Archived (${tasks.filter((t) => t.status === 'ARCHIVED').length})`} />
                 <Tab label={`All (${tasks.length})`} />
             </Tabs>
 

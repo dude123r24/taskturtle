@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -10,26 +10,71 @@ import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
-import Checkbox from '@mui/material/Checkbox';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import Drawer from '@mui/material/Drawer';
+import Skeleton from '@mui/material/Skeleton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import TodayIcon from '@mui/icons-material/Today';
+import InboxIcon from '@mui/icons-material/Inbox';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useTaskStore, type Task } from '@/store/taskStore';
-import { QUADRANT_LABELS, formatMinutes } from '@/lib/utils';
+import { formatMinutes } from '@/lib/utils';
+import {
+    DndContext,
+    DragOverlay,
+    useDroppable,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+    type DragStartEvent,
+} from '@dnd-kit/core';
+import DraggableTaskCard from '@/components/tasks/DraggableTaskCard';
 import TaskCard from '@/components/tasks/TaskCard';
 
+interface CalendarEvent {
+    id: string;
+    calendarName: string;
+    calendarColor: string;
+    summary: string;
+    isDuplicate: boolean;
+    description?: string;
+    start?: { dateTime?: string; date?: string };
+    end?: { dateTime?: string; date?: string };
+}
+
+interface PlannedTaskData {
+    timeSlotStart: string | null;
+    timeSlotEnd: string | null;
+}
+
 export default function PlannerPage() {
-    const { tasks, fetchTasks } = useTaskStore();
+    const { tasks, isLoading: isTasksLoading, fetchTasks, patchTask } = useTaskStore();
     const [selectedDate, setSelectedDate] = useState(
         new Date().toISOString().split('T')[0]
     );
-    const [plannedTaskIds, setPlannedTaskIds] = useState<Set<string>>(new Set());
+
+    // Map of taskId -> { timeSlotStart, timeSlotEnd }
+    const [plannedTasksMap, setPlannedTasksMap] = useState<Record<string, PlannedTaskData>>({});
+
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
+    const [isEventsLoading, setIsEventsLoading] = useState(false);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        })
+    );
+
     const [isSaving, setIsSaving] = useState(false);
+    const [activeId, setActiveId] = useState<string | null>(null);
+    const [inboxOpen, setInboxOpen] = useState(false);
+    const [isScheduling, setIsScheduling] = useState(false);
+
     const [overloadInfo, setOverloadInfo] = useState<{
         taskCount: number;
         maxDaily: number;
@@ -45,6 +90,7 @@ export default function PlannerPage() {
 
     useEffect(() => {
         fetchDailyPlan();
+        fetchEvents();
     }, [selectedDate]);
 
     const fetchDailyPlan = async () => {
@@ -54,42 +100,162 @@ export default function PlannerPage() {
                 const data = await res.json();
                 setOverloadInfo(data.overload);
                 if (data.plan?.tasks) {
-                    setPlannedTaskIds(
-                        new Set(data.plan.tasks.map((pt: { taskId: string }) => pt.taskId))
-                    );
+                    const map: Record<string, PlannedTaskData> = {};
+                    data.plan.tasks.forEach((pt: any) => {
+                        map[pt.taskId] = {
+                            timeSlotStart: pt.timeSlotStart,
+                            timeSlotEnd: pt.timeSlotEnd,
+                        };
+                    });
+                    setPlannedTasksMap(map);
                 } else {
-                    setPlannedTaskIds(new Set());
+                    setPlannedTasksMap({});
                 }
             }
         } catch { /* graceful degradation */ }
     };
 
-    const toggleTask = (taskId: string) => {
-        setPlannedTaskIds((prev) => {
-            const next = new Set(prev);
-            if (next.has(taskId)) {
-                next.delete(taskId);
-            } else {
-                next.add(taskId);
+    const fetchEvents = async () => {
+        setIsEventsLoading(true);
+        try {
+            const res = await fetch(`/api/calendar/events?date=${selectedDate}&hideDuplicates=true`);
+            if (res.ok) {
+                const data = await res.json();
+                setEvents(Array.isArray(data) ? data : []);
             }
-            return next;
-        });
+        } catch { /* graceful degradation */ }
+        setIsEventsLoading(false);
     };
 
-    const savePlan = async () => {
-        setIsSaving(true);
+    const savePlan = async (silent = false) => {
+        if (!silent) setIsSaving(true);
         try {
+            const tasksArray = Object.entries(plannedTasksMap).map(([taskId, data]) => ({
+                taskId,
+                ...data
+            }));
+
             await fetch('/api/planning/daily', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     date: selectedDate,
-                    taskIds: Array.from(plannedTaskIds),
+                    tasks: tasksArray,
                 }),
             });
-            await fetchDailyPlan();
+            if (!silent) await fetchDailyPlan();
         } catch { /* error handling */ }
-        setIsSaving(false);
+        if (!silent) setIsSaving(false);
+    };
+
+    const handleAutoSchedule = async () => {
+        setIsScheduling(true);
+        try {
+            // Get all tasks in the Day Plan bucket without a timeslot
+            const unblockedTasks = tasks.filter((t) => Object.hasOwn(plannedTasksMap, t.id) && !plannedTasksMap[t.id].timeSlotStart);
+            if (unblockedTasks.length === 0) {
+                alert("No unscheduled tasks in the Day Plan Bucket.");
+                setIsScheduling(false);
+                return;
+            }
+
+            const cleanEvents = events.map(e => ({
+                summary: e.summary,
+                start: e.start?.dateTime || e.start?.date,
+                end: e.end?.dateTime || e.end?.date,
+            }));
+
+            const cleanTasks = unblockedTasks.map(t => ({
+                taskId: t.id,
+                title: t.title,
+                estimatedMinutes: t.estimatedMinutes,
+                quadrant: t.quadrant,
+            }));
+
+            const res = await fetch('/api/planning/auto-schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: selectedDate,
+                    tasks: cleanTasks,
+                    events: cleanEvents,
+                }),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.schedule && Array.isArray(data.schedule)) {
+                    setPlannedTasksMap(prev => {
+                        const next = { ...prev };
+                        data.schedule.forEach((item: any) => {
+                            if (next[item.taskId]) {
+                                next[item.taskId] = {
+                                    timeSlotStart: item.timeSlotStart,
+                                    timeSlotEnd: item.timeSlotEnd,
+                                };
+                            }
+                        });
+                        return next;
+                    });
+                }
+            } else {
+                alert("Failed to auto-schedule.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error auto-scheduling.");
+        }
+        setIsScheduling(false);
+    };
+
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveId(event.active.id as string);
+    };
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveId(null);
+        if (!over) return;
+
+        const taskId = active.id as string;
+        const overId = over.id as string;
+        const task = tasks.find(t => t.id === taskId);
+
+        if (!task) return;
+
+        if (overId === 'backlog' || overId === 'this-week') {
+            // Remove from plan
+            const horizon = overId === 'backlog' ? 'LONG_TERM' : 'SHORT_TERM';
+            patchTask(taskId, { horizon });
+            setPlannedTasksMap((prev) => {
+                const next = { ...prev };
+                delete next[taskId];
+                return next;
+            });
+        } else if (overId === 'planned') {
+            // Add to Day Plan bucket (no time slot)
+            patchTask(taskId, { horizon: 'SHORT_TERM' });
+            setPlannedTasksMap((prev) => ({
+                ...prev,
+                [taskId]: { timeSlotStart: null, timeSlotEnd: null }
+            }));
+        } else if (overId.startsWith('timeline-slot-')) {
+            // Dropped onto a specific time slot on the calendar
+            const hourStr = overId.replace('timeline-slot-', ''); // e.g. "09:00"
+            const startStr = `${selectedDate}T${hourStr}:00`;
+
+            // Calculate end time based on estimated minutes (default 30)
+            const durationMins = task.estimatedMinutes || 30;
+            const endDate = new Date(startStr);
+            endDate.setMinutes(endDate.getMinutes() + durationMins);
+            const endStr = endDate.toISOString();
+
+            patchTask(taskId, { horizon: 'SHORT_TERM' });
+            setPlannedTasksMap((prev) => ({
+                ...prev,
+                [taskId]: { timeSlotStart: startStr, timeSlotEnd: endStr }
+            }));
+        }
     };
 
     const navigateDate = (days: number) => {
@@ -98,22 +264,29 @@ export default function PlannerPage() {
         setSelectedDate(d.toISOString().split('T')[0]);
     };
 
-    const goToToday = () => {
-        setSelectedDate(new Date().toISOString().split('T')[0]);
-    };
-
-    const activeTasks = tasks.filter(
-        (t) => t.status !== 'DONE' && t.status !== 'ARCHIVED'
+    // Filter tasks
+    const backlogTasks = tasks.filter(
+        (t) => t.status !== 'DONE' && t.status !== 'ARCHIVED' && t.horizon === 'LONG_TERM' && !plannedTasksMap[t.id]
+    );
+    const thisWeekTasks = tasks.filter(
+        (t) => t.status !== 'DONE' && t.status !== 'ARCHIVED' && t.horizon === 'SHORT_TERM' && !plannedTasksMap[t.id]
     );
 
-    const plannedTasks = tasks.filter((t) => plannedTaskIds.has(t.id));
-    const totalPlannedMinutes = plannedTasks.reduce(
-        (sum, t) => sum + (t.estimatedMinutes || 0),
-        0
-    );
+    // Planned tasks inside the Day Plan (no time slot)
+    const bucketTasks = tasks.filter((t) => plannedTasksMap[t.id] && !plannedTasksMap[t.id].timeSlotStart);
+
+    // Timeblocked tasks (have a start time)
+    const timeblockedTasks = tasks.filter((t) => plannedTasksMap[t.id]?.timeSlotStart);
+
+    const plannedCount = Object.keys(plannedTasksMap).length;
+    const totalPlannedMinutes = Object.keys(plannedTasksMap).reduce((sum, id) => {
+        const t = tasks.find(x => x.id === id);
+        return sum + (t?.estimatedMinutes || 0);
+    }, 0);
+
     const maxDaily = overloadInfo?.maxDaily || 8;
     const maxMinutes = overloadInfo?.maxDailyMinutes || 480;
-    const isOverloaded = plannedTaskIds.size > maxDaily;
+    const isOverloaded = plannedCount > maxDaily;
     const isTimeOverloaded = totalPlannedMinutes > maxMinutes;
 
     const dateLabel = new Date(selectedDate + 'T00:00:00').toLocaleDateString(
@@ -121,172 +294,348 @@ export default function PlannerPage() {
         { weekday: 'long', month: 'long', day: 'numeric' }
     );
 
+    const activeTask = tasks.find((t) => t.id === activeId);
+
+    // Timeline hours
+    const hours = Array.from({ length: 14 }, (_, i) => i + 7); // 7am to 8pm
+
+    const formatTime = (isoString?: string | null) => {
+        if (!isoString) return '';
+        return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
     return (
-        <Stack spacing={3}>
-            {/* Date nav */}
-            <Stack direction="row" alignItems="center" spacing={2}>
-                <IconButton onClick={() => navigateDate(-1)}>
-                    <ChevronLeftIcon />
-                </IconButton>
-                <Typography variant="h5" fontWeight={600}>
-                    {dateLabel}
-                </Typography>
-                <IconButton onClick={() => navigateDate(1)}>
-                    <ChevronRightIcon />
-                </IconButton>
-                <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<TodayIcon />}
-                    onClick={goToToday}
-                >
-                    Today
-                </Button>
-            </Stack>
-
-            {/* Overload warning */}
-            {isOverloaded && (
-                <Alert severity="warning" sx={{ borderRadius: 2 }}>
-                    ⚠️ {plannedTaskIds.size}/{maxDaily} tasks — you&apos;re overcommitting!
-                </Alert>
-            )}
-            {isTimeOverloaded && (
-                <Alert severity="error" sx={{ borderRadius: 2 }}>
-                    ⏰ {formatMinutes(totalPlannedMinutes)} planned vs {formatMinutes(maxMinutes)} max
-                </Alert>
-            )}
-
-            <Box
-                sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                    gap: 3,
-                }}
-            >
-                {/* Available tasks */}
-                <Card
-                    sx={{
-                        background: 'rgba(26, 25, 41, 0.6)',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                    }}
-                >
-                    <CardContent>
-                        <Typography variant="h6" fontWeight={600} mb={2}>
-                            Available Tasks
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            <Stack spacing={3}>
+                {/* Header / Nav */}
+                <Stack direction="row" alignItems="center" spacing={2} justifyContent="space-between">
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                        <IconButton onClick={() => navigateDate(-1)}>
+                            <ChevronLeftIcon />
+                        </IconButton>
+                        <Typography variant="h5" fontWeight={600}>
+                            {dateLabel}
                         </Typography>
-                        <List dense disablePadding>
-                            {activeTasks.map((task) => {
-                                const q = QUADRANT_LABELS[task.quadrant];
-                                const isPlanned = plannedTaskIds.has(task.id);
-                                return (
-                                    <ListItem key={task.id} disablePadding>
-                                        <ListItemButton
-                                            onClick={() => toggleTask(task.id)}
-                                            sx={{ borderRadius: 1, mb: 0.5 }}
-                                        >
-                                            <ListItemIcon>
-                                                <Checkbox
-                                                    checked={isPlanned}
-                                                    edge="start"
-                                                    tabIndex={-1}
-                                                    disableRipple
-                                                    sx={{
-                                                        color: q.color,
-                                                        '&.Mui-checked': { color: q.color },
-                                                    }}
-                                                />
-                                            </ListItemIcon>
-                                            <ListItemText
-                                                primary={task.title}
-                                                secondary={
-                                                    task.estimatedMinutes
-                                                        ? formatMinutes(task.estimatedMinutes)
-                                                        : undefined
-                                                }
-                                                primaryTypographyProps={{
-                                                    fontWeight: 500,
-                                                    fontSize: '0.9rem',
-                                                }}
-                                            />
-                                            <Typography
-                                                variant="caption"
-                                                sx={{ color: q.color }}
-                                            >
-                                                {q.icon}
-                                            </Typography>
-                                        </ListItemButton>
-                                    </ListItem>
-                                );
-                            })}
-                            {activeTasks.length === 0 && (
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    sx={{ textAlign: 'center', py: 4, fontStyle: 'italic' }}
-                                >
-                                    No active tasks. Create one with the + button.
-                                </Typography>
-                            )}
-                        </List>
-                    </CardContent>
-                </Card>
-
-                {/* Today's Plan */}
-                <Card
-                    sx={{
-                        background: 'rgba(26, 25, 41, 0.6)',
-                        border: '1px solid rgba(108,99,255,0.15)',
-                    }}
-                >
-                    <CardContent>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                            <Typography variant="h6" fontWeight={600}>
-                                Day Plan
-                            </Typography>
-                            <Stack direction="row" spacing={1} alignItems="center">
-                                <Chip
-                                    label={`${plannedTaskIds.size}/${maxDaily}`}
-                                    size="small"
-                                    color={isOverloaded ? 'warning' : 'default'}
-                                />
-                                {totalPlannedMinutes > 0 && (
-                                    <Chip
-                                        label={formatMinutes(totalPlannedMinutes)}
-                                        size="small"
-                                        color={isTimeOverloaded ? 'error' : 'default'}
-                                    />
-                                )}
-                            </Stack>
-                        </Stack>
-
-                        <Stack spacing={1}>
-                            {plannedTasks.length === 0 ? (
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    sx={{ textAlign: 'center', py: 4, fontStyle: 'italic' }}
-                                >
-                                    Select tasks from the left to plan your day.
-                                </Typography>
-                            ) : (
-                                plannedTasks.map((task) => (
-                                    <TaskCard key={task.id} task={task} compact />
-                                ))
-                            )}
-                        </Stack>
-
+                        <IconButton onClick={() => navigateDate(1)}>
+                            <ChevronRightIcon />
+                        </IconButton>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<TodayIcon />}
+                            onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
+                        >
+                            Today
+                        </Button>
+                    </Stack>
+                    <Stack direction="row" spacing={2}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<InboxIcon />}
+                            onClick={() => setInboxOpen(true)}
+                        >
+                            Inbox ({(backlogTasks.length + thisWeekTasks.length)})
+                        </Button>
                         <Button
                             variant="contained"
-                            fullWidth
-                            onClick={savePlan}
+                            onClick={() => savePlan(false)}
                             disabled={isSaving}
-                            sx={{ mt: 2 }}
                         >
-                            {isSaving ? 'Saving...' : 'Save Day Plan'}
+                            {isSaving ? 'Saving...' : 'Save Plan'}
                         </Button>
-                    </CardContent>
-                </Card>
+                    </Stack>
+                </Stack>
+
+                {/* Overload warnings */}
+                {isOverloaded && (
+                    <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                        ⚠️ {plannedCount}/{maxDaily} tasks — you&apos;re overcommitting!
+                    </Alert>
+                )}
+                {isTimeOverloaded && (
+                    <Alert severity="error" sx={{ borderRadius: 2 }}>
+                        ⏰ {formatMinutes(totalPlannedMinutes)} planned vs {formatMinutes(maxMinutes)} max
+                    </Alert>
+                )}
+
+                {/* Split Screen Layout */}
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: { xs: '1fr', md: '350px 1fr' },
+                        gap: 3,
+                        alignItems: 'start'
+                    }}
+                >
+                    {/* Left: Day Plan Bucket */}
+                    <DroppableList
+                        id="planned"
+                        title="Day Plan Bucket"
+                        subtitle="Tasks to do today (drag to calendar)"
+                        tasks={bucketTasks}
+                        isPlanning={true}
+                        emptyContent={
+                            <Stack spacing={2} alignItems="center">
+                                <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                                    Your day plan is empty.
+                                </Typography>
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<InboxIcon />}
+                                    onClick={() => setInboxOpen(true)}
+                                >
+                                    Open Inbox to add tasks
+                                </Button>
+                            </Stack>
+                        }
+                    />
+
+                    {/* Right: Calendar Timeline */}
+                    <Card
+                        sx={{
+                            background: 'rgba(26, 25, 41, 0.6)',
+                            border: '1px solid rgba(255,255,255,0.06)',
+                            minHeight: 600,
+                        }}
+                    >
+                        <CardContent sx={{ p: 0 }}>
+                            <Box sx={{ p: 2, borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Typography variant="h6" fontWeight={600}>Timeline</Typography>
+                                <Button
+                                    variant="text"
+                                    size="small"
+                                    endIcon={<AccessTimeIcon />}
+                                    onClick={handleAutoSchedule}
+                                    disabled={isScheduling}
+                                >
+                                    {isScheduling ? 'Scheduling...' : 'Auto-Schedule My Day ✨'}
+                                </Button>
+                            </Box>
+
+                            {isEventsLoading ? (
+                                <Box sx={{ p: 4 }}><Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} /></Box>
+                            ) : (
+                                <Stack spacing={0}>
+                                    {hours.map((hour) => {
+                                        const hourStr = `${hour.toString().padStart(2, '0')}:00`;
+                                        const slotId = `timeline-slot-${hourStr}`;
+
+                                        // Find calendar events for this hour
+                                        const hourEvents = events.filter((e) => {
+                                            const start = e.start?.dateTime;
+                                            if (!start) return false;
+                                            return new Date(start).getHours() === hour;
+                                        });
+
+                                        // Find timeblocked tasks for this hour
+                                        const hourTasks = timeblockedTasks.filter((t) => {
+                                            const start = plannedTasksMap[t.id]?.timeSlotStart;
+                                            if (!start) return false;
+                                            return new Date(start).getHours() === hour;
+                                        });
+
+                                        return (
+                                            <TimeSlot
+                                                key={hour}
+                                                id={slotId}
+                                                hourStr={hourStr}
+                                                events={hourEvents}
+                                                tasks={hourTasks}
+                                                taskMap={plannedTasksMap}
+                                                formatTime={formatTime}
+                                            />
+                                        );
+                                    })}
+                                </Stack>
+                            )}
+                        </CardContent>
+                    </Card>
+                </Box>
+            </Stack>
+
+            {/* Inbox Drawer */}
+            <Drawer
+                anchor="left"
+                open={inboxOpen}
+                onClose={() => setInboxOpen(false)}
+                sx={{
+                    '& .MuiDrawer-paper': {
+                        width: 400,
+                        p: 3,
+                        background: '#0F0E17',
+                        borderRight: '1px solid rgba(255,255,255,0.06)'
+                    }
+                }}
+            >
+                <Typography variant="h5" fontWeight={600} mb={3}>Inbox</Typography>
+                <Stack spacing={4}>
+                    <DroppableList
+                        id="this-week"
+                        title="This Week"
+                        subtitle="Short Term Priorities"
+                        tasks={thisWeekTasks}
+                        isPlanning={false}
+                    />
+                    <DroppableList
+                        id="backlog"
+                        title="Backlog"
+                        subtitle="Long Term / Someday"
+                        tasks={backlogTasks}
+                        isPlanning={false}
+                    />
+                </Stack>
+            </Drawer>
+
+            <DragOverlay>
+                {activeId && activeTask ? (
+                    <div style={{ opacity: 0.8, transform: 'scale(1.05)' }}>
+                        <TaskCard task={activeTask} compact />
+                    </div>
+                ) : null}
+            </DragOverlay>
+        </DndContext>
+    );
+}
+
+// Sub-components
+
+function TimeSlot({
+    id,
+    hourStr,
+    events,
+    tasks,
+    taskMap,
+    formatTime
+}: {
+    id: string;
+    hourStr: string;
+    events: CalendarEvent[];
+    tasks: Task[];
+    taskMap: Record<string, PlannedTaskData>;
+    formatTime: (s?: string | null) => string;
+}) {
+    const { setNodeRef, isOver } = useDroppable({ id });
+
+    return (
+        <Box
+            ref={setNodeRef}
+            sx={{
+                display: 'grid',
+                gridTemplateColumns: '60px 1fr',
+                minHeight: 70,
+                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                background: isOver ? 'rgba(108, 99, 255, 0.1)' : 'transparent',
+                transition: 'background 0.2s'
+            }}
+        >
+            <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ pt: 1, textAlign: 'right', pr: 2 }}
+            >
+                {hourStr}
+            </Typography>
+            <Box sx={{ py: 1, pl: 1, pr: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+
+                {/* Google Calendar Events */}
+                {events.map((event) => (
+                    <Box
+                        key={event.id}
+                        sx={{
+                            p: 1.5,
+                            borderRadius: 1,
+                            background: `${event.calendarColor || '#1E88E5'}15`,
+                            borderLeft: `3px solid ${event.calendarColor || '#1E88E5'}`,
+                        }}
+                    >
+                        <Stack direction="row" justifyContent="space-between">
+                            <Typography variant="body2" fontWeight={500}>{event.summary}</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {formatTime(event.start?.dateTime)} - {formatTime(event.end?.dateTime)}
+                            </Typography>
+                        </Stack>
+                    </Box>
+                ))}
+
+                {/* Timeblocked Tasks */}
+                {tasks.map((task) => (
+                    <Box key={task.id}>
+                        <DraggableTaskCard task={task} compact disableSwipe />
+                        <Typography variant="caption" sx={{ color: '#6C63FF', display: 'block', mt: 0.5, ml: 1 }}>
+                            ⏱️ {formatTime(taskMap[task.id].timeSlotStart)} - {formatTime(taskMap[task.id].timeSlotEnd)}
+                        </Typography>
+                    </Box>
+                ))}
             </Box>
-        </Stack>
+        </Box>
+    );
+}
+
+function DroppableList({
+    id,
+    title,
+    subtitle,
+    tasks,
+    isPlanning,
+    emptyContent,
+}: {
+    id: string;
+    title: string;
+    subtitle?: string;
+    tasks: Task[];
+    isPlanning: boolean;
+    emptyContent?: React.ReactNode;
+}) {
+    const { setNodeRef, isOver } = useDroppable({ id });
+
+    return (
+        <Card
+            ref={setNodeRef}
+            sx={{
+                background: isOver
+                    ? 'rgba(108, 99, 255, 0.1)'
+                    : 'rgba(26, 25, 41, 0.6)',
+                border: isOver
+                    ? '1px dashed rgba(108, 99, 255, 0.5)'
+                    : '1px solid rgba(255,255,255,0.06)',
+                transition: 'all 0.2s',
+                minHeight: 200,
+                display: 'flex',
+                flexDirection: 'column',
+            }}
+        >
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+                <Box sx={{ mb: 2 }}>
+                    <Typography variant="h6" fontWeight={600} lineHeight={1.2}>
+                        {title}
+                    </Typography>
+                    {subtitle && (
+                        <Typography variant="caption" color="text.secondary">
+                            {subtitle}
+                        </Typography>
+                    )}
+                </Box>
+
+                <List dense disablePadding sx={{ flex: 1 }}>
+                    {tasks.map((task) => (
+                        <Box key={task.id} sx={{ mb: 1.5 }}>
+                            <DraggableTaskCard task={task} compact disableSwipe />
+                        </Box>
+                    ))}
+                    {tasks.length === 0 && (
+                        <Box sx={{ textAlign: 'center', py: 6, opacity: 0.5 }}>
+                            {emptyContent ? (
+                                emptyContent
+                            ) : (
+                                <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                                    {isPlanning ? 'Drag tasks here to plan your day.' : 'Empty list.'}
+                                </Typography>
+                            )}
+                        </Box>
+                    )}
+                </List>
+            </CardContent>
+        </Card>
     );
 }

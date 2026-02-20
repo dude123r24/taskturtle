@@ -46,6 +46,7 @@ interface TaskStore {
 
     // Quick add dialog
     quickAddOpen: boolean;
+    draftQuadrant: EisenhowerQuadrant | null;
     editingTask: Task | null;
 
     // Actions
@@ -56,7 +57,7 @@ interface TaskStore {
     setLoading: (loading: boolean) => void;
     setError: (error: string | null) => void;
     setTodayPlan: (plan: DailyPlan | null) => void;
-    setQuickAddOpen: (open: boolean) => void;
+    setQuickAddOpen: (open: boolean, quadrant?: EisenhowerQuadrant) => void;
     setEditingTask: (task: Task | null) => void;
 
     // Fetch helpers
@@ -72,6 +73,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     error: null,
     todayPlan: null,
     quickAddOpen: false,
+    draftQuadrant: null,
     editingTask: null,
 
     setTasks: (tasks) => set({ tasks }),
@@ -84,8 +86,8 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     setLoading: (isLoading) => set({ isLoading }),
     setError: (error) => set({ error }),
     setTodayPlan: (todayPlan) => set({ todayPlan }),
-    setQuickAddOpen: (quickAddOpen) => set({ quickAddOpen }),
-    setEditingTask: (editingTask) => set({ editingTask }),
+    setQuickAddOpen: (open, quadrant) => set({ quickAddOpen: open, draftQuadrant: quadrant || null }),
+    setEditingTask: (editingTask) => set({ editingTask, quickAddOpen: !!editingTask }),
 
     fetchTasks: async () => {
         set({ isLoading: true, error: null });

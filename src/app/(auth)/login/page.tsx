@@ -92,7 +92,7 @@ export default function LoginPage() {
                             variant="contained"
                             size="large"
                             fullWidth
-                            onClick={() => signIn('google', { callbackUrl: '/' })}
+                            onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
                             sx={{
                                 py: 1.5,
                                 fontSize: '1rem',

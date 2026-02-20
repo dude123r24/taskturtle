@@ -55,11 +55,11 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { date, taskIds } = body as { date: string; taskIds: string[] };
+    const { date, tasks } = body as { date: string; tasks: { taskId: string; timeSlotStart?: string; timeSlotEnd?: string }[] };
 
-    if (!date || !taskIds) {
+    if (!date || !tasks) {
         return NextResponse.json(
-            { error: 'date and taskIds are required' },
+            { error: 'date and tasks are required' },
             { status: 400 }
         );
     }
@@ -73,8 +73,10 @@ export async function PUT(request: Request) {
             userId: session.user.id,
             date: dateObj,
             tasks: {
-                create: taskIds.map((taskId, i) => ({
-                    taskId,
+                create: tasks.map((t, i) => ({
+                    task: { connect: { id: t.taskId } },
+                    timeSlotStart: t.timeSlotStart || null,
+                    timeSlotEnd: t.timeSlotEnd || null,
                     sortOrder: i,
                 })),
             },
@@ -82,8 +84,10 @@ export async function PUT(request: Request) {
         update: {
             tasks: {
                 deleteMany: {},
-                create: taskIds.map((taskId, i) => ({
-                    taskId,
+                create: tasks.map((t, i) => ({
+                    task: { connect: { id: t.taskId } },
+                    timeSlotStart: t.timeSlotStart || null,
+                    timeSlotEnd: t.timeSlotEnd || null,
                     sortOrder: i,
                 })),
             },

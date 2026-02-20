@@ -29,7 +29,8 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
     const quadrantInfo = QUADRANT_LABELS[task.quadrant];
     const isDone = task.status === 'DONE';
 
-    const toggleDone = () => {
+    const toggleDone = (e: React.MouseEvent) => {
+        e.stopPropagation();
         patchTask(task.id, {
             status: isDone ? 'TODO' : 'DONE',
         });
@@ -37,7 +38,9 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
 
     return (
         <Card
+            onClick={() => setEditingTask(task)}
             sx={{
+                cursor: 'pointer',
                 background: isDone
                     ? 'rgba(67, 160, 71, 0.06)'
                     : 'rgba(26, 25, 41, 0.6)',
@@ -122,7 +125,10 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                             <Tooltip title="Edit">
                                 <IconButton
                                     size="small"
-                                    onClick={() => setEditingTask(task)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingTask(task);
+                                    }}
                                     sx={{ color: 'text.secondary' }}
                                 >
                                     <EditIcon fontSize="small" />
@@ -131,7 +137,10 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                             <Tooltip title="Delete">
                                 <IconButton
                                     size="small"
-                                    onClick={() => deleteTask(task.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteTask(task.id);
+                                    }}
                                     sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
                                 >
                                     <DeleteOutlineIcon fontSize="small" />

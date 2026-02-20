@@ -14,6 +14,43 @@ export async function GET(request: Request) {
     const horizon = searchParams.get('horizon');
     const status = searchParams.get('status');
 
+    // --- Auto-Archive and Cleanup Logic ---
+    try {
+        const settings = await prisma.userSettings.findUnique({
+            where: { userId: session.user.id }
+        }) || { autoClearArchivedEnabled: true, autoClearArchivedDays: 30 };
+
+        const now = new Date();
+
+        // 1. Auto-archive ELIMINATE tasks older than 7 days
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        await prisma.task.updateMany({
+            where: {
+                userId: session.user.id,
+                quadrant: 'ELIMINATE',
+                status: { not: 'ARCHIVED' },
+                updatedAt: { lt: sevenDaysAgo }
+            },
+            data: { status: 'ARCHIVED' }
+        });
+
+        // 2. Auto-clear ARCHIVED tasks if enabled
+        if (settings.autoClearArchivedEnabled && settings.autoClearArchivedDays > 0) {
+            const clearThreshold = new Date(now.getTime() - settings.autoClearArchivedDays * 24 * 60 * 60 * 1000);
+            await prisma.task.deleteMany({
+                where: {
+                    userId: session.user.id,
+                    status: 'ARCHIVED',
+                    updatedAt: { lt: clearThreshold }
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Failed to run auto-archive routines:', e);
+        // Continue to fetch tasks even if cleanup fails
+    }
+    // --------------------------------------
+
     const where: Record<string, unknown> = { userId: session.user.id };
     if (quadrant) where.quadrant = quadrant;
     if (horizon) where.horizon = horizon;

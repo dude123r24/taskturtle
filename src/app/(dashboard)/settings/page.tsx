@@ -23,12 +23,19 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
 import SyncIcon from '@mui/icons-material/Sync';
 
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+
 interface Settings {
     maxDailyTasks: number;
     maxWeeklyTasks: number;
     maxDailyMinutes: number;
     defaultView: string;
     calendarSyncEnabled: boolean;
+    autoClearArchivedEnabled: boolean;
+    autoClearArchivedDays: number;
 }
 
 interface CalendarAccount {
@@ -54,6 +61,8 @@ function SettingsContent() {
         maxDailyMinutes: 480,
         defaultView: 'matrix',
         calendarSyncEnabled: true,
+        autoClearArchivedEnabled: true,
+        autoClearArchivedDays: 30,
     });
     const [calendarAccounts, setCalendarAccounts] = useState<CalendarAccount[]>([]);
     const [isSaving, setIsSaving] = useState(false);
@@ -138,6 +147,57 @@ function SettingsContent() {
             });
             setCalendarAccounts((prev) => prev.filter((a) => a.id !== accountId));
         } catch { /* error */ }
+    };
+
+    const handleExport = (format: 'json' | 'csv') => {
+        window.open(`/api/tasks/export?format=${format}`, '_blank');
+    };
+
+    const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const content = e.target?.result as string;
+            let tasks: any[] = [];
+
+            try {
+                if (file.name.endsWith('.json')) {
+                    tasks = JSON.parse(content).tasks || JSON.parse(content);
+                } else if (file.name.endsWith('.csv')) {
+                    const lines = content.split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    tasks = lines.slice(1).map(line => {
+                        const values = line.split(',');
+                        const task: any = {};
+                        headers.forEach((h, i) => {
+                            if (values[i]) task[h.toLowerCase()] = values[i].replace(/^"|"$/g, '');
+                        });
+                        return task;
+                    }).filter(t => Object.keys(t).length > 0);
+                }
+
+                const response = await fetch('/api/tasks/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tasks }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    setShowSuccess(true);
+                } else {
+                    const data = await response.json();
+                    alert(`Import failed: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Import failed', error);
+                alert('Import failed. Check file format.');
+            }
+        };
+        reader.readAsText(file);
     };
 
     return (
@@ -283,6 +343,89 @@ function SettingsContent() {
                             helperText={`Currently set to ${Math.round(settings.maxDailyMinutes / 60)} hours`}
                             fullWidth
                         />
+
+                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                            <Typography variant="subtitle1" fontWeight={500} mb={1}>
+                                Auto-Archiving
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" mb={2}>
+                                Tasks in the Eliminate quadrant are automatically archived after 7 days. Configure how long archived tasks are kept before being permanently deleted.
+                            </Typography>
+                            <Stack spacing={2}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={settings.autoClearArchivedEnabled}
+                                            onChange={(e) =>
+                                                setSettings({ ...settings, autoClearArchivedEnabled: e.target.checked })
+                                            }
+                                            color="primary"
+                                        />
+                                    }
+                                    label="Permanently delete old archived tasks"
+                                />
+                                {settings.autoClearArchivedEnabled && (
+                                    <TextField
+                                        label="Keep archived tasks for (days)"
+                                        type="number"
+                                        size="small"
+                                        value={settings.autoClearArchivedDays}
+                                        onChange={(e) =>
+                                            setSettings({ ...settings, autoClearArchivedDays: parseInt(e.target.value) || 0 })
+                                        }
+                                        inputProps={{ min: 1, max: 365 }}
+                                        fullWidth
+                                    />
+                                )}
+                            </Stack>
+                        </Box>
+                    </Stack>
+                </CardContent>
+            </Card>
+
+            {/* Data Management */}
+            <Card
+                sx={{
+                    background: 'rgba(26, 25, 41, 0.6)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                }}
+            >
+                <CardContent>
+                    <Typography variant="h6" fontWeight={600} mb={2}>
+                        Data Management
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" mb={3}>
+                        Export your tasks for backup or import from another tool.
+                    </Typography>
+
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<FileDownloadIcon />}
+                            onClick={() => handleExport('csv')}
+                        >
+                            Export as CSV
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            startIcon={<CloudDownloadIcon />}
+                            onClick={() => handleExport('json')}
+                        >
+                            Export as JSON
+                        </Button>
+                        <Button
+                            component="label"
+                            variant="outlined"
+                            startIcon={<CloudUploadIcon />}
+                        >
+                            Import Tasks
+                            <input
+                                type="file"
+                                hidden
+                                accept=".json,.csv"
+                                onChange={handleImport}
+                            />
+                        </Button>
                     </Stack>
                 </CardContent>
             </Card>

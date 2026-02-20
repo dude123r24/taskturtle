@@ -157,6 +157,8 @@ model UserSettings {
   maxDailyMinutes     Int     @default(480)
   defaultView         String  @default("matrix")
   calendarSyncEnabled Boolean @default(true)
+  autoClearArchivedEnabled Boolean @default(true)
+  autoClearArchivedDays    Int     @default(30)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

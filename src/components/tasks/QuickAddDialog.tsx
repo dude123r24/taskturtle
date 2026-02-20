@@ -1,6 +1,4 @@
-'use client';
-
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -12,7 +10,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { useTaskStore, type EisenhowerQuadrant } from '@/store/taskStore';
+import { useTaskStore, type EisenhowerQuadrant, type TaskStatus } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
 
 interface QuickAddDialogProps {
@@ -20,28 +18,71 @@ interface QuickAddDialogProps {
     onClose: () => void;
 }
 
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+    TODO: { label: 'To Do', color: '#6C63FF' },
+    DONE: { label: 'Done', color: '#43A047' },
+    ARCHIVED: { label: 'Archived', color: '#ef5350' },
+};
+
 export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
-    const { createTask } = useTaskStore();
+    const { createTask, patchTask, editingTask, setEditingTask, draftQuadrant } = useTaskStore();
     const [title, setTitle] = useState('');
     const [quadrant, setQuadrant] = useState<EisenhowerQuadrant>('SCHEDULE');
+    const [status, setStatus] = useState<TaskStatus>('TODO');
     const [estimatedMinutes, setEstimatedMinutes] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const isEditing = !!editingTask;
+
+    useEffect(() => {
+        if (editingTask) {
+            setTitle(editingTask.title);
+            setQuadrant(editingTask.quadrant);
+            setStatus(editingTask.status);
+            setEstimatedMinutes(editingTask.estimatedMinutes?.toString() || '');
+        } else {
+            setTitle('');
+            setQuadrant(draftQuadrant || 'SCHEDULE');
+            setStatus('TODO');
+            setEstimatedMinutes('');
+        }
+    }, [editingTask, open, draftQuadrant]);
+
+    useEffect(() => {
+        if (open) {
+            // Slight delay ensures the dialog transition is complete and the input is focusable
+            const timer = setTimeout(() => {
+                inputRef.current?.focus();
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [open]);
+
+    const handleClose = () => {
+        setEditingTask(null);
+        onClose();
+    };
 
     const handleSubmit = async () => {
         if (!title.trim()) return;
         setIsSubmitting(true);
 
-        await createTask({
+        const taskData = {
             title: title.trim(),
             quadrant,
+            status,
             estimatedMinutes: estimatedMinutes ? parseInt(estimatedMinutes) : undefined,
-        });
+        };
 
-        setTitle('');
-        setQuadrant('SCHEDULE');
-        setEstimatedMinutes('');
+        if (isEditing && editingTask) {
+            await patchTask(editingTask.id, taskData);
+        } else {
+            await createTask(taskData);
+        }
+
         setIsSubmitting(false);
-        onClose();
+        handleClose();
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -54,7 +95,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
     return (
         <Dialog
             open={open}
-            onClose={onClose}
+            onClose={handleClose}
             maxWidth="sm"
             fullWidth
             PaperProps={{
@@ -65,11 +106,13 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                 },
             }}
         >
-            <DialogTitle sx={{ fontWeight: 600 }}>Quick Add Task</DialogTitle>
+            <DialogTitle sx={{ fontWeight: 600 }}>
+                {isEditing ? 'Edit Task' : 'Quick Add Task'}
+            </DialogTitle>
             <DialogContent>
                 <Stack spacing={3} sx={{ mt: 1 }}>
                     <TextField
-                        autoFocus
+                        inputRef={inputRef}
                         fullWidth
                         label="What needs to be done?"
                         value={title}
@@ -77,6 +120,39 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                         onKeyDown={handleKeyDown}
                         variant="outlined"
                     />
+
+                    {isEditing && (
+                        <Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                Status
+                            </Typography>
+                            <ToggleButtonGroup
+                                value={status}
+                                exclusive
+                                onChange={(_, val) => val && setStatus(val)}
+                                fullWidth
+                                size="small"
+                            >
+                                {Object.entries(STATUS_LABELS).map(([key, s]) => (
+                                    <ToggleButton
+                                        key={key}
+                                        value={key}
+                                        sx={{
+                                            flex: 1,
+                                            fontSize: '0.75rem',
+                                            '&.Mui-selected': {
+                                                bgcolor: `${s.color}22`,
+                                                color: s.color,
+                                                borderColor: `${s.color}55`,
+                                            },
+                                        }}
+                                    >
+                                        {s.label}
+                                    </ToggleButton>
+                                ))}
+                            </ToggleButtonGroup>
+                        </Box>
+                    )}
 
                     <Box>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -122,7 +198,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                 </Stack>
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 2 }}>
-                <Button onClick={onClose} color="inherit">
+                <Button onClick={handleClose} color="inherit">
                     Cancel
                 </Button>
                 <Button
@@ -130,7 +206,9 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                     variant="contained"
                     disabled={!title.trim() || isSubmitting}
                 >
-                    {isSubmitting ? 'Adding...' : 'Add Task'}
+                    {isSubmitting
+                        ? isEditing ? 'Saving...' : 'Adding...'
+                        : isEditing ? 'Save Changes' : 'Add Task'}
                 </Button>
             </DialogActions>
         </Dialog>

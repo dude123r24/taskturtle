@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -27,18 +28,21 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import { useTaskStore } from '@/store/taskStore';
 import QuickAddDialog from '@/components/tasks/QuickAddDialog';
+import CommandPalette from '@/components/layout/CommandPalette';
 
 const DRAWER_WIDTH = 240;
 
-const navItems = [
-    { label: 'Dashboard', href: '/', icon: <DashboardIcon /> },
-    { label: 'Tasks', href: '/tasks', icon: <ChecklistIcon /> },
-    { label: 'Planner', href: '/planner', icon: <ViewTimelineIcon /> },
-    { label: 'Calendar', href: '/calendar', icon: <CalendarMonthIcon /> },
-    { label: 'AI Assistant', href: '/chat', icon: <SmartToyIcon /> },
-    { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
+const NAV_ITEMS = [
+    { label: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
+    { label: 'Tasks', icon: <ChecklistIcon />, href: '/tasks' },
+    { label: 'Planner', icon: <ViewTimelineIcon />, href: '/planner' },
+    { label: 'Calendar', icon: <CalendarMonthIcon />, href: '/calendar' },
+    { label: 'Focus', icon: <CenterFocusStrongIcon />, href: '/focus' },
+    { label: 'AI Assistant', icon: <SmartToyIcon />, href: '/chat' },
+    { label: 'Settings', icon: <SettingsIcon />, href: '/settings' },
 ];
 
 export default function DashboardLayout({
@@ -70,33 +74,39 @@ export default function DashboardLayout({
             </Box>
             <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />
             <List sx={{ flex: 1, px: 1, pt: 1 }}>
-                {navItems.map((item) => (
-                    <ListItemButton
-                        key={item.href}
-                        component={Link}
-                        href={item.href}
-                        selected={pathname === item.href}
-                        sx={{
-                            borderRadius: 2,
-                            mb: 0.5,
-                            '&.Mui-selected': {
-                                bgcolor: 'rgba(108, 99, 255, 0.15)',
-                                color: '#6C63FF',
-                                '& .MuiListItemIcon-root': { color: '#6C63FF' },
-                            },
-                            '&:hover': {
-                                bgcolor: 'rgba(108, 99, 255, 0.08)',
-                            },
-                        }}
-                    >
-                        <ListItemIcon sx={{ minWidth: 40, color: 'text.secondary' }}>
-                            {item.icon}
-                        </ListItemIcon>
-                        <ListItemText
-                            primary={item.label}
-                            primaryTypographyProps={{ fontWeight: 500, fontSize: '0.9rem' }}
-                        />
-                    </ListItemButton>
+                {NAV_ITEMS.map((item) => (
+                    <ListItem key={item.href} disablePadding>
+                        <ListItemButton
+                            component={Link}
+                            href={item.href}
+                            selected={pathname === item.href}
+                            sx={{
+                                borderRadius: 2,
+                                mb: 0.5,
+                                '&.Mui-selected': {
+                                    bgcolor: 'rgba(108, 99, 255, 0.15)',
+                                    color: '#6C63FF',
+                                    '& .MuiListItemIcon-root': {
+                                        color: '#6C63FF',
+                                    },
+                                },
+                                '&:hover': {
+                                    bgcolor: 'rgba(108, 99, 255, 0.08)',
+                                },
+                            }}
+                        >
+                            <ListItemIcon sx={{ minWidth: 40 }}>
+                                {item.icon}
+                            </ListItemIcon>
+                            <ListItemText
+                                primary={item.label}
+                                primaryTypographyProps={{
+                                    fontSize: '0.875rem',
+                                    fontWeight: pathname === item.href ? 600 : 400
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
                 ))}
             </List>
         </Box>
@@ -164,9 +174,11 @@ export default function DashboardLayout({
                         >
                             <MenuIcon />
                         </IconButton>
-                        <Typography variant="h6" sx={{ flex: 1, fontWeight: 600 }}>
-                            {navItems.find((n) => n.href === pathname)?.label || 'Dashboard'}
-                        </Typography>
+                        <Box sx={{ flexGrow: 1 }}>
+                            <Typography variant="h6" noWrap component="div">
+                                {NAV_ITEMS.find((n) => n.href === pathname)?.label || 'Dashboard'}
+                            </Typography>
+                        </Box>
                         <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
                             <Avatar
                                 src={session?.user?.image || undefined}
@@ -225,6 +237,9 @@ export default function DashboardLayout({
                 open={quickAddOpen}
                 onClose={() => setQuickAddOpen(false)}
             />
+
+            {/* Command Palette */}
+            <CommandPalette />
         </Box>
     );
 }
