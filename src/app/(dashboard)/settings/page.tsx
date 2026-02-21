@@ -27,6 +27,12 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import { useThemeMode, type ThemeMode } from '@/components/ThemeContext';
 
 interface Settings {
     maxDailyTasks: number;
@@ -55,6 +61,7 @@ const CALENDAR_COLORS = [
 
 function SettingsContent() {
     const searchParams = useSearchParams();
+    const { mode: themeMode, setMode: setThemeMode } = useThemeMode();
     const [settings, setSettings] = useState<Settings>({
         maxDailyTasks: 8,
         maxWeeklyTasks: 25,
@@ -206,11 +213,47 @@ function SettingsContent() {
                 Settings
             </Typography>
 
+            {/* Appearance */}
+            <Card
+                sx={{
+                    background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                    border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
+                }}
+            >
+                <CardContent>
+                    <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+                        <SettingsBrightnessIcon sx={{ color: 'primary.main' }} />
+                        <Typography variant="h6" fontWeight={600}>
+                            Appearance
+                        </Typography>
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary" mb={2}>
+                        Choose your preferred color theme or match your system settings.
+                    </Typography>
+                    <ToggleButtonGroup
+                        value={themeMode}
+                        exclusive
+                        onChange={(_, val) => val && setThemeMode(val as ThemeMode)}
+                        size="small"
+                    >
+                        <ToggleButton value="light" sx={{ gap: 1 }}>
+                            <LightModeIcon fontSize="small" /> Light
+                        </ToggleButton>
+                        <ToggleButton value="dark" sx={{ gap: 1 }}>
+                            <DarkModeIcon fontSize="small" /> Dark
+                        </ToggleButton>
+                        <ToggleButton value="system" sx={{ gap: 1 }}>
+                            <SettingsBrightnessIcon fontSize="small" /> System
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </CardContent>
+            </Card>
+
             {/* Calendar Accounts */}
             <Card
                 sx={{
-                    background: 'rgba(26, 25, 41, 0.6)',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                    border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
                 }}
             >
                 <CardContent>
@@ -298,8 +341,8 @@ function SettingsContent() {
             {/* Task Limits */}
             <Card
                 sx={{
-                    background: 'rgba(26, 25, 41, 0.6)',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                    border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
                 }}
             >
                 <CardContent>
@@ -386,8 +429,8 @@ function SettingsContent() {
             {/* Data Management */}
             <Card
                 sx={{
-                    background: 'rgba(26, 25, 41, 0.6)',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                    border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
                 }}
             >
                 <CardContent>
