@@ -348,9 +348,12 @@ const LandingPage = () => {
             {/* Footer */}
             <Box sx={{ py: 10, borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
                 <Stack direction="row" spacing={4} justifyContent="center" sx={{ mb: 4 }}>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', '&:hover': { color: 'white' } }}>Privacy</Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', '&:hover': { color: 'white' } }}>Terms</Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', '&:hover': { color: 'white' } }}>Twitter</Typography>
+                    <Link href="/privacy" style={{ textDecoration: 'none' }}>
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', '&:hover': { color: 'white' } }}>Privacy Policy</Typography>
+                    </Link>
+                    <Link href="/terms" style={{ textDecoration: 'none' }}>
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', '&:hover': { color: 'white' } }}>Terms of Service</Typography>
+                    </Link>
                 </Stack>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.2)' }}>
                     © 2026 TaskTurtle. Precision tools for modern builders.
