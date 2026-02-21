@@ -72,7 +72,7 @@ export default function DashboardLayout({
                     TaskTurtle
                 </Typography>
             </Box>
-            <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />
+            <Divider sx={{ borderColor: 'divider' }} />
             <List sx={{ flex: 1, px: 1, pt: 1 }}>
                 {NAV_ITEMS.map((item) => (
                     <ListItem key={item.href} disablePadding>
@@ -125,7 +125,8 @@ export default function DashboardLayout({
                     '& .MuiDrawer-paper': {
                         width: DRAWER_WIDTH,
                         bgcolor: 'background.paper',
-                        borderRight: '1px solid rgba(255,255,255,0.06)',
+                        borderRight: '1px solid',
+                        borderRightColor: 'divider',
                     },
                 }}
             >
@@ -140,7 +141,8 @@ export default function DashboardLayout({
                     '& .MuiDrawer-paper': {
                         width: DRAWER_WIDTH,
                         bgcolor: 'background.paper',
-                        borderRight: '1px solid rgba(255,255,255,0.06)',
+                        borderRight: '1px solid',
+                        borderRightColor: 'divider',
                     },
                 }}
             >
@@ -161,9 +163,10 @@ export default function DashboardLayout({
                     position="sticky"
                     elevation={0}
                     sx={{
-                        bgcolor: 'rgba(15, 14, 23, 0.8)',
+                        bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(15, 14, 23, 0.8)' : 'rgba(255, 255, 255, 0.85)',
                         backdropFilter: 'blur(10px)',
-                        borderBottom: '1px solid rgba(255,255,255,0.06)',
+                        borderBottom: '1px solid',
+                        borderBottomColor: 'divider',
                     }}
                 >
                     <Toolbar>

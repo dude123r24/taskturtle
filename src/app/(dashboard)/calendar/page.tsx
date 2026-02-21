@@ -201,8 +201,8 @@ export default function CalendarPage() {
                         <Card
                             sx={{
                                 mt: 2,
-                                background: 'rgba(26, 25, 41, 0.6)',
-                                border: '1px solid rgba(255,255,255,0.06)',
+                                background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                                border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
                                 textAlign: 'center',
                             }}
                         >

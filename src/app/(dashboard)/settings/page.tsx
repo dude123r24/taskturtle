@@ -387,7 +387,7 @@ function SettingsContent() {
                             fullWidth
                         />
 
-                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderTopColor: 'divider' }}>
                             <Typography variant="subtitle1" fontWeight={500} mb={1}>
                                 Auto-Archiving
                             </Typography>

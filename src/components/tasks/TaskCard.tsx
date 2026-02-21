@@ -41,16 +41,16 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
             onClick={() => setEditingTask(task)}
             sx={{
                 cursor: 'pointer',
-                background: isDone
+                background: (theme) => isDone
                     ? 'rgba(67, 160, 71, 0.06)'
-                    : 'rgba(26, 25, 41, 0.6)',
-                border: `1px solid ${isDone ? 'rgba(67,160,71,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                    : theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                border: (theme) => `1px solid ${isDone ? 'rgba(67,160,71,0.2)' : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)')}`,
                 transition: 'all 0.2s ease',
                 opacity: isDone ? 0.7 : 1,
                 '&:hover': {
                     border: `1px solid ${quadrantInfo.color}44`,
                     transform: 'translateY(-1px)',
-                    boxShadow: `0 4px 12px rgba(0,0,0,0.3)`,
+                    boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.1)',
                 },
             }}
         >

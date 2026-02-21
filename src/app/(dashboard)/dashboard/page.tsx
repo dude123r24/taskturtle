@@ -276,8 +276,8 @@ export default function DashboardPage() {
                         {/* Calendar Events */}
                         <Card
                             sx={{
-                                background: 'rgba(26, 25, 41, 0.6)',
-                                border: '1px solid rgba(255,255,255,0.06)',
+                                background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                                border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
                             }}
                         >
                             <CardContent>
@@ -347,7 +347,7 @@ export default function DashboardPage() {
                     </Typography>
                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
                         {/* Chart 1: Quadrant Distribution */}
-                        <Card sx={{ background: 'rgba(26, 25, 41, 0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <Card sx={{ background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)', border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}` }}>
                             <CardContent>
                                 <Typography variant="h6" fontWeight={600} mb={3}>Task Distribution</Typography>
                                 <Box sx={{ height: 300, width: '100%' }}>
@@ -390,7 +390,7 @@ export default function DashboardPage() {
                         </Card>
 
                         {/* Chart 2: Time Planned vs Focused */}
-                        <Card sx={{ background: 'rgba(26, 25, 41, 0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <Card sx={{ background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)', border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}` }}>
                             <CardContent>
                                 <Typography variant="h6" fontWeight={600} mb={3}>Time: Planned vs Actual (Minutes)</Typography>
                                 <Box sx={{ height: 300, width: '100%' }}>

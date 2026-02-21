@@ -150,7 +150,7 @@ export default function FocusPage() {
                 right: 0,
                 bottom: 0,
                 zIndex: 1300,
-                bgcolor: '#0F0E17',
+                bgcolor: (theme) => theme.palette.background.default,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -204,7 +204,7 @@ export default function FocusPage() {
                             value={100}
                             size={320}
                             thickness={2}
-                            sx={{ color: 'rgba(255,255,255,0.05)' }}
+                            sx={{ color: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
                         />
                         <CircularProgress
                             variant="determinate"
@@ -238,7 +238,7 @@ export default function FocusPage() {
 
                     {/* Controls */}
                     <Stack direction="row" spacing={3}>
-                        <IconButton onClick={resetTimer} size="large" sx={{ bgcolor: 'rgba(255,255,255,0.05)' }}>
+                        <IconButton onClick={resetTimer} size="large" sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
                             <RefreshIcon fontSize="large" />
                         </IconButton>
 
@@ -251,7 +251,7 @@ export default function FocusPage() {
                             {isActive ? <PauseIcon sx={{ fontSize: 40 }} /> : <PlayArrowIcon sx={{ fontSize: 40 }} />}
                         </Fab>
 
-                        <IconButton onClick={handleSkipTask} size="large" sx={{ bgcolor: 'rgba(255,255,255,0.05)' }}>
+                        <IconButton onClick={handleSkipTask} size="large" sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
                             <SkipNextIcon fontSize="large" />
                         </IconButton>
                     </Stack>

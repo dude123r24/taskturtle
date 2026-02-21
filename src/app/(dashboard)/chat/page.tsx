@@ -240,8 +240,8 @@ export default function ChatPage() {
                                                 ? 'rgba(108, 99, 255, 0.12)'
                                                 : 'rgba(255, 255, 255, 0.04)',
                                         border: `1px solid ${msg.role === 'user'
-                                                ? 'rgba(108, 99, 255, 0.2)'
-                                                : 'rgba(255, 255, 255, 0.06)'
+                                            ? 'rgba(108, 99, 255, 0.2)'
+                                            : 'rgba(255, 255, 255, 0.06)'
                                             }`,
                                     }}
                                 >
@@ -325,8 +325,8 @@ export default function ChatPage() {
                     alignItems: 'flex-end',
                     p: 1.5,
                     borderRadius: 2,
-                    bgcolor: 'rgba(26, 25, 41, 0.6)',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                    border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
                 }}
             >
                 <TextField

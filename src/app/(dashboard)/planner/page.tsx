@@ -394,13 +394,13 @@ export default function PlannerPage() {
                     {/* Right: Calendar Timeline */}
                     <Card
                         sx={{
-                            background: 'rgba(26, 25, 41, 0.6)',
-                            border: '1px solid rgba(255,255,255,0.06)',
+                            background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                            border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
                             minHeight: 600,
                         }}
                     >
                         <CardContent sx={{ p: 0 }}>
-                            <Box sx={{ p: 2, borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Box sx={{ p: 2, borderBottom: '1px solid', borderBottomColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Typography variant="h6" fontWeight={600}>Timeline</Typography>
                                 <Button
                                     variant="text"
@@ -463,8 +463,9 @@ export default function PlannerPage() {
                     '& .MuiDrawer-paper': {
                         width: 400,
                         p: 3,
-                        background: '#0F0E17',
-                        borderRight: '1px solid rgba(255,255,255,0.06)'
+                        background: (theme) => theme.palette.background.default,
+                        borderRight: '1px solid',
+                        borderRightColor: 'divider',
                     }
                 }}
             >
@@ -593,12 +594,12 @@ function DroppableList({
         <Card
             ref={setNodeRef}
             sx={{
-                background: isOver
+                background: (theme) => isOver
                     ? 'rgba(108, 99, 255, 0.1)'
-                    : 'rgba(26, 25, 41, 0.6)',
-                border: isOver
+                    : theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                border: (theme) => isOver
                     ? '1px dashed rgba(108, 99, 255, 0.5)'
-                    : '1px solid rgba(255,255,255,0.06)',
+                    : `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
                 transition: 'all 0.2s',
                 minHeight: 200,
                 display: 'flex',

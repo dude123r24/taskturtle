@@ -88,14 +88,15 @@ export default function CommandPalette() {
             maxWidth="sm"
             PaperProps={{
                 sx: {
-                    bgcolor: '#1a1929',
+                    bgcolor: 'background.paper',
                     backgroundImage: 'none',
                     borderRadius: 3,
-                    border: '1px solid rgba(255,255,255,0.1)'
+                    border: '1px solid',
+                    borderColor: 'divider',
                 }
             }}
         >
-            <Box sx={{ p: 2, display: 'flex', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <Box sx={{ p: 2, display: 'flex', alignItems: 'center', borderBottom: '1px solid', borderBottomColor: 'divider' }}>
                 <SearchIcon sx={{ color: 'text.secondary', mr: 2 }} />
                 <InputBase
                     placeholder="Search or type a command..."
@@ -104,7 +105,7 @@ export default function CommandPalette() {
                     autoFocus
                     sx={{ width: '100%', fontSize: '1.2rem' }}
                 />
-                <Typography variant="caption" sx={{ color: 'text.secondary', ml: 2, border: '1px solid rgba(255,255,255,0.2)', borderRadius: 1, px: 1 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', ml: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1, px: 1 }}>
                     ESC
                 </Typography>
             </Box>
