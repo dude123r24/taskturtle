@@ -3,15 +3,15 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { darkTheme, lightTheme } from '@/lib/theme';
+import { darkTheme, lightTheme, googleTheme } from '@/lib/theme';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = 'light' | 'dark' | 'system' | 'google';
 
 interface ThemeContextType {
     mode: ThemeMode;
     setMode: (mode: ThemeMode) => void;
-    resolvedMode: 'light' | 'dark';
+    resolvedMode: 'light' | 'dark' | 'google';
 }
 
 const ThemeContext = createContext<ThemeContextType>({
@@ -32,7 +32,7 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
     // Load saved preference on mount
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
-        if (saved && ['light', 'dark', 'system'].includes(saved)) {
+        if (saved && ['light', 'dark', 'system', 'google'].includes(saved)) {
             setModeState(saved);
         }
         setMounted(true);
@@ -43,14 +43,19 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, newMode);
     };
 
-    const resolvedMode: 'light' | 'dark' = mode === 'system'
-        ? (prefersDark ? 'dark' : 'light')
-        : mode;
+    const resolvedMode: 'light' | 'dark' | 'google' = mode === 'google'
+        ? 'google'
+        : mode === 'system'
+            ? (prefersDark ? 'dark' : 'light')
+            : mode as 'light' | 'dark';
 
-    const theme = useMemo(
-        () => (resolvedMode === 'dark' ? darkTheme : lightTheme),
-        [resolvedMode]
-    );
+    const theme = useMemo(() => {
+        switch (resolvedMode) {
+            case 'google': return googleTheme;
+            case 'light': return lightTheme;
+            default: return darkTheme;
+        }
+    }, [resolvedMode]);
 
     // Prevent flash of wrong theme on initial load
     if (!mounted) {
