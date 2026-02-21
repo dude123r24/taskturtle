@@ -29,6 +29,7 @@ import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useTaskStore } from '@/store/taskStore';
 import QuickAddDialog from '@/components/tasks/QuickAddDialog';
 import CommandPalette from '@/components/layout/CommandPalette';
@@ -108,6 +109,40 @@ export default function DashboardLayout({
                         </ListItemButton>
                     </ListItem>
                 ))}
+                {session?.user?.email === 'sanghviamit@gmail.com' && (
+                    <ListItem disablePadding>
+                        <ListItemButton
+                            component={Link}
+                            href="/admin"
+                            selected={pathname === '/admin'}
+                            sx={{
+                                borderRadius: 2,
+                                mb: 0.5,
+                                '&.Mui-selected': {
+                                    bgcolor: 'rgba(251, 140, 0, 0.15)',
+                                    color: '#FB8C00',
+                                    '& .MuiListItemIcon-root': {
+                                        color: '#FB8C00',
+                                    },
+                                },
+                                '&:hover': {
+                                    bgcolor: 'rgba(251, 140, 0, 0.08)',
+                                },
+                            }}
+                        >
+                            <ListItemIcon sx={{ minWidth: 40 }}>
+                                <AdminPanelSettingsIcon />
+                            </ListItemIcon>
+                            <ListItemText
+                                primary="Admin"
+                                primaryTypographyProps={{
+                                    fontSize: '0.875rem',
+                                    fontWeight: pathname === '/admin' ? 600 : 400
+                                }}
+                            />
+                        </ListItemButton>
+                    </ListItem>
+                )}
             </List>
         </Box>
     );

@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 
 // Add admin emails here
 const ADMIN_EMAILS = [
-    'sanghviamit1@gmail.com',
+    'sanghviamit@gmail.com',
 ];
 
 export async function GET() {
