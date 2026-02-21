@@ -3,15 +3,15 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { darkTheme, lightTheme, googleTheme } from '@/lib/theme';
+import { darkTheme, lightTheme, googleTheme, appleTheme } from '@/lib/theme';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-export type ThemeMode = 'light' | 'dark' | 'system' | 'google';
+export type ThemeMode = 'light' | 'dark' | 'system' | 'google' | 'apple';
 
 interface ThemeContextType {
     mode: ThemeMode;
     setMode: (mode: ThemeMode) => void;
-    resolvedMode: 'light' | 'dark' | 'google';
+    resolvedMode: 'light' | 'dark' | 'google' | 'apple';
 }
 
 const ThemeContext = createContext<ThemeContextType>({
@@ -32,7 +32,7 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
     // Load saved preference on mount
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
-        if (saved && ['light', 'dark', 'system', 'google'].includes(saved)) {
+        if (saved && ['light', 'dark', 'system', 'google', 'apple'].includes(saved)) {
             setModeState(saved);
         }
         setMounted(true);
@@ -43,15 +43,18 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, newMode);
     };
 
-    const resolvedMode: 'light' | 'dark' | 'google' = mode === 'google'
+    const resolvedMode: 'light' | 'dark' | 'google' | 'apple' = mode === 'google'
         ? 'google'
-        : mode === 'system'
-            ? (prefersDark ? 'dark' : 'light')
-            : mode as 'light' | 'dark';
+        : mode === 'apple'
+            ? 'apple'
+            : mode === 'system'
+                ? (prefersDark ? 'dark' : 'light')
+                : mode as 'light' | 'dark';
 
     const theme = useMemo(() => {
         switch (resolvedMode) {
             case 'google': return googleTheme;
+            case 'apple': return appleTheme;
             case 'light': return lightTheme;
             default: return darkTheme;
         }

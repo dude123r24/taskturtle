@@ -281,5 +281,164 @@ export const googleTheme = createTheme({
     },
 });
 
+export const appleTheme = createTheme({
+    palette: {
+        mode: 'light',
+        primary: {
+            main: '#007AFF',   // Apple Blue
+            light: '#409CFF',
+            dark: '#0062CC',
+        },
+        secondary: {
+            main: '#5856D6',   // Apple Purple
+            light: '#7A79E0',
+            dark: '#3634A3',
+        },
+        background: {
+            default: '#F2F2F7', // Apple system gray 6
+            paper: 'rgba(255, 255, 255, 0.72)',
+        },
+        error: { main: '#FF3B30' },    // Apple Red
+        warning: { main: '#FF9500' },  // Apple Orange
+        info: { main: '#5AC8FA' },     // Apple Teal
+        success: { main: '#34C759' },  // Apple Green
+        text: {
+            primary: '#1C1C1E',
+            secondary: '#8E8E93',
+        },
+        divider: 'rgba(60, 60, 67, 0.12)',
+    },
+    typography: {
+        ...sharedTypography,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Arial", sans-serif',
+        h1: { fontWeight: 700, fontSize: '2.5rem', letterSpacing: '-0.02em' },
+        h2: { fontWeight: 700, fontSize: '2rem', letterSpacing: '-0.02em' },
+        h3: { fontWeight: 600, fontSize: '1.5rem', letterSpacing: '-0.01em' },
+        h4: { fontWeight: 600, fontSize: '1.25rem', letterSpacing: '-0.01em' },
+        h5: { fontWeight: 600, fontSize: '1.1rem' },
+        h6: { fontWeight: 600, fontSize: '1rem' },
+        button: { textTransform: 'none' as const, fontWeight: 600, letterSpacing: '-0.01em' },
+    },
+    shape: { borderRadius: 12 },
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    borderRadius: 10,
+                    padding: '8px 20px',
+                    fontWeight: 600,
+                    letterSpacing: '-0.01em',
+                },
+                contained: {
+                    boxShadow: 'none',
+                    '&:hover': {
+                        boxShadow: 'none',
+                        opacity: 0.88,
+                    },
+                },
+                outlined: {
+                    borderColor: 'rgba(60, 60, 67, 0.18)',
+                    '&:hover': {
+                        backgroundColor: 'rgba(0, 122, 255, 0.06)',
+                        borderColor: '#007AFF',
+                    },
+                },
+            },
+        },
+        MuiChip: {
+            styleOverrides: {
+                root: {
+                    fontWeight: 500,
+                    borderRadius: 8,
+                    backdropFilter: 'blur(20px)',
+                },
+            },
+        },
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'none',
+                    backgroundColor: 'rgba(255, 255, 255, 0.72)',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    border: '1px solid rgba(60, 60, 67, 0.08)',
+                    boxShadow: '0 0.5px 0 rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.06)',
+                    borderRadius: 12,
+                },
+            },
+        },
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'none',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                },
+            },
+        },
+        MuiFab: {
+            styleOverrides: {
+                root: {
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.12)',
+                    borderRadius: 16,
+                },
+            },
+        },
+        MuiToggleButton: {
+            styleOverrides: {
+                root: {
+                    borderRadius: 8,
+                    textTransform: 'none' as const,
+                    '&.Mui-selected': {
+                        backgroundColor: 'rgba(0, 122, 255, 0.12)',
+                        color: '#007AFF',
+                    },
+                },
+            },
+        },
+        MuiListItemButton: {
+            styleOverrides: {
+                root: {
+                    borderRadius: 10,
+                    '&.Mui-selected': {
+                        backgroundColor: 'rgba(0, 122, 255, 0.12)',
+                        color: '#007AFF',
+                    },
+                },
+            },
+        },
+        MuiAppBar: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: 'rgba(242, 242, 247, 0.72)',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    color: '#1C1C1E',
+                },
+            },
+        },
+        MuiDrawer: {
+            styleOverrides: {
+                paper: {
+                    backgroundColor: 'rgba(242, 242, 247, 0.82)',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    borderRight: '1px solid rgba(60, 60, 67, 0.08)',
+                },
+            },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                paper: {
+                    backdropFilter: 'blur(30px) saturate(200%)',
+                    WebkitBackdropFilter: 'blur(30px) saturate(200%)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    borderRadius: 14,
+                },
+            },
+        },
+    },
+});
+
 // Keep backwards compat — default to dark
 export const theme = darkTheme;

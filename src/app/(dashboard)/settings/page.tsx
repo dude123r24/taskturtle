@@ -252,6 +252,9 @@ function SettingsContent() {
                                 <Box component="span" sx={{ color: '#EA4335' }}>e</Box>
                             </Box>
                         </ToggleButton>
+                        <ToggleButton value="apple" sx={{ gap: 0.5 }}>
+                            <Box component="span" sx={{ fontSize: '1rem', lineHeight: 1 }}></Box> Apple
+                        </ToggleButton>
                         <ToggleButton value="system" sx={{ gap: 1 }}>
                             <SettingsBrightnessIcon fontSize="small" /> System
                         </ToggleButton>
