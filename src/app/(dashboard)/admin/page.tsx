@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -103,6 +104,7 @@ function StatCard({
 
 export default function AdminPage() {
     const router = useRouter();
+    const theme = useTheme();
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -204,7 +206,7 @@ export default function AdminPage() {
                         title="Total Users"
                         value={stats.users.total}
                         icon={<PeopleIcon sx={{ fontSize: 32 }} />}
-                        color="#6C63FF"
+                        color={theme.palette.primary.main}
                     />
                 </Grid>
                 <Grid item xs={6} md={3}>
@@ -245,7 +247,7 @@ export default function AdminPage() {
                         value={stats.tasks.total}
                         subtitle={`${stats.tasks.createdLast7d} created this week`}
                         icon={<TaskAltIcon sx={{ fontSize: 32 }} />}
-                        color="#6C63FF"
+                        color={theme.palette.primary.main}
                     />
                 </Grid>
                 {Object.entries(stats.tasks.byStatus).map(([status, count]) => (
@@ -289,7 +291,7 @@ export default function AdminPage() {
                         value={stats.features.planner.totalPlans}
                         subtitle={`${stats.features.planner.uniqueUsers} users · ${stats.features.planner.plansLast7d} this week`}
                         icon={<ViewTimelineIcon sx={{ fontSize: 32 }} />}
-                        color="#6C63FF"
+                        color={theme.palette.primary.main}
                     />
                 </Grid>
                 <Grid item xs={6} md={3}>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -24,6 +25,7 @@ const BREAK_MINUTES = 5;
 
 export default function FocusPage() {
     const router = useRouter();
+    const theme = useTheme();
     const { tasks, fetchTasks, patchTask, isLoading } = useTaskStore();
 
     const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -107,7 +109,7 @@ export default function FocusPage() {
             particleCount: 100,
             spread: 70,
             origin: { y: 0.6 },
-            colors: ['#6C63FF', '#FF6584']
+            colors: [theme.palette.primary.main, theme.palette.secondary.main]
         });
 
         await patchTask(activeTask.id, { status: 'DONE' });
@@ -212,7 +214,7 @@ export default function FocusPage() {
                             size={320}
                             thickness={2}
                             sx={{
-                                color: mode === 'work' ? '#6C63FF' : '#FF6584',
+                                color: mode === 'work' ? theme.palette.primary.main : theme.palette.secondary.main,
                                 position: 'absolute',
                                 left: 0,
                                 strokeLinecap: 'round'

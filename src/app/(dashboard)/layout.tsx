@@ -64,7 +64,7 @@ export default function DashboardLayout({
                     variant="h5"
                     sx={{
                         fontWeight: 700,
-                        background: 'linear-gradient(135deg, #6C63FF, #FF6584)',
+                        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
                         backgroundClip: 'text',
                         WebkitBackgroundClip: 'text',
                         color: 'transparent',
@@ -85,14 +85,14 @@ export default function DashboardLayout({
                                 borderRadius: 2,
                                 mb: 0.5,
                                 '&.Mui-selected': {
-                                    bgcolor: 'rgba(108, 99, 255, 0.15)',
-                                    color: '#6C63FF',
+                                    bgcolor: (theme) => `${theme.palette.primary.main}15`,
+                                    color: 'primary.main',
                                     '& .MuiListItemIcon-root': {
-                                        color: '#6C63FF',
+                                        color: 'primary.main',
                                     },
                                 },
                                 '&:hover': {
-                                    bgcolor: 'rgba(108, 99, 255, 0.08)',
+                                    bgcolor: (theme) => `${theme.palette.primary.main}14`,
                                 },
                             }}
                         >

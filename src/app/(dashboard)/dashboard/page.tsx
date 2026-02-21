@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -66,6 +67,7 @@ interface OverloadInfo {
 }
 
 export default function DashboardPage() {
+    const theme = useTheme();
     const { tasks, isLoading, fetchTasks } = useTaskStore();
     const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
     const [overload, setOverload] = useState<OverloadInfo | null>(null);
@@ -200,7 +202,7 @@ export default function DashboardPage() {
                         borderRadius: 2,
                         bgcolor: 'rgba(108, 99, 255, 0.05)',
                         border: '1px solid rgba(108, 99, 255, 0.15)',
-                        '& .MuiAlert-icon': { color: '#6C63FF' },
+                        '& .MuiAlert-icon': { color: 'primary.main' },
                     }}
                 >
                     <Typography variant="subtitle2" fontWeight={600} gutterBottom>
@@ -417,8 +419,8 @@ export default function DashboardPage() {
                                                 contentStyle={{ backgroundColor: '#1a1929', borderColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}
                                             />
                                             <Legend />
-                                            <Bar dataKey="planned" fill="#6C63FF" name="Planned (min)" radius={[4, 4, 0, 0]} />
-                                            <Bar dataKey="actual" fill="#FF6584" name="Actual (min)" radius={[4, 4, 0, 0]} />
+                                            <Bar dataKey="planned" fill={theme.palette.primary.main} name="Planned (min)" radius={[4, 4, 0, 0]} />
+                                            <Bar dataKey="actual" fill={theme.palette.secondary.main} name="Actual (min)" radius={[4, 4, 0, 0]} />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </Box>

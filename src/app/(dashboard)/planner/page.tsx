@@ -563,7 +563,7 @@ function TimeSlot({
                 {tasks.map((task) => (
                     <Box key={task.id}>
                         <DraggableTaskCard task={task} compact disableSwipe />
-                        <Typography variant="caption" sx={{ color: '#6C63FF', display: 'block', mt: 0.5, ml: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'primary.main', display: 'block', mt: 0.5, ml: 1 }}>
                             ⏱️ {formatTime(taskMap[task.id].timeSlotStart)} - {formatTime(taskMap[task.id].timeSlotEnd)}
                         </Typography>
                     </Box>

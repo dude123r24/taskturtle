@@ -101,7 +101,7 @@ export default function ChatPage() {
         >
             {/* Header */}
             <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-                <SmartToyIcon sx={{ color: '#6C63FF' }} />
+                <SmartToyIcon sx={{ color: 'primary.main' }} />
                 <Typography variant="h5" fontWeight={600}>
                     AI Assistant
                 </Typography>
@@ -110,7 +110,7 @@ export default function ChatPage() {
                     size="small"
                     sx={{
                         bgcolor: 'rgba(108, 99, 255, 0.15)',
-                        color: '#6C63FF',
+                        color: 'primary.main',
                         fontSize: '0.7rem',
                     }}
                 />
@@ -177,7 +177,7 @@ export default function ChatPage() {
                                         borderColor: 'rgba(108, 99, 255, 0.3)',
                                         '&:hover': {
                                             bgcolor: 'rgba(108, 99, 255, 0.1)',
-                                            borderColor: '#6C63FF',
+                                            borderColor: 'primary.main',
                                         },
                                     }}
                                 />
@@ -218,14 +218,14 @@ export default function ChatPage() {
                                         <PersonIcon
                                             sx={{
                                                 fontSize: 18,
-                                                color: '#6C63FF',
+                                                color: 'primary.main',
                                             }}
                                         />
                                     ) : (
                                         <SmartToyIcon
                                             sx={{
                                                 fontSize: 18,
-                                                color: '#FF6584',
+                                                color: 'secondary.main',
                                             }}
                                         />
                                     )}
@@ -283,7 +283,7 @@ export default function ChatPage() {
                                     <SmartToyIcon
                                         sx={{
                                             fontSize: 18,
-                                            color: '#FF6584',
+                                            color: 'secondary.main',
                                         }}
                                     />
                                 </Box>
@@ -300,7 +300,7 @@ export default function ChatPage() {
                                 >
                                     <CircularProgress
                                         size={16}
-                                        sx={{ color: '#FF6584' }}
+                                        sx={{ color: 'secondary.main' }}
                                     />
                                     <Typography
                                         variant="body2"
@@ -358,7 +358,7 @@ export default function ChatPage() {
                 >
                     <SendIcon
                         sx={{
-                            color: input.trim() ? '#6C63FF' : 'text.disabled',
+                            color: input.trim() ? 'primary.main' : 'text.disabled',
                         }}
                     />
                 </IconButton>

@@ -243,7 +243,7 @@ function SettingsContent() {
                             <DarkModeIcon fontSize="small" /> Dark
                         </ToggleButton>
                         <ToggleButton value="google" sx={{ gap: 1 }}>
-                            <Box component="span" sx={{ display: 'inline-flex', fontSize: '1rem', fontWeight: 700 }}>
+                            <Box component="span" sx={{ display: 'inline-flex', fontSize: '0.95rem', fontWeight: 700 }}>
                                 <Box component="span" sx={{ color: '#4285F4' }}>G</Box>
                                 <Box component="span" sx={{ color: '#EA4335' }}>o</Box>
                                 <Box component="span" sx={{ color: '#FBBC05' }}>o</Box>
