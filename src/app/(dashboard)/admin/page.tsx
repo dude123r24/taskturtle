@@ -26,6 +26,7 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface AdminStats {
     users: {
@@ -45,6 +46,12 @@ interface AdminStats {
         calendar: { totalAccounts: number; uniqueUsers: number };
         settingsConfigured: number;
     };
+    growth: {
+        date: string;
+        displayDate: string;
+        newUsers: number;
+        newTasks: number;
+    }[];
     userList: {
         id: string;
         name: string | null;
@@ -80,7 +87,7 @@ function StatCard({
                     `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
             }}
         >
-            <CardContent>
+            <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                     <Box>
                         <Typography variant="caption" color="text.secondary" fontWeight={500}>
@@ -200,39 +207,104 @@ export default function AdminPage() {
             <Typography variant="h6" fontWeight={600} mb={2}>
                 👥 Users
             </Typography>
+            <Grid container spacing={2} mb={4} alignItems="stretch">
+                <Grid item xs={6} md={3} sx={{ display: 'flex' }}>
+                    <Box sx={{ width: '100%' }}>
+                        <StatCard
+                            title="Total Users"
+                            value={stats.users.total}
+                            icon={<PeopleIcon sx={{ fontSize: 32 }} />}
+                            color={theme.palette.primary.main}
+                        />
+                    </Box>
+                </Grid>
+                <Grid item xs={6} md={3} sx={{ display: 'flex' }}>
+                    <Box sx={{ width: '100%' }}>
+                        <StatCard
+                            title="Active (7d)"
+                            value={stats.users.activeLast7d}
+                            subtitle={`${stats.users.total > 0 ? Math.round((stats.users.activeLast7d / stats.users.total) * 100) : 0}% of total`}
+                            icon={<TrendingUpIcon sx={{ fontSize: 32 }} />}
+                            color="#43A047"
+                        />
+                    </Box>
+                </Grid>
+                <Grid item xs={6} md={3} sx={{ display: 'flex' }}>
+                    <Box sx={{ width: '100%' }}>
+                        <StatCard
+                            title="New (7d)"
+                            value={stats.users.newLast7d}
+                            icon={<PeopleIcon sx={{ fontSize: 32 }} />}
+                            color="#1E88E5"
+                        />
+                    </Box>
+                </Grid>
+                <Grid item xs={6} md={3} sx={{ display: 'flex' }}>
+                    <Box sx={{ width: '100%' }}>
+                        <StatCard
+                            title="New (30d)"
+                            value={stats.users.newLast30d}
+                            icon={<PeopleIcon sx={{ fontSize: 32 }} />}
+                            color="#FB8C00"
+                        />
+                    </Box>
+                </Grid>
+            </Grid>
+
+            {/* ── Growth Charts ── */}
+            <Typography variant="h6" fontWeight={600} mb={2}>
+                📈 30-Day Growth
+            </Typography>
             <Grid container spacing={2} mb={4}>
-                <Grid item xs={6} md={3}>
-                    <StatCard
-                        title="Total Users"
-                        value={stats.users.total}
-                        icon={<PeopleIcon sx={{ fontSize: 32 }} />}
-                        color={theme.palette.primary.main}
-                    />
+                <Grid item xs={12} md={6}>
+                    <Card sx={{
+                        p: 2, background: theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                        border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`
+                    }}>
+                        <Typography variant="subtitle2" color="text.secondary" mb={2}>New Users (Last 30 Days)</Typography>
+                        <Box sx={{ height: 250, width: '100%' }}>
+                            <ResponsiveContainer>
+                                <AreaChart data={stats.growth} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'} />
+                                    <XAxis dataKey="displayDate" tick={{ fontSize: 11, fill: theme.palette.text.secondary }} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={30} />
+                                    <YAxis tick={{ fontSize: 11, fill: theme.palette.text.secondary }} tickLine={false} axisLine={false} />
+                                    <Tooltip contentStyle={{ backgroundColor: theme.palette.mode === 'dark' ? '#1a1929' : '#fff', borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                    <Area type="monotone" dataKey="newUsers" stroke={theme.palette.primary.main} strokeWidth={2} fillOpacity={1} fill="url(#colorUsers)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </Box>
+                    </Card>
                 </Grid>
-                <Grid item xs={6} md={3}>
-                    <StatCard
-                        title="Active (7d)"
-                        value={stats.users.activeLast7d}
-                        subtitle={`${stats.users.total > 0 ? Math.round((stats.users.activeLast7d / stats.users.total) * 100) : 0}% of total`}
-                        icon={<TrendingUpIcon sx={{ fontSize: 32 }} />}
-                        color="#43A047"
-                    />
-                </Grid>
-                <Grid item xs={6} md={3}>
-                    <StatCard
-                        title="New (7d)"
-                        value={stats.users.newLast7d}
-                        icon={<PeopleIcon sx={{ fontSize: 32 }} />}
-                        color="#1E88E5"
-                    />
-                </Grid>
-                <Grid item xs={6} md={3}>
-                    <StatCard
-                        title="New (30d)"
-                        value={stats.users.newLast30d}
-                        icon={<PeopleIcon sx={{ fontSize: 32 }} />}
-                        color="#FB8C00"
-                    />
+                <Grid item xs={12} md={6}>
+                    <Card sx={{
+                        p: 2, background: theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                        border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`
+                    }}>
+                        <Typography variant="subtitle2" color="text.secondary" mb={2}>New Tasks (Last 30 Days)</Typography>
+                        <Box sx={{ height: 250, width: '100%' }}>
+                            <ResponsiveContainer>
+                                <AreaChart data={stats.growth} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={theme.palette.success.main} stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor={theme.palette.success.main} stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'} />
+                                    <XAxis dataKey="displayDate" tick={{ fontSize: 11, fill: theme.palette.text.secondary }} tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={30} />
+                                    <YAxis tick={{ fontSize: 11, fill: theme.palette.text.secondary }} tickLine={false} axisLine={false} />
+                                    <Tooltip contentStyle={{ backgroundColor: theme.palette.mode === 'dark' ? '#1a1929' : '#fff', borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                    <Area type="monotone" dataKey="newTasks" stroke={theme.palette.success.main} strokeWidth={2} fillOpacity={1} fill="url(#colorTasks)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </Box>
+                    </Card>
                 </Grid>
             </Grid>
 
@@ -240,30 +312,34 @@ export default function AdminPage() {
             <Typography variant="h6" fontWeight={600} mb={2}>
                 ✅ Tasks
             </Typography>
-            <Grid container spacing={2} mb={2}>
-                <Grid item xs={6} md={3}>
-                    <StatCard
-                        title="Total Tasks"
-                        value={stats.tasks.total}
-                        subtitle={`${stats.tasks.createdLast7d} created this week`}
-                        icon={<TaskAltIcon sx={{ fontSize: 32 }} />}
-                        color={theme.palette.primary.main}
-                    />
+            <Grid container spacing={2} mb={2} alignItems="stretch">
+                <Grid item xs={6} md={3} sx={{ display: 'flex' }}>
+                    <Box sx={{ width: '100%' }}>
+                        <StatCard
+                            title="Total Tasks"
+                            value={stats.tasks.total}
+                            subtitle={`${stats.tasks.createdLast7d} created this week`}
+                            icon={<TaskAltIcon sx={{ fontSize: 32 }} />}
+                            color={theme.palette.primary.main}
+                        />
+                    </Box>
                 </Grid>
                 {Object.entries(stats.tasks.byStatus).map(([status, count]) => (
-                    <Grid item xs={6} md={3} key={status}>
-                        <StatCard
-                            title={STATUS_LABELS[status] || status}
-                            value={count}
-                            icon={<TaskAltIcon sx={{ fontSize: 32 }} />}
-                            color={
-                                status === 'DONE'
-                                    ? '#43A047'
-                                    : status === 'ARCHIVED'
-                                        ? '#E53935'
-                                        : '#FB8C00'
-                            }
-                        />
+                    <Grid item xs={6} md={3} key={status} sx={{ display: 'flex' }}>
+                        <Box sx={{ width: '100%' }}>
+                            <StatCard
+                                title={STATUS_LABELS[status] || status}
+                                value={count}
+                                icon={<TaskAltIcon sx={{ fontSize: 32 }} />}
+                                color={
+                                    status === 'DONE'
+                                        ? '#43A047'
+                                        : status === 'ARCHIVED'
+                                            ? '#E53935'
+                                            : '#FB8C00'
+                                }
+                            />
+                        </Box>
                     </Grid>
                 ))}
             </Grid>
@@ -284,33 +360,39 @@ export default function AdminPage() {
             <Typography variant="h6" fontWeight={600} mb={2}>
                 🧩 Feature Usage
             </Typography>
-            <Grid container spacing={2} mb={4}>
-                <Grid item xs={6} md={3}>
-                    <StatCard
-                        title="Daily Plans"
-                        value={stats.features.planner.totalPlans}
-                        subtitle={`${stats.features.planner.uniqueUsers} users · ${stats.features.planner.plansLast7d} this week`}
-                        icon={<ViewTimelineIcon sx={{ fontSize: 32 }} />}
-                        color={theme.palette.primary.main}
-                    />
+            <Grid container spacing={2} mb={4} alignItems="stretch">
+                <Grid item xs={6} md={3} sx={{ display: 'flex' }}>
+                    <Box sx={{ width: '100%' }}>
+                        <StatCard
+                            title="Daily Plans"
+                            value={stats.features.planner.totalPlans}
+                            subtitle={`${stats.features.planner.uniqueUsers} users · ${stats.features.planner.plansLast7d} this week`}
+                            icon={<ViewTimelineIcon sx={{ fontSize: 32 }} />}
+                            color={theme.palette.primary.main}
+                        />
+                    </Box>
                 </Grid>
-                <Grid item xs={6} md={3}>
-                    <StatCard
-                        title="Calendars Connected"
-                        value={stats.features.calendar.totalAccounts}
-                        subtitle={`${stats.features.calendar.uniqueUsers} users`}
-                        icon={<CalendarMonthIcon sx={{ fontSize: 32 }} />}
-                        color="#1E88E5"
-                    />
+                <Grid item xs={6} md={3} sx={{ display: 'flex' }}>
+                    <Box sx={{ width: '100%' }}>
+                        <StatCard
+                            title="Calendars Connected"
+                            value={stats.features.calendar.totalAccounts}
+                            subtitle={`${stats.features.calendar.uniqueUsers} users`}
+                            icon={<CalendarMonthIcon sx={{ fontSize: 32 }} />}
+                            color="#1E88E5"
+                        />
+                    </Box>
                 </Grid>
-                <Grid item xs={6} md={3}>
-                    <StatCard
-                        title="Settings Configured"
-                        value={stats.features.settingsConfigured}
-                        subtitle={`${stats.users.total > 0 ? Math.round((stats.features.settingsConfigured / stats.users.total) * 100) : 0}% of users`}
-                        icon={<TaskAltIcon sx={{ fontSize: 32 }} />}
-                        color="#43A047"
-                    />
+                <Grid item xs={6} md={3} sx={{ display: 'flex' }}>
+                    <Box sx={{ width: '100%' }}>
+                        <StatCard
+                            title="Settings Configured"
+                            value={stats.features.settingsConfigured}
+                            subtitle={`${stats.users.total > 0 ? Math.round((stats.features.settingsConfigured / stats.users.total) * 100) : 0}% of users`}
+                            icon={<TaskAltIcon sx={{ fontSize: 32 }} />}
+                            color="#43A047"
+                        />
+                    </Box>
                 </Grid>
             </Grid>
 
@@ -368,6 +450,6 @@ export default function AdminPage() {
                     </TableBody>
                 </Table>
             </TableContainer>
-        </Box>
+        </Box >
     );
 }

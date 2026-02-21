@@ -77,6 +77,41 @@ export async function GET() {
         take: 50,
     });
 
+    // ── Time-Series Data (Last 30 Days) ─────────────────────────────
+    // Fetch users and tasks created in last 30 days
+    const usersCreatedLast30d = await prisma.user.findMany({
+        select: { createdAt: true },
+        where: { createdAt: { gte: thirtyDaysAgo } },
+    });
+    const tasksCreatedLast30dList = await prisma.task.findMany({
+        select: { createdAt: true },
+        where: { createdAt: { gte: thirtyDaysAgo } },
+    });
+
+    // Bucket into days
+    const daysArr = Array.from({ length: 30 }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (29 - i));
+        return {
+            date: d.toISOString().split('T')[0],
+            displayDate: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            newUsers: 0,
+            newTasks: 0,
+        };
+    });
+
+    usersCreatedLast30d.forEach(u => {
+        const dateStr = u.createdAt.toISOString().split('T')[0];
+        const dayMatch = daysArr.find(d => d.date === dateStr);
+        if (dayMatch) dayMatch.newUsers++;
+    });
+
+    tasksCreatedLast30dList.forEach(t => {
+        const dateStr = t.createdAt.toISOString().split('T')[0];
+        const dayMatch = daysArr.find(d => d.date === dateStr);
+        if (dayMatch) dayMatch.newTasks++;
+    });
+
     return NextResponse.json({
         users: {
             total: totalUsers,
@@ -106,6 +141,7 @@ export async function GET() {
             },
             settingsConfigured,
         },
+        growth: daysArr,
         userList: usersWithTaskCounts.map((u) => ({
             id: u.id,
             name: u.name,
