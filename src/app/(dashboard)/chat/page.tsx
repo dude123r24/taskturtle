@@ -109,7 +109,7 @@ export default function ChatPage() {
                     label="Gemini 2.0"
                     size="small"
                     sx={{
-                        bgcolor: 'rgba(108, 99, 255, 0.15)',
+                        bgcolor: (theme) => `${theme.palette.primary.main}26`,
                         color: 'primary.main',
                         fontSize: '0.7rem',
                     }}
@@ -142,7 +142,7 @@ export default function ChatPage() {
                         }}
                     >
                         <SmartToyIcon
-                            sx={{ fontSize: 64, color: 'rgba(108, 99, 255, 0.3)' }}
+                            sx={{ fontSize: 64, color: (theme) => `${theme.palette.primary.main}4D` }}
                         />
                         <Typography
                             variant="h6"
@@ -174,9 +174,9 @@ export default function ChatPage() {
                                     onClick={() => sendMessage(prompt)}
                                     sx={{
                                         cursor: 'pointer',
-                                        borderColor: 'rgba(108, 99, 255, 0.3)',
+                                        borderColor: (theme) => `${theme.palette.primary.main}4D`,
                                         '&:hover': {
-                                            bgcolor: 'rgba(108, 99, 255, 0.1)',
+                                            bgcolor: (theme) => `${theme.palette.primary.main}1A`,
                                             borderColor: 'primary.main',
                                         },
                                     }}
@@ -209,7 +209,7 @@ export default function ChatPage() {
                                         justifyContent: 'center',
                                         bgcolor:
                                             msg.role === 'user'
-                                                ? 'rgba(108, 99, 255, 0.2)'
+                                                ? (theme) => `${theme.palette.primary.main}33`
                                                 : 'rgba(255, 101, 132, 0.2)',
                                         flexShrink: 0,
                                     }}
@@ -237,11 +237,12 @@ export default function ChatPage() {
                                         borderRadius: 2,
                                         bgcolor:
                                             msg.role === 'user'
-                                                ? 'rgba(108, 99, 255, 0.12)'
+                                                ? (theme) => `${theme.palette.primary.main}1F`
                                                 : 'rgba(255, 255, 255, 0.04)',
-                                        border: `1px solid ${msg.role === 'user'
-                                            ? 'rgba(108, 99, 255, 0.2)'
-                                            : 'rgba(255, 255, 255, 0.06)'
+                                        border: (theme) =>
+                                            `1px solid ${msg.role === 'user'
+                                                ? `${theme.palette.primary.main}33`
+                                                : 'rgba(255, 255, 255, 0.06)'
                                             }`,
                                     }}
                                 >
@@ -351,9 +352,9 @@ export default function ChatPage() {
                     disabled={!input.trim() || isLoading}
                     sx={{
                         bgcolor: input.trim()
-                            ? 'rgba(108, 99, 255, 0.2)'
+                            ? (theme) => `${theme.palette.primary.main}33`
                             : 'transparent',
-                        '&:hover': { bgcolor: 'rgba(108, 99, 255, 0.3)' },
+                        '&:hover': { bgcolor: (theme) => `${theme.palette.primary.main}4D` },
                     }}
                 >
                     <SendIcon

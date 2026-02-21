@@ -33,8 +33,12 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useTaskStore } from '@/store/taskStore';
 import QuickAddDialog from '@/components/tasks/QuickAddDialog';
 import CommandPalette from '@/components/layout/CommandPalette';
+import { useThemeMode } from '@/components/ThemeContext';
 
 const DRAWER_WIDTH = 240;
+
+// Google RGBY colors for sidebar icons
+const GOOGLE_ICON_COLORS = ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#4285F4', '#EA4335', '#34A853'];
 
 const NAV_ITEMS = [
     { label: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
@@ -56,26 +60,43 @@ export default function DashboardLayout({
     const [mobileOpen, setMobileOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const { quickAddOpen, setQuickAddOpen } = useTaskStore();
+    const { resolvedMode } = useThemeMode();
+    const isGoogle = resolvedMode === 'google';
 
     const drawer = (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography
-                    variant="h5"
-                    sx={{
-                        fontWeight: 700,
-                        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        color: 'transparent',
-                    }}
-                >
-                    TaskTurtle
-                </Typography>
+                {isGoogle ? (
+                    <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                        <Box component="span" sx={{ color: '#4285F4' }}>T</Box>
+                        <Box component="span" sx={{ color: '#EA4335' }}>a</Box>
+                        <Box component="span" sx={{ color: '#FBBC05' }}>s</Box>
+                        <Box component="span" sx={{ color: '#4285F4' }}>k</Box>
+                        <Box component="span" sx={{ color: '#34A853' }}>T</Box>
+                        <Box component="span" sx={{ color: '#EA4335' }}>u</Box>
+                        <Box component="span" sx={{ color: '#4285F4' }}>r</Box>
+                        <Box component="span" sx={{ color: '#FBBC05' }}>t</Box>
+                        <Box component="span" sx={{ color: '#34A853' }}>l</Box>
+                        <Box component="span" sx={{ color: '#EA4335' }}>e</Box>
+                    </Typography>
+                ) : (
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            fontWeight: 700,
+                            background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                            backgroundClip: 'text',
+                            WebkitBackgroundClip: 'text',
+                            color: 'transparent',
+                        }}
+                    >
+                        TaskTurtle
+                    </Typography>
+                )}
             </Box>
             <Divider sx={{ borderColor: 'divider' }} />
             <List sx={{ flex: 1, px: 1, pt: 1 }}>
-                {NAV_ITEMS.map((item) => (
+                {NAV_ITEMS.map((item, index) => (
                     <ListItem key={item.href} disablePadding>
                         <ListItemButton
                             component={Link}
@@ -86,9 +107,9 @@ export default function DashboardLayout({
                                 mb: 0.5,
                                 '&.Mui-selected': {
                                     bgcolor: (theme) => `${theme.palette.primary.main}15`,
-                                    color: 'primary.main',
+                                    color: isGoogle ? GOOGLE_ICON_COLORS[index] : 'primary.main',
                                     '& .MuiListItemIcon-root': {
-                                        color: 'primary.main',
+                                        color: isGoogle ? GOOGLE_ICON_COLORS[index] : 'primary.main',
                                     },
                                 },
                                 '&:hover': {
@@ -96,7 +117,7 @@ export default function DashboardLayout({
                                 },
                             }}
                         >
-                            <ListItemIcon sx={{ minWidth: 40 }}>
+                            <ListItemIcon sx={{ minWidth: 40, color: isGoogle ? GOOGLE_ICON_COLORS[index] : undefined }}>
                                 {item.icon}
                             </ListItemIcon>
                             <ListItemText
@@ -204,6 +225,15 @@ export default function DashboardLayout({
                         borderBottomColor: 'divider',
                     }}
                 >
+                    {/* Google 4-color strip */}
+                    {isGoogle && (
+                        <Box sx={{ display: 'flex', height: 4 }}>
+                            <Box sx={{ flex: 1, bgcolor: '#4285F4' }} />
+                            <Box sx={{ flex: 1, bgcolor: '#EA4335' }} />
+                            <Box sx={{ flex: 1, bgcolor: '#FBBC05' }} />
+                            <Box sx={{ flex: 1, bgcolor: '#34A853' }} />
+                        </Box>
+                    )}
                     <Toolbar>
                         <IconButton
                             edge="start"

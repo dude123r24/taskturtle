@@ -200,8 +200,8 @@ export default function DashboardPage() {
                     }
                     sx={{
                         borderRadius: 2,
-                        bgcolor: 'rgba(108, 99, 255, 0.05)',
-                        border: '1px solid rgba(108, 99, 255, 0.15)',
+                        bgcolor: (theme) => `${theme.palette.primary.main}0D`,
+                        border: (theme) => `1px solid ${theme.palette.primary.main}26`,
                         '& .MuiAlert-icon': { color: 'primary.main' },
                     }}
                 >
