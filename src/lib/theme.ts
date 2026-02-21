@@ -321,6 +321,14 @@ export const appleTheme = createTheme({
     },
     shape: { borderRadius: 12 },
     components: {
+        MuiCssBaseline: {
+            styleOverrides: {
+                body: {
+                    background: 'radial-gradient(circle at 15% 50%, rgba(0, 122, 255, 0.12), transparent 50%), radial-gradient(circle at 85% 30%, rgba(88, 86, 214, 0.12), transparent 50%), radial-gradient(circle at 50% 80%, rgba(52, 199, 89, 0.1), transparent 50%), #F2F2F7',
+                    backgroundAttachment: 'fixed',
+                },
+            },
+        },
         MuiButton: {
             styleOverrides: {
                 root: {
