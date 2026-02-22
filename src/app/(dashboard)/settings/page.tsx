@@ -209,10 +209,6 @@ function SettingsContent() {
 
     return (
         <Stack spacing={3}>
-            <Typography variant="h5" fontWeight={600}>
-                Settings
-            </Typography>
-
             {/* Appearance */}
             <Card
                 sx={{
@@ -230,19 +226,23 @@ function SettingsContent() {
                     <Typography variant="body2" color="text.secondary" mb={2}>
                         Choose your preferred color theme or match your system settings.
                     </Typography>
+
                     <ToggleButtonGroup
                         value={themeMode}
                         exclusive
                         onChange={(_, val) => val && setThemeMode(val as ThemeMode)}
                         size="small"
+                        sx={{
+                            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'transparent',
+                        }}
                     >
-                        <ToggleButton value="light" sx={{ gap: 1 }}>
+                        <ToggleButton value="light" sx={{ gap: 1, color: 'text.primary' }}>
                             <LightModeIcon fontSize="small" /> Light
                         </ToggleButton>
-                        <ToggleButton value="dark" sx={{ gap: 1 }}>
+                        <ToggleButton value="dark" sx={{ gap: 1, color: 'text.primary' }}>
                             <DarkModeIcon fontSize="small" /> Dark
                         </ToggleButton>
-                        <ToggleButton value="google" sx={{ gap: 1 }}>
+                        <ToggleButton value="google" sx={{ gap: 1, color: 'text.primary' }}>
                             <Box component="span" sx={{ display: 'inline-flex', fontSize: '0.95rem', fontWeight: 700 }}>
                                 <Box component="span" sx={{ color: '#4285F4' }}>G</Box>
                                 <Box component="span" sx={{ color: '#EA4335' }}>o</Box>
@@ -252,10 +252,10 @@ function SettingsContent() {
                                 <Box component="span" sx={{ color: '#EA4335' }}>e</Box>
                             </Box>
                         </ToggleButton>
-                        <ToggleButton value="apple" sx={{ gap: 0.5 }}>
+                        <ToggleButton value="apple" sx={{ gap: 0.5, color: 'text.primary' }}>
                             <Box component="span" sx={{ fontSize: '1rem', lineHeight: 1 }}></Box> Apple
                         </ToggleButton>
-                        <ToggleButton value="system" sx={{ gap: 1 }}>
+                        <ToggleButton value="system" sx={{ gap: 1, color: 'text.primary' }}>
                             <SettingsBrightnessIcon fontSize="small" /> System
                         </ToggleButton>
                     </ToggleButtonGroup>
