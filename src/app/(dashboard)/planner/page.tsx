@@ -258,6 +258,31 @@ export default function PlannerPage() {
         }
     };
 
+    const updateTaskDuration = (taskId: string, minutesDelta: number) => {
+        setPlannedTasksMap(prev => {
+            const taskData = prev[taskId];
+            if (!taskData || !taskData.timeSlotStart || !taskData.timeSlotEnd) return prev;
+
+            const start = new Date(taskData.timeSlotStart);
+            const end = new Date(taskData.timeSlotEnd);
+            const currentDuration = Math.round((end.getTime() - start.getTime()) / 60000);
+            const newDuration = Math.max(15, currentDuration + minutesDelta);
+
+            const newEnd = new Date(start.getTime() + newDuration * 60000);
+
+            // Background update to base task
+            patchTask(taskId, { estimatedMinutes: newDuration });
+
+            return {
+                ...prev,
+                [taskId]: {
+                    ...taskData,
+                    timeSlotEnd: newEnd.toISOString()
+                }
+            };
+        });
+    };
+
     const navigateDate = (days: number) => {
         const d = new Date(selectedDate);
         d.setDate(d.getDate() + days);
@@ -296,8 +321,12 @@ export default function PlannerPage() {
 
     const activeTask = tasks.find((t) => t.id === activeId);
 
-    // Timeline hours
-    const hours = Array.from({ length: 14 }, (_, i) => i + 7); // 7am to 8pm
+    // Timeline slots (30-min increments from 7am to 8pm)
+    const timeSlotsList: { hour: number; minute: number }[] = [];
+    for (let h = 7; h <= 20; h++) {
+        timeSlotsList.push({ hour: h, minute: 0 });
+        timeSlotsList.push({ hour: h, minute: 30 });
+    }
 
     const formatTime = (isoString?: string | null) => {
         if (!isoString) return '';
@@ -417,33 +446,37 @@ export default function PlannerPage() {
                                 <Box sx={{ p: 4 }}><Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} /></Box>
                             ) : (
                                 <Stack spacing={0}>
-                                    {hours.map((hour) => {
-                                        const hourStr = `${hour.toString().padStart(2, '0')}:00`;
+                                    {timeSlotsList.map(({ hour, minute }) => {
+                                        const hourStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
                                         const slotId = `timeline-slot-${hourStr}`;
 
-                                        // Find calendar events for this hour
-                                        const hourEvents = events.filter((e) => {
+                                        // Find calendar events for this slot
+                                        const slotEvents = events.filter((e) => {
                                             const start = e.start?.dateTime;
                                             if (!start) return false;
-                                            return new Date(start).getHours() === hour;
+                                            const d = new Date(start);
+                                            return d.getHours() === hour && (minute === 0 ? d.getMinutes() < 30 : d.getMinutes() >= 30);
                                         });
 
-                                        // Find timeblocked tasks for this hour
-                                        const hourTasks = timeblockedTasks.filter((t) => {
+                                        // Find timeblocked tasks for this slot
+                                        const slotTasks = timeblockedTasks.filter((t) => {
                                             const start = plannedTasksMap[t.id]?.timeSlotStart;
                                             if (!start) return false;
-                                            return new Date(start).getHours() === hour;
+                                            const d = new Date(start);
+                                            return d.getHours() === hour && (minute === 0 ? d.getMinutes() < 30 : d.getMinutes() >= 30);
                                         });
 
                                         return (
                                             <TimeSlot
-                                                key={hour}
+                                                key={slotId}
                                                 id={slotId}
                                                 hourStr={hourStr}
-                                                events={hourEvents}
-                                                tasks={hourTasks}
+                                                isHalfHour={minute === 30}
+                                                events={slotEvents}
+                                                tasks={slotTasks}
                                                 taskMap={plannedTasksMap}
                                                 formatTime={formatTime}
+                                                onUpdateDuration={updateTaskDuration}
                                             />
                                         );
                                     })}
@@ -504,17 +537,21 @@ export default function PlannerPage() {
 function TimeSlot({
     id,
     hourStr,
+    isHalfHour,
     events,
     tasks,
     taskMap,
-    formatTime
+    formatTime,
+    onUpdateDuration
 }: {
     id: string;
     hourStr: string;
+    isHalfHour: boolean;
     events: CalendarEvent[];
     tasks: Task[];
     taskMap: Record<string, PlannedTaskData>;
     formatTime: (s?: string | null) => string;
+    onUpdateDuration: (taskId: string, mins: number) => void;
 }) {
     const { setNodeRef, isOver } = useDroppable({ id });
 
@@ -524,8 +561,8 @@ function TimeSlot({
             sx={{
                 display: 'grid',
                 gridTemplateColumns: '60px 1fr',
-                minHeight: 70,
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                minHeight: isHalfHour ? 40 : 70,
+                borderBottom: isHalfHour ? '1px solid rgba(255,255,255,0.04)' : '1px dashed rgba(255,255,255,0.02)',
                 background: isOver ? 'rgba(108, 99, 255, 0.1)' : 'transparent',
                 transition: 'background 0.2s'
             }}
@@ -560,14 +597,21 @@ function TimeSlot({
                 ))}
 
                 {/* Timeblocked Tasks */}
-                {tasks.map((task) => (
-                    <Box key={task.id}>
-                        <DraggableTaskCard task={task} compact disableSwipe />
-                        <Typography variant="caption" sx={{ color: 'primary.main', display: 'block', mt: 0.5, ml: 1 }}>
-                            ⏱️ {formatTime(taskMap[task.id].timeSlotStart)} - {formatTime(taskMap[task.id].timeSlotEnd)}
-                        </Typography>
-                    </Box>
-                ))}
+                {tasks.map((task) => {
+                    const durationMins = Math.round((new Date(taskMap[task.id].timeSlotEnd!).getTime() - new Date(taskMap[task.id].timeSlotStart!).getTime()) / 60000);
+                    return (
+                        <Box key={task.id} sx={{ position: 'relative' }}>
+                            <DraggableTaskCard task={task} compact disableSwipe />
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5, ml: 1 }}>
+                                <Typography variant="caption" sx={{ color: 'primary.main' }}>
+                                    ⏱️ {formatTime(taskMap[task.id].timeSlotStart)} - {formatTime(taskMap[task.id].timeSlotEnd)} ({durationMins}m)
+                                </Typography>
+                                <Button size="small" variant="text" sx={{ minWidth: 0, p: 0.5, fontSize: '0.7rem' }} onClick={() => onUpdateDuration(task.id, -15)}>-15m</Button>
+                                <Button size="small" variant="text" sx={{ minWidth: 0, p: 0.5, fontSize: '0.7rem' }} onClick={() => onUpdateDuration(task.id, 15)}>+15m</Button>
+                            </Stack>
+                        </Box>
+                    );
+                })}
             </Box>
         </Box>
     );

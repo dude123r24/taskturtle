@@ -13,6 +13,8 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestoreIcon from '@mui/icons-material/Restore';
+import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
+import Link from 'next/link';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -175,16 +177,29 @@ export default function TasksPage() {
                 <Typography variant="h5" fontWeight={600}>
                     All Tasks
                 </Typography>
-                <Button
-                    color="error"
-                    variant="outlined"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => setRecycleBinOpen(true)}
-                    size="small"
-                    sx={{ borderRadius: 2 }}
-                >
-                    Recycle Bin
-                </Button>
+                <Stack direction="row" spacing={2}>
+                    <Button
+                        component={Link}
+                        href="/planner"
+                        variant="contained"
+                        color="primary"
+                        startIcon={<ViewTimelineIcon />}
+                        size="small"
+                        sx={{ borderRadius: 2 }}
+                    >
+                        Plan Timeline
+                    </Button>
+                    <Button
+                        color="error"
+                        variant="outlined"
+                        startIcon={<DeleteIcon />}
+                        onClick={() => setRecycleBinOpen(true)}
+                        size="small"
+                        sx={{ borderRadius: 2 }}
+                    >
+                        Recycle Bin
+                    </Button>
+                </Stack>
             </Stack>
 
             {/* Filters */}
