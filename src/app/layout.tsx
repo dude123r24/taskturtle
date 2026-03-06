@@ -37,8 +37,8 @@ export default function RootLayout({
                     rel="stylesheet"
                     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
                 />
-                <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
-                <link rel="apple-touch-icon" href="/icons/icon.svg" />
+                <link rel="icon" href="/icons/icon-192.png" type="image/png" />
+                <link rel="apple-touch-icon" href="/icons/icon-192.png" />
             </head>
             <body>
                 <Providers>
