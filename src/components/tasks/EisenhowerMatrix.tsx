@@ -5,9 +5,14 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import {
     DndContext,
     DragOverlay,
@@ -23,12 +28,10 @@ import { type Task, useTaskStore } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
 import TaskCard from './TaskCard';
 import DraggableTaskCard from './DraggableTaskCard';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 interface EisenhowerMatrixProps {
     tasks: Task[];
-    todayTasks?: Task[];
-    onDropToToday?: (taskId: string) => void;
-    onRemoveFromToday?: (taskId: string) => void;
 }
 
 const quadrantOrder = ['DO_FIRST', 'SCHEDULE', 'DELEGATE', 'ELIMINATE'] as const;
@@ -39,6 +42,172 @@ const quadrantDescriptions: Record<string, string> = {
     DELEGATE: 'Urgent, Not Important',
     ELIMINATE: 'Neither Urgent nor Important',
 };
+
+function BacklogList({ tasks }: { tasks: Task[] }) {
+    const { setNodeRef, isOver } = useDroppable({
+        id: 'UNASSIGNED',
+    });
+    const { setQuickAddOpen, createTask, fetchTasks } = useTaskStore();
+    const [bulkMode, setBulkMode] = useState(false);
+    const [bulkText, setBulkText] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleBulkAdd = async () => {
+        const lines = bulkText.split('\n').map((l) => l.trim()).filter(Boolean);
+        if (lines.length === 0) return;
+        setIsSubmitting(true);
+        for (const title of lines) {
+            await createTask({ title, quadrant: 'UNASSIGNED' });
+        }
+        setBulkText('');
+        setBulkMode(false);
+        setIsSubmitting(false);
+    };
+
+    return (
+        <Box
+            ref={setNodeRef}
+            onClick={(e) => {
+                if (!(e.target as HTMLElement).closest('.MuiCard-root') && !(e.target as HTMLElement).closest('.bulk-add-area')) {
+                    setQuickAddOpen(true, 'UNASSIGNED');
+                }
+            }}
+            sx={{
+                p: 2,
+                borderRadius: 3,
+                border: isOver ? `2px dashed rgba(255, 255, 255, 0.4)` : `1px solid rgba(158, 158, 158, 0.2)`,
+                background: isOver
+                    ? `rgba(158, 158, 158, 0.1)`
+                    : `linear-gradient(135deg, rgba(158, 158, 158, 0.05), transparent)`,
+                height: { xs: 400, md: 'calc(90vh - 100px)' },
+                minHeight: 400,
+                overflowY: 'auto',
+                transition: 'all 0.2s',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                '&:hover': {
+                    borderColor: `rgba(158, 158, 158, 0.4)`,
+                },
+            }}
+        >
+            <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ mb: 2 }}
+            >
+                <Box>
+                    <Typography
+                        variant="h6"
+                        sx={{ fontWeight: 600, color: 'text.primary', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: 1 }}
+                    >
+                        <ListAltIcon fontSize="small" sx={{ color: 'text.secondary' }} /> Backlog
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        Drag tasks into the Matrix to prioritize them.
+                    </Typography>
+                </Box>
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                    <Tooltip title="Bulk add tasks">
+                        <IconButton
+                            size="small"
+                            className="bulk-add-area"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setBulkMode(!bulkMode);
+                            }}
+                            sx={{
+                                color: bulkMode ? 'primary.main' : 'text.secondary',
+                                bgcolor: bulkMode ? 'rgba(108,99,255,0.1)' : 'transparent',
+                                '&:hover': { bgcolor: 'rgba(108,99,255,0.15)' },
+                            }}
+                        >
+                            <PlaylistAddIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    <Chip
+                        label={tasks.length}
+                        size="small"
+                        sx={{
+                            bgcolor: `rgba(158, 158, 158, 0.2)`,
+                            color: 'text.secondary',
+                            fontWeight: 600,
+                            fontSize: '0.75rem',
+                        }}
+                    />
+                </Stack>
+            </Stack>
+
+            {/* Bulk Add Area */}
+            {bulkMode && (
+                <Box
+                    className="bulk-add-area"
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{ mb: 2 }}
+                >
+                    <TextField
+                        fullWidth
+                        multiline
+                        minRows={3}
+                        maxRows={8}
+                        size="small"
+                        placeholder={"Enter tasks, one per line...\ne.g.\nBuy milk\nCall dentist\nReview report"}
+                        value={bulkText}
+                        onChange={(e) => setBulkText(e.target.value)}
+                        autoFocus
+                        sx={{
+                            mb: 1,
+                            '& .MuiOutlinedInput-root': {
+                                fontSize: '0.85rem',
+                            },
+                        }}
+                    />
+                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                        <Button
+                            size="small"
+                            color="inherit"
+                            onClick={() => { setBulkMode(false); setBulkText(''); }}
+                            disabled={isSubmitting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            size="small"
+                            variant="contained"
+                            onClick={handleBulkAdd}
+                            disabled={!bulkText.trim() || isSubmitting}
+                            startIcon={<PlaylistAddIcon />}
+                        >
+                            {isSubmitting ? 'Adding...' : `Add ${bulkText.split('\n').filter((l) => l.trim()).length} Tasks`}
+                        </Button>
+                    </Stack>
+                </Box>
+            )}
+
+            <Stack spacing={1} sx={{ flex: 1 }}>
+                {tasks.length === 0 && !bulkMode ? (
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                            textAlign: 'center',
+                            py: 3,
+                            fontStyle: 'italic',
+                            opacity: 0.5,
+                        }}
+                    >
+                        No tasks in backlog
+                    </Typography>
+                ) : (
+                    tasks.map((task) => (
+                        <DraggableTaskCard key={task.id} task={task} compact disableSwipe />
+                    ))
+                )}
+            </Stack>
+        </Box>
+    );
+}
 
 function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }) {
     const { setNodeRef, isOver } = useDroppable({
@@ -131,66 +300,6 @@ function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }
     );
 }
 
-function TodayQuadrant({ tasks }: { tasks: Task[] }) {
-    const { setNodeRef, isOver } = useDroppable({
-        id: 'TODAY_PLAN',
-    });
-
-    // Sort by importance: DO_FIRST > SCHEDULE > DELEGATE > ELIMINATE
-    const sortedTasks = [...tasks].sort((a, b) => {
-        const order = { 'DO_FIRST': 0, 'SCHEDULE': 1, 'DELEGATE': 2, 'ELIMINATE': 3 };
-        return order[a.quadrant as keyof typeof order] - order[b.quadrant as keyof typeof order];
-    });
-
-    return (
-        <Box
-            ref={setNodeRef}
-            sx={{
-                p: 2,
-                borderRadius: 3,
-                border: isOver ? `2px dashed #6C63FF` : `1px solid rgba(108, 99, 255, 0.2)`,
-                background: isOver
-                    ? `rgba(108, 99, 255, 0.1)`
-                    : `linear-gradient(135deg, rgba(108, 99, 255, 0.05), transparent)`,
-                height: { xs: 250, md: 'calc(30vh - 50px)' },
-                minHeight: 180,
-                maxHeight: 350,
-                overflowY: 'auto',
-                transition: 'all 0.2s',
-                mb: 4,
-            }}
-        >
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#6C63FF', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FormatListBulletedIcon fontSize="small" /> Today's Focus
-                </Typography>
-                <Chip
-                    label={tasks.length}
-                    size="small"
-                    sx={{ bgcolor: `rgba(108, 99, 255, 0.2)`, color: '#6C63FF', fontWeight: 600, fontSize: '0.75rem' }}
-                />
-            </Stack>
-
-            {sortedTasks.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3, fontStyle: 'italic', opacity: 0.5 }}>
-                    Drop tasks here to focus on them today
-                </Typography>
-            ) : (
-                <Box
-                    sx={{
-                        display: 'grid',
-                        gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
-                        gap: 1,
-                    }}
-                >
-                    {sortedTasks.map((task) => (
-                        <DraggableTaskCard key={task.id} task={task} compact disableSwipe />
-                    ))}
-                </Box>
-            )}
-        </Box>
-    );
-}
 
 function DroppableAction({
     id,
@@ -250,7 +359,7 @@ function DroppableAction({
     );
 }
 
-export default function EisenhowerMatrix({ tasks, todayTasks = [], onDropToToday, onRemoveFromToday }: EisenhowerMatrixProps) {
+export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
     const { patchTask } = useTaskStore();
     const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -274,15 +383,12 @@ export default function EisenhowerMatrix({ tasks, todayTasks = [], onDropToToday
 
             if (overId === 'ARCHIVE_ACTION') {
                 patchTask(active.id as string, { status: 'ARCHIVED' });
-                if (onRemoveFromToday) onRemoveFromToday(active.id as string);
             } else if (overId === 'DONE_ACTION') {
                 patchTask(active.id as string, { status: 'DONE' });
-                if (onRemoveFromToday) onRemoveFromToday(active.id as string);
-            } else if (overId === 'TODAY_PLAN') {
-                if (onDropToToday) onDropToToday(active.id as string);
+            } else if (overId === 'UNASSIGNED') {
+                patchTask(active.id as string, { quadrant: 'UNASSIGNED' });
             } else if (quadrantOrder.includes(overId as any)) {
                 patchTask(active.id as string, { quadrant: overId as any });
-                if (onRemoveFromToday) onRemoveFromToday(active.id as string);
             }
         }
         setActiveId(null);
@@ -292,15 +398,24 @@ export default function EisenhowerMatrix({ tasks, todayTasks = [], onDropToToday
 
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <Box sx={{ position: 'relative' }}>
-                <TodayQuadrant tasks={todayTasks} />
+            <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', lg: '300px 1fr' },
+                gap: 3,
+                width: '100%'
+            }}>
+                {/* Left Column: Backlog */}
+                <Box>
+                    <BacklogList tasks={tasks.filter((t) => t.quadrant === 'UNASSIGNED' && t.status !== 'ARCHIVED')} />
+                </Box>
 
+                {/* Right Column: Matrix */}
                 <Box
                     sx={{
                         display: 'grid',
                         gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
                         gap: 2,
-                        width: '100%',
+                        alignContent: 'start',
                     }}
                 >
                     {quadrantOrder.map((quadrant) => (
@@ -308,7 +423,7 @@ export default function EisenhowerMatrix({ tasks, todayTasks = [], onDropToToday
                             key={quadrant}
                             quadrant={quadrant}
                             tasks={tasks.filter(
-                                (t) => t.quadrant === quadrant && t.status !== 'ARCHIVED' && t.status !== 'DONE' && !todayTasks.some(today => today.id === t.id)
+                                (t) => t.quadrant === quadrant && t.status !== 'ARCHIVED'
                             )}
                         />
                     ))}
@@ -353,7 +468,7 @@ export default function EisenhowerMatrix({ tasks, todayTasks = [], onDropToToday
                     </div>
                 ) : null}
             </DragOverlay>
-        </DndContext>
+        </DndContext >
     );
 }
 

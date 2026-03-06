@@ -10,15 +10,13 @@ import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { useTaskStore } from '@/store/taskStore';
-import EisenhowerMatrix from '@/components/tasks/EisenhowerMatrix';
-import TaskCard from '@/components/tasks/TaskCard';
+import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useTaskStore, type Task } from '@/store/taskStore';
 import {
     PieChart,
     Pie,
@@ -47,16 +45,6 @@ const QUADRANT_LABELS = {
     ELIMINATE: 'Eliminate',
 };
 
-interface CalendarEvent {
-    id: string;
-    calendarName: string;
-    calendarColor: string;
-    summary: string;
-    isDuplicate: boolean;
-    start?: { dateTime?: string; date?: string };
-    end?: { dateTime?: string; date?: string };
-}
-
 interface OverloadInfo {
     taskCount: number;
     maxDaily: number;
@@ -66,13 +54,104 @@ interface OverloadInfo {
     isTimeOverloaded: boolean;
 }
 
+function ChaseList({ tasks }: { tasks: Task[] }) {
+    const { patchTask, setEditingTask } = useTaskStore();
+    const chaseTasks = tasks.filter((t) => t.isChase && t.status !== 'ARCHIVED' && t.status !== 'DONE');
+
+    if (chaseTasks.length === 0) return null;
+
+    return (
+        <Card
+            sx={{
+                background: (theme) =>
+                    theme.palette.mode === 'dark'
+                        ? 'linear-gradient(135deg, rgba(255, 109, 0, 0.08), rgba(26, 25, 41, 0.6))'
+                        : 'linear-gradient(135deg, rgba(255, 109, 0, 0.05), rgba(255,255,255,0.8))',
+                border: '1px solid rgba(255, 109, 0, 0.15)',
+                borderRadius: 3,
+            }}
+        >
+            <CardContent>
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                    <DirectionsRunIcon sx={{ color: '#FF6D00', fontSize: '1.5rem' }} />
+                    <Typography variant="h6" fontWeight={600} sx={{ color: '#FF6D00' }}>
+                        Chase List
+                    </Typography>
+                    <Chip
+                        label={chaseTasks.length}
+                        size="small"
+                        sx={{ bgcolor: 'rgba(255,109,0,0.15)', color: '#FF6D00', fontWeight: 700 }}
+                    />
+                </Stack>
+
+                <Stack spacing={1}>
+                    {chaseTasks.map((task) => (
+                        <Box
+                            key={task.id}
+                            onClick={() => setEditingTask(task)}
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 2,
+                                bgcolor: (theme) =>
+                                    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                                border: (theme) =>
+                                    `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                                cursor: 'pointer',
+                                transition: 'all 0.15s',
+                                '&:hover': {
+                                    bgcolor: (theme) =>
+                                        theme.palette.mode === 'dark' ? 'rgba(255,109,0,0.08)' : 'rgba(255,109,0,0.04)',
+                                    borderColor: 'rgba(255,109,0,0.25)',
+                                },
+                            }}
+                        >
+                            <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Typography variant="body2" fontWeight={600} noWrap>
+                                        {task.title}
+                                    </Typography>
+                                    {task.updates && task.updates.length > 0 && (
+                                        <Typography
+                                            variant="caption"
+                                            color="text.secondary"
+                                            sx={{
+                                                display: 'block',
+                                                mt: 0.5,
+                                                fontSize: '0.7rem',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                            }}
+                                        >
+                                            📝 {task.updates[0].content}
+                                        </Typography>
+                                    )}
+                                </Box>
+                                <Stack direction="row" spacing={0}>
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            patchTask(task.id, { status: 'DONE' });
+                                        }}
+                                        sx={{ p: 0.5, color: 'text.secondary', '&:hover': { color: 'success.main' } }}
+                                    >
+                                        <CheckCircleOutlineIcon sx={{ fontSize: '1.1rem' }} />
+                                    </IconButton>
+                                </Stack>
+                            </Stack>
+                        </Box>
+                    ))}
+                </Stack>
+            </CardContent>
+        </Card>
+    );
+}
+
 export default function DashboardPage() {
     const theme = useTheme();
     const { tasks, isLoading, fetchTasks } = useTaskStore();
-    const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
     const [overload, setOverload] = useState<OverloadInfo | null>(null);
-    const [todayTasks, setTodayTasks] = useState<typeof tasks>([]);
-    const [tabIndex, setTabIndex] = useState(0);
     const [showAlert, setShowAlert] = useState(true);
 
     useEffect(() => {
@@ -82,7 +161,6 @@ export default function DashboardPage() {
         }
         fetchTasks();
         fetchTodayPlan();
-        fetchCalendarEvents();
     }, []);
 
     const fetchTodayPlan = async () => {
@@ -92,79 +170,11 @@ export default function DashboardPage() {
             if (res.ok) {
                 const data = await res.json();
                 setOverload(data.overload);
-                if (data.plan?.tasks) {
-                    setTodayTasks(data.plan.tasks.map((pt: { task: typeof tasks[0] }) => pt.task));
-                }
             }
         } catch { /* graceful degradation */ }
     };
 
-    const fetchCalendarEvents = async () => {
-        try {
-            const today = new Date().toISOString().split('T')[0];
-            const res = await fetch(`/api/calendar/events?date=${today}&hideDuplicates=true`);
-            if (res.ok) {
-                const data = await res.json();
-                if (Array.isArray(data)) setCalendarEvents(data);
-            }
-        } catch { /* graceful degradation */ }
-    };
 
-    const formatEventTime = (event: CalendarEvent) => {
-        const start = event.start?.dateTime;
-        if (!start) return 'All day';
-        return new Date(start).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
-
-    const handleDropToToday = async (taskId: string) => {
-        // Optimistic UI update
-        const taskToAdd = tasks.find((t) => t.id === taskId);
-        if (!taskToAdd) return;
-
-        if (!todayTasks.find((t) => t.id === taskId)) {
-            setTodayTasks((prev) => [...prev, taskToAdd]);
-        }
-
-        // Save to DB
-        try {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const updatedTasks = [...todayTasks.filter((t) => t.id !== taskId), taskToAdd].map((t) => ({
-                taskId: t.id,
-            }));
-            await fetch('/api/planning/daily', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ date: todayStr, tasks: updatedTasks }),
-            });
-            fetchTodayPlan();
-        } catch (e) {
-            console.error('Failed to update today plan', e);
-        }
-    };
-
-    const handleRemoveFromToday = async (taskId: string) => {
-        // Optimistic UI update
-        setTodayTasks((prev) => prev.filter((t) => t.id !== taskId));
-
-        // Save to DB
-        try {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const updatedTasks = todayTasks.filter((t) => t.id !== taskId).map((t) => ({
-                taskId: t.id,
-            }));
-            await fetch('/api/planning/daily', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ date: todayStr, tasks: updatedTasks }),
-            });
-            fetchTodayPlan();
-        } catch (e) {
-            console.error('Failed to remove from today plan', e);
-        }
-    };
 
     if (isLoading) {
         return (
@@ -209,8 +219,8 @@ export default function DashboardPage() {
                         Welcome to your Priority Dashboard! 🚀
                     </Typography>
                     <Typography variant="body2">
-                        Use the **Eisenhower Matrix** below to organize your tasks by Importance and Urgency.
-                        Drag tasks between quadrants to prioritize, then head to the **Planner** to schedule them into your day.
+                        Welcome to your Analytics Dashboard! Here you can get a high-level overview of your
+                        priorities, time allocation, and any overload warnings to help you stay focused.
                     </Typography>
                 </Alert>
             )}
@@ -244,191 +254,94 @@ export default function DashboardPage() {
                 </Alert>
             )}
 
-            {/* Tabs */}
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-                <Tabs value={tabIndex} onChange={(_, nv) => setTabIndex(nv)}>
-                    <Tab label="Priorities" />
-                    <Tab label="Analytics & Insights" />
-                </Tabs>
-            </Box>
+            {/* Chase List */}
+            <ChaseList tasks={tasks} />
 
-            {tabIndex === 0 && (
-                <Box>
-                    {/* Eisenhower Matrix */}
-                    <Box sx={{ mb: 4 }}>
-                        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-                            Eisenhower Matrix & Today
-                        </Typography>
-                        <EisenhowerMatrix
-                            tasks={tasks}
-                            todayTasks={todayTasks}
-                            onDropToToday={handleDropToToday}
-                            onRemoveFromToday={handleRemoveFromToday}
-                        />
-                    </Box>
-
-                    {/* Bottom row: Calendar */}
-                    <Box
-                        sx={{
-                            display: 'grid',
-                            gridTemplateColumns: { xs: '1fr', md: '1fr' },
-                            gap: 2,
-                        }}
-                    >
-                        {/* Calendar Events */}
-                        <Card
-                            sx={{
-                                background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
-                                border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
-                            }}
-                        >
-                            <CardContent>
-                                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                                    <Typography variant="h6" fontWeight={600}>
-                                        🗓️ Calendar
-                                    </Typography>
-                                    <Chip
-                                        label={`${calendarEvents.length} events`}
-                                        size="small"
-                                    />
-                                </Stack>
-                                <Stack spacing={1}>
-                                    {calendarEvents.length === 0 ? (
-                                        <Typography
-                                            variant="body2"
-                                            color="text.secondary"
-                                            sx={{ textAlign: 'center', py: 4, fontStyle: 'italic' }}
-                                        >
-                                            No calendar events today, or sign in to connect Google Calendar.
-                                        </Typography>
-                                    ) : (
-                                        calendarEvents.map((event) => (
-                                            <Box
-                                                key={event.id}
-                                                sx={{
-                                                    p: 1.5,
-                                                    borderRadius: 2,
-                                                    bgcolor: `${event.calendarColor || '#1E88E5'}11`,
-                                                    border: `1px solid ${event.calendarColor || '#1E88E5'}33`,
-                                                    borderLeft: `3px solid ${event.calendarColor || '#1E88E5'}`,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: 1,
-                                                }}
-                                            >
-                                                <CalendarTodayIcon
-                                                    sx={{ fontSize: '1rem', color: event.calendarColor || 'info.main' }}
-                                                />
-                                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                                    <Typography variant="body2" fontWeight={500} noWrap>
-                                                        {event.summary}
-                                                    </Typography>
-                                                    {event.calendarName && (
-                                                        <Typography variant="caption" color="text.secondary">
-                                                            {event.calendarName}
-                                                        </Typography>
-                                                    )}
-                                                </Box>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {formatEventTime(event)}
-                                                </Typography>
-                                            </Box>
-                                        ))
-                                    )}
-                                </Stack>
-                            </CardContent>
-                        </Card>
-                    </Box>
-                </Box>
-            )}
-
-            {tabIndex === 1 && (
-                <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-                        Analytics & Insights
-                    </Typography>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-                        {/* Chart 1: Quadrant Distribution */}
-                        <Card sx={{ background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)', border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}` }}>
-                            <CardContent>
-                                <Typography variant="h6" fontWeight={600} mb={3}>Task Distribution</Typography>
-                                <Box sx={{ height: 300, width: '100%' }}>
-                                    <ResponsiveContainer>
-                                        <PieChart>
-                                            <Pie
-                                                data={[
-                                                    { name: 'Do First', value: tasks.filter(t => t.quadrant === 'DO_FIRST').length },
-                                                    { name: 'Schedule', value: tasks.filter(t => t.quadrant === 'SCHEDULE').length },
-                                                    { name: 'Delegate', value: tasks.filter(t => t.quadrant === 'DELEGATE').length },
-                                                    { name: 'Eliminate', value: tasks.filter(t => t.quadrant === 'ELIMINATE').length },
-                                                ].filter(d => d.value > 0)}
-                                                cx="50%"
-                                                cy="50%"
-                                                innerRadius={60}
-                                                outerRadius={100}
-                                                paddingAngle={5}
-                                                dataKey="value"
-                                            >
-                                                {
-                                                    [
-                                                        { name: 'Do First', color: QUADRANT_COLORS['DO_FIRST'] },
-                                                        { name: 'Schedule', color: QUADRANT_COLORS['SCHEDULE'] },
-                                                        { name: 'Delegate', color: QUADRANT_COLORS['DELEGATE'] },
-                                                        { name: 'Eliminate', color: QUADRANT_COLORS['ELIMINATE'] },
-                                                    ].map((entry, index) => (
-                                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                                    ))
-                                                }
-                                            </Pie>
-                                            <Tooltip
-                                                contentStyle={{ backgroundColor: '#1a1929', borderColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}
-                                                itemStyle={{ color: '#fff' }}
-                                            />
-                                            <Legend />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                </Box>
-                            </CardContent>
-                        </Card>
-
-                        {/* Chart 2: Time Planned vs Focused */}
-                        <Card sx={{ background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)', border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}` }}>
-                            <CardContent>
-                                <Typography variant="h6" fontWeight={600} mb={3}>Time: Planned vs Actual (Minutes)</Typography>
-                                <Box sx={{ height: 300, width: '100%' }}>
-                                    <ResponsiveContainer>
-                                        <BarChart
+            <Box>
+                <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+                    Analytics & Insights
+                </Typography>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+                    {/* Chart 1: Quadrant Distribution */}
+                    <Card sx={{ background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)', border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}` }}>
+                        <CardContent>
+                            <Typography variant="h6" fontWeight={600} mb={3}>Task Distribution</Typography>
+                            <Box sx={{ height: 300, width: '100%', minHeight: 200 }}>
+                                <ResponsiveContainer>
+                                    <PieChart>
+                                        <Pie
                                             data={[
-                                                {
-                                                    name: 'Do First',
-                                                    planned: tasks.filter(t => t.quadrant === 'DO_FIRST').reduce((sum, t) => sum + (t.estimatedMinutes || 0), 0),
-                                                    actual: tasks.filter(t => t.quadrant === 'DO_FIRST').reduce((sum, t) => sum + (t.actualMinutes || 0), 0),
-                                                },
-                                                {
-                                                    name: 'Schedule',
-                                                    planned: tasks.filter(t => t.quadrant === 'SCHEDULE').reduce((sum, t) => sum + (t.estimatedMinutes || 0), 0),
-                                                    actual: tasks.filter(t => t.quadrant === 'SCHEDULE').reduce((sum, t) => sum + (t.actualMinutes || 0), 0),
-                                                }
-                                            ]}
-                                            margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                                                { name: 'Do First', value: tasks.filter(t => t.quadrant === 'DO_FIRST').length },
+                                                { name: 'Schedule', value: tasks.filter(t => t.quadrant === 'SCHEDULE').length },
+                                                { name: 'Delegate', value: tasks.filter(t => t.quadrant === 'DELEGATE').length },
+                                                { name: 'Eliminate', value: tasks.filter(t => t.quadrant === 'ELIMINATE').length },
+                                            ].filter(d => d.value > 0)}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={60}
+                                            outerRadius={100}
+                                            paddingAngle={5}
+                                            dataKey="value"
                                         >
-                                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                                            <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" />
-                                            <YAxis stroke="rgba(255,255,255,0.5)" />
-                                            <Tooltip
-                                                contentStyle={{ backgroundColor: '#1a1929', borderColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}
-                                            />
-                                            <Legend />
-                                            <Bar dataKey="planned" fill={theme.palette.primary.main} name="Planned (min)" radius={[4, 4, 0, 0]} />
-                                            <Bar dataKey="actual" fill={theme.palette.secondary.main} name="Actual (min)" radius={[4, 4, 0, 0]} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    </Box>
+                                            {
+                                                [
+                                                    { name: 'Do First', color: QUADRANT_COLORS['DO_FIRST'] },
+                                                    { name: 'Schedule', color: QUADRANT_COLORS['SCHEDULE'] },
+                                                    { name: 'Delegate', color: QUADRANT_COLORS['DELEGATE'] },
+                                                    { name: 'Eliminate', color: QUADRANT_COLORS['ELIMINATE'] },
+                                                ].map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                                ))
+                                            }
+                                        </Pie>
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#1a1929', borderColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}
+                                            itemStyle={{ color: '#fff' }}
+                                        />
+                                        <Legend />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </Box>
+                        </CardContent>
+                    </Card>
+
+                    {/* Chart 2: Time Planned vs Focused */}
+                    <Card sx={{ background: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)', border: (theme) => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}` }}>
+                        <CardContent>
+                            <Typography variant="h6" fontWeight={600} mb={3}>Time: Planned vs Actual (Minutes)</Typography>
+                            <Box sx={{ height: 300, width: '100%', minHeight: 200 }}>
+                                <ResponsiveContainer>
+                                    <BarChart
+                                        data={[
+                                            {
+                                                name: 'Do First',
+                                                planned: tasks.filter(t => t.quadrant === 'DO_FIRST').reduce((sum, t) => sum + (t.estimatedMinutes || 0), 0),
+                                                actual: tasks.filter(t => t.quadrant === 'DO_FIRST').reduce((sum, t) => sum + (t.actualMinutes || 0), 0),
+                                            },
+                                            {
+                                                name: 'Schedule',
+                                                planned: tasks.filter(t => t.quadrant === 'SCHEDULE').reduce((sum, t) => sum + (t.estimatedMinutes || 0), 0),
+                                                actual: tasks.filter(t => t.quadrant === 'SCHEDULE').reduce((sum, t) => sum + (t.actualMinutes || 0), 0),
+                                            }
+                                        ]}
+                                        margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                                    >
+                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                        <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" />
+                                        <YAxis stroke="rgba(255,255,255,0.5)" />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#1a1929', borderColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}
+                                        />
+                                        <Legend />
+                                        <Bar dataKey="planned" fill={theme.palette.primary.main} name="Planned (min)" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="actual" fill={theme.palette.secondary.main} name="Actual (min)" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </Box>
+                        </CardContent>
+                    </Card>
                 </Box>
-            )}
+            </Box>
         </Stack>
     );
 }

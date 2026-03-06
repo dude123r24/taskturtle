@@ -1,7 +1,6 @@
 'use client';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { useDraggable } from '@dnd-kit/core';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import Box from '@mui/material/Box';
 import TaskCard from './TaskCard';
@@ -24,16 +23,14 @@ export default function DraggableTaskCard({ task, compact, disableSwipe = false 
         listeners,
         setNodeRef,
         transform,
-        transition,
         isDragging: isDnDDragging,
-    } = useSortable({ id: task.id });
+    } = useDraggable({ id: task.id });
 
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
+    const style: React.CSSProperties = {
+        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
         opacity: isDnDDragging ? 0.3 : 1,
-        touchAction: 'none',
-        zIndex: isDnDDragging ? 999 : 'auto',
+        touchAction: 'none' as const,
+        zIndex: isDnDDragging ? 999 : 'auto' as any,
     };
 
     // Swipe Gestures
@@ -78,7 +75,6 @@ export default function DraggableTaskCard({ task, compact, disableSwipe = false 
                         pointerEvents: 'none',
                     }}
                 >
-                    {/* Icons could go here if needed, but color is enough for now */}
                 </motion.div>
             )}
 
@@ -96,3 +92,4 @@ export default function DraggableTaskCard({ task, compact, disableSwipe = false 
         </Box>
     );
 }
+

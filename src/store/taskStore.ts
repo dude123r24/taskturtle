@@ -1,8 +1,15 @@
 import { create } from 'zustand';
 
-export type EisenhowerQuadrant = 'DO_FIRST' | 'SCHEDULE' | 'DELEGATE' | 'ELIMINATE';
+export type EisenhowerQuadrant = 'DO_FIRST' | 'SCHEDULE' | 'DELEGATE' | 'ELIMINATE' | 'UNASSIGNED';
 export type TaskHorizon = 'SHORT_TERM' | 'LONG_TERM';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE' | 'ARCHIVED';
+
+export interface TaskUpdate {
+    id: string;
+    taskId: string;
+    content: string;
+    createdAt: string;
+}
 
 export interface Task {
     id: string;
@@ -16,6 +23,8 @@ export interface Task {
     dueDate?: string;
     calendarEventId?: string;
     sortOrder: number;
+    isChase: boolean;
+    updates?: TaskUpdate[];
     createdAt: string;
     updatedAt: string;
 }

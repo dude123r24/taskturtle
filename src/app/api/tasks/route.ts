@@ -59,6 +59,7 @@ export async function GET(request: Request) {
     const tasks = await prisma.task.findMany({
         where,
         orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+        include: { updates: { orderBy: { createdAt: 'desc' }, take: 1 } },
     });
 
     return NextResponse.json(tasks);
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, description, quadrant, horizon, estimatedMinutes, dueDate } = body;
+    const { title, description, quadrant, horizon, estimatedMinutes, dueDate, isChase } = body;
 
     if (!title || !quadrant) {
         return NextResponse.json(
@@ -90,7 +91,9 @@ export async function POST(request: Request) {
             horizon: horizon || 'LONG_TERM',
             estimatedMinutes: estimatedMinutes || null,
             dueDate: dueDate ? new Date(dueDate) : null,
+            isChase: isChase || false,
         },
+        include: { updates: { orderBy: { createdAt: 'desc' }, take: 1 } },
     });
 
     return NextResponse.json(task, { status: 201 });

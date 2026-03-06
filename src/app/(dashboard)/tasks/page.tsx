@@ -23,6 +23,7 @@ import IconButton from '@mui/material/IconButton';
 import { useTaskStore, type EisenhowerQuadrant, type TaskHorizon, type Task } from '@/store/taskStore';
 import { QUADRANT_LABELS, HORIZON_LABELS } from '@/lib/utils';
 import TaskCard from '@/components/tasks/TaskCard';
+import EisenhowerMatrix from '@/components/tasks/EisenhowerMatrix';
 
 function RecycleBinDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
     const { tasks, patchTask, deleteTask } = useTaskStore();
@@ -268,6 +269,7 @@ export default function TasksPage() {
                 onChange={(_, v) => setStatusTab(v)}
                 sx={{
                     '& .MuiTab-root': { textTransform: 'none', fontWeight: 500 },
+                    mb: 2
                 }}
             >
                 <Tab label={`Active (${tasks.filter((t) => t.status !== 'DONE' && t.status !== 'ARCHIVED').length})`} />
@@ -275,29 +277,9 @@ export default function TasksPage() {
                 <Tab label={`All (${tasks.filter((t) => t.status !== 'ARCHIVED').length})`} />
             </Tabs>
 
-            {/* Task list */}
-            <Stack spacing={1.5}>
-                {isLoading ? (
-                    <Typography color="text.secondary">Loading tasks...</Typography>
-                ) : filteredTasks.length === 0 ? (
-                    <Box
-                        sx={{
-                            textAlign: 'center',
-                            py: 6,
-                            color: 'text.secondary',
-                            fontStyle: 'italic',
-                        }}
-                    >
-                        <Typography variant="body1">
-                            {search ? 'No tasks match your search.' : 'No tasks yet. Use the + button to add one!'}
-                        </Typography>
-                    </Box>
-                ) : (
-                    filteredTasks.map((task) => (
-                        <TaskCard key={task.id} task={task} />
-                    ))
-                )}
-            </Stack>
+            <Box sx={{ mt: 2 }}>
+                <EisenhowerMatrix tasks={filteredTasks} />
+            </Box>
 
             <RecycleBinDialog open={recycleBinOpen} onClose={() => setRecycleBinOpen(false)} />
         </Stack>

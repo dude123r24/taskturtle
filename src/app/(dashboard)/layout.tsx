@@ -44,7 +44,6 @@ const NAV_ITEMS = [
     { label: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
     { label: 'Tasks', icon: <ChecklistIcon />, href: '/tasks' },
     { label: 'Planner', icon: <ViewTimelineIcon />, href: '/planner' },
-    { label: 'Calendar', icon: <CalendarMonthIcon />, href: '/calendar' },
     { label: 'Focus', icon: <CenterFocusStrongIcon />, href: '/focus' },
     { label: 'AI Assistant', icon: <SmartToyIcon />, href: '/chat' },
     { label: 'Settings', icon: <SettingsIcon />, href: '/settings' },
@@ -65,7 +64,7 @@ export default function DashboardLayout({
 
     const drawer = (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ px: 2, display: 'flex', alignItems: 'center', gap: 1, minHeight: 56 }}>
                 {isGoogle ? (
                     <Typography variant="h5" sx={{ fontWeight: 700 }}>
                         <Box component="span" sx={{ color: '#4285F4' }}>T</Box>
@@ -234,7 +233,7 @@ export default function DashboardLayout({
                             <Box sx={{ flex: 1, bgcolor: '#34A853' }} />
                         </Box>
                     )}
-                    <Toolbar>
+                    <Toolbar sx={{ minHeight: '56px !important' }}>
                         <IconButton
                             edge="start"
                             onClick={() => setMobileOpen(true)}

@@ -17,6 +17,7 @@ export const QUADRANT_LABELS: Record<string, { label: string; color: string; ico
     SCHEDULE: { label: 'Schedule', color: '#1E88E5', icon: '📅' },
     DELEGATE: { label: 'Delegate', color: '#FB8C00', icon: '👥' },
     ELIMINATE: { label: 'Eliminate', color: '#757575', icon: '🗑️' },
+    UNASSIGNED: { label: 'Unassigned', color: '#9E9E9E', icon: '⚪' },
 };
 
 export const HORIZON_LABELS: Record<string, string> = {

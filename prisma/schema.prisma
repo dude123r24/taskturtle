@@ -70,7 +70,7 @@ model Task {
   id               String             @id @default(cuid())
   userId           String
   title            String
-  description      String?
+  description      String?            @db.Text
   quadrant         EisenhowerQuadrant
   horizon          TaskHorizon        @default(LONG_TERM)
   status           TaskStatus         @default(TODO)
@@ -79,10 +79,12 @@ model Task {
   dueDate          DateTime?
   calendarEventId  String?
   sortOrder        Int                @default(0)
+  isChase          Boolean            @default(false)
 
   user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   estimateLogs   TimeEstimateLog[]
   dailyPlanTasks DailyPlanTask[]
+  updates        TaskUpdate[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -90,6 +92,7 @@ model Task {
   @@index([userId, status])
   @@index([userId, quadrant])
   @@index([userId, horizon])
+  @@index([userId, isChase])
 }
 
 model TimeSlot {
@@ -147,6 +150,18 @@ model TimeEstimateLog {
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+}
+
+model TaskUpdate {
+  id        String   @id @default(cuid())
+  taskId    String
+  content   String   @db.Text
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
 }
 
 model UserSettings {
@@ -212,6 +227,7 @@ enum EisenhowerQuadrant {
   SCHEDULE  // Not Urgent + Important
   DELEGATE  // Urgent + Not Important
   ELIMINATE // Not Urgent + Not Important
+  UNASSIGNED // Unprioritized (Backlog)
 }
 
 enum TaskHorizon {

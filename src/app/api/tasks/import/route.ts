@@ -29,9 +29,10 @@ export async function POST(request: Request) {
                 t.quadrant === 'DO_FIRST' ||
                     t.quadrant === 'SCHEDULE' ||
                     t.quadrant === 'DELEGATE' ||
-                    t.quadrant === 'ELIMINATE'
+                    t.quadrant === 'ELIMINATE' ||
+                    t.quadrant === 'UNASSIGNED'
                     ? t.quadrant
-                    : 'SCHEDULE',
+                    : 'UNASSIGNED',
             status:
                 t.status === 'TODO' ||
                     t.status === 'IN_PROGRESS' ||

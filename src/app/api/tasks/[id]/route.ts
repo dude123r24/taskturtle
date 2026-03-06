@@ -12,7 +12,10 @@ export async function PATCH(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const task = await prisma.task.findUnique({ where: { id: params.id } });
+    const task = await prisma.task.findUnique({
+        where: { id: params.id },
+        include: { updates: { orderBy: { createdAt: 'desc' } } },
+    });
     if (!task || task.userId !== session.user.id) {
         return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
@@ -21,7 +24,7 @@ export async function PATCH(
     const allowedFields = [
         'title', 'description', 'quadrant', 'horizon',
         'status', 'estimatedMinutes', 'actualMinutes',
-        'dueDate', 'calendarEventId', 'sortOrder',
+        'dueDate', 'calendarEventId', 'sortOrder', 'isChase',
     ];
 
     const data: Record<string, unknown> = {};
@@ -52,6 +55,7 @@ export async function PATCH(
     const updated = await prisma.task.update({
         where: { id: params.id },
         data,
+        include: { updates: { orderBy: { createdAt: 'desc' } } },
     });
 
     return NextResponse.json(updated);

@@ -15,6 +15,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import { type Task, useTaskStore } from '@/store/taskStore';
 import { formatMinutes, HORIZON_LABELS, QUADRANT_LABELS } from '@/lib/utils';
 
@@ -86,6 +87,12 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                             {task.title}
                         </Typography>
 
+                        {task.isChase && (
+                            <Tooltip title="Chasing">
+                                <DirectionsRunIcon sx={{ fontSize: compact ? '0.85rem' : '1rem', color: '#FF6D00', ml: 0.5, flexShrink: 0 }} />
+                            </Tooltip>
+                        )}
+
                         {!compact && task.description && (
                             <Typography
                                 variant="caption"
@@ -94,6 +101,22 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                                 sx={{ mt: 0.25, display: 'block', fontSize: '0.7rem' }}
                             >
                                 {task.description}
+                            </Typography>
+                        )}
+
+                        {!compact && task.updates && task.updates.length > 0 && (
+                            <Typography
+                                variant="caption"
+                                noWrap
+                                sx={{
+                                    mt: 0.25,
+                                    display: 'block',
+                                    fontSize: '0.65rem',
+                                    color: 'text.secondary',
+                                    opacity: 0.8,
+                                }}
+                            >
+                                📝 {task.updates[0].content}
                             </Typography>
                         )}
 
