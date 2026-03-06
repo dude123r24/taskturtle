@@ -34,6 +34,7 @@ import { useTaskStore } from '@/store/taskStore';
 import QuickAddDialog from '@/components/tasks/QuickAddDialog';
 import CommandPalette from '@/components/layout/CommandPalette';
 import { useThemeMode } from '@/components/ThemeContext';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 
 const DRAWER_WIDTH = 240;
 
@@ -46,6 +47,7 @@ const NAV_ITEMS = [
     { label: 'Focus', icon: <CenterFocusStrongIcon />, href: '/focus' },
     { label: 'AI Assistant', icon: <SmartToyIcon />, href: '/chat' },
     { label: 'Analytics', icon: <DashboardIcon />, href: '/dashboard' },
+    { label: 'Ideas', icon: <LightbulbOutlinedIcon />, href: '/ideas' },
     { label: 'Settings', icon: <SettingsIcon />, href: '/settings' },
 ];
 

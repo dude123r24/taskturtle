@@ -23,6 +23,7 @@ model User {
   dailyPlans       DailyPlan[]
   settings         UserSettings?
   calendarAccounts CalendarAccount[]
+  featureRequests  FeatureRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -241,4 +242,32 @@ enum TaskStatus {
   IN_PROGRESS
   DONE
   ARCHIVED
+}
+
+enum FeatureRequestStatus {
+  NEW
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+// ─── Ideas / Feature Requests ────────────────────────────────────────
+
+model FeatureRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?  @db.Text
+  status      FeatureRequestStatus @default(NEW)
+  impact      Int      @default(5) // 1-10
+  effort      Int      @default(5) // 1-10
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId])
 }
