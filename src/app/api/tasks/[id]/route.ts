@@ -63,7 +63,7 @@ export async function PATCH(
 
 // DELETE /api/tasks/[id] — Delete a task
 export async function DELETE(
-    _request: Request,
+    request: Request,
     { params }: { params: { id: string } }
 ) {
     const session = await auth();
@@ -76,7 +76,18 @@ export async function DELETE(
         return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    await prisma.task.delete({ where: { id: params.id } });
+    const { searchParams } = new URL(request.url);
+    const isPermanent = searchParams.get('permanent') === 'true';
 
-    return NextResponse.json({ success: true });
+    if (isPermanent) {
+        await prisma.task.delete({ where: { id: params.id } });
+        return NextResponse.json({ success: true });
+    } else {
+        const updated = await prisma.task.update({
+            where: { id: params.id },
+            data: { status: 'ARCHIVED', archivedAt: new Date() },
+            include: { updates: { orderBy: { createdAt: 'desc' } } },
+        });
+        return NextResponse.json(updated);
+    }
 }

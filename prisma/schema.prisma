@@ -86,8 +86,9 @@ model Task {
   dailyPlanTasks DailyPlanTask[]
   updates        TaskUpdate[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  archivedAt DateTime?
 
   @@index([userId, status])
   @@index([userId, quadrant])

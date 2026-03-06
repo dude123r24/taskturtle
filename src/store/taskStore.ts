@@ -27,6 +27,7 @@ export interface Task {
     updates?: TaskUpdate[];
     createdAt: string;
     updatedAt: string;
+    archivedAt?: string;
 }
 
 export interface DailyPlanTask {
@@ -73,7 +74,7 @@ interface TaskStore {
     fetchTasks: () => Promise<void>;
     createTask: (data: Partial<Task>) => Promise<Task | null>;
     patchTask: (id: string, data: Partial<Task>) => Promise<void>;
-    deleteTask: (id: string) => Promise<void>;
+    deleteTask: (id: string, permanent?: boolean) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskStore>((set, get) => ({
@@ -142,11 +143,17 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         }
     },
 
-    deleteTask: async (id) => {
+    deleteTask: async (id, permanent = false) => {
         try {
-            const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+            const url = `/api/tasks/${id}${permanent ? '?permanent=true' : ''}`;
+            const res = await fetch(url, { method: 'DELETE' });
             if (!res.ok) throw new Error('Failed to delete task');
-            get().removeTask(id);
+            if (permanent) {
+                get().removeTask(id);
+            } else {
+                const updated = await res.json();
+                get().updateTask(id, updated);
+            }
         } catch (e) {
             set({ error: (e as Error).message });
         }

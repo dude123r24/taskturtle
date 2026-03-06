@@ -37,12 +37,12 @@ function RecycleBinDialog({ open, onClose }: { open: boolean; onClose: () => voi
     };
 
     const handlePermanentDelete = async (task: Task) => {
-        await deleteTask(task.id);
+        await deleteTask(task.id, true);
     };
 
     const handleEmptyBin = async () => {
         // Run deletions concurrently
-        await Promise.all(archivedTasks.map(t => deleteTask(t.id)));
+        await Promise.all(archivedTasks.map(t => deleteTask(t.id, true)));
     };
 
     return (
@@ -100,7 +100,9 @@ function RecycleBinDialog({ open, onClose }: { open: boolean; onClose: () => voi
                                         {task.title}
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary" noWrap>
-                                        Deleted: {new Date(task.updatedAt).toLocaleString()}
+                                        Deleted: {new Date(task.archivedAt || task.updatedAt).toLocaleDateString()}
+                                        {' • '}
+                                        Auto-deletes in {Math.max(0, 400 - Math.floor((Date.now() - new Date(task.archivedAt || task.updatedAt).getTime()) / (1000 * 60 * 60 * 24)))} days
                                     </Typography>
                                 </Box>
                                 <Stack direction="row" spacing={1}>
@@ -255,11 +257,13 @@ export default function TasksPage() {
                     size="small"
                 >
                     <ToggleButton value="ALL" sx={{ fontSize: '0.7rem' }}>All</ToggleButton>
-                    {Object.entries(HORIZON_LABELS).map(([key, label]) => (
-                        <ToggleButton key={key} value={key} sx={{ fontSize: '0.7rem' }}>
-                            {label}
-                        </ToggleButton>
-                    ))}
+                    {Object.entries(HORIZON_LABELS)
+                        .filter(([key]) => key !== 'LONG_TERM')
+                        .map(([key, label]) => (
+                            <ToggleButton key={key} value={key} sx={{ fontSize: '0.7rem' }}>
+                                {label}
+                            </ToggleButton>
+                        ))}
                 </ToggleButtonGroup>
             </Stack>
 
