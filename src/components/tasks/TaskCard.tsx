@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -16,6 +17,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import { type Task, useTaskStore } from '@/store/taskStore';
 import { formatMinutes, HORIZON_LABELS, QUADRANT_LABELS } from '@/lib/utils';
 
@@ -25,6 +27,7 @@ interface TaskCardProps {
 }
 
 export default function TaskCard({ task, compact = false }: TaskCardProps) {
+    const router = useRouter();
     const { patchTask, deleteTask, setEditingTask } = useTaskStore();
 
     const quadrantInfo = QUADRANT_LABELS[task.quadrant];
@@ -165,6 +168,20 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
 
                     {!compact && (
                         <Stack direction="row" spacing={0} sx={{ ml: 1 }}>
+                            {task.quadrant === 'DO_FIRST' && !isDone && (
+                                <Tooltip title="Focus on this">
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            router.push(`/focus?taskId=${task.id}`);
+                                        }}
+                                        sx={{ color: '#6C63FF', p: 0.5, '&:hover': { color: '#5A52D5', bgcolor: 'rgba(108,99,255,0.1)' } }}
+                                    >
+                                        <CenterFocusStrongIcon sx={{ fontSize: '1rem' }} />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
                             <Tooltip title="Edit">
                                 <IconButton
                                     size="small"

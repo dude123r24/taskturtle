@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -25,6 +25,7 @@ const BREAK_MINUTES = 5;
 
 export default function FocusPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const theme = useTheme();
     const { tasks, fetchTasks, patchTask, isLoading } = useTaskStore();
 
@@ -34,14 +35,22 @@ export default function FocusPage() {
     const [mode, setMode] = useState<'work' | 'break'>('work');
 
     useEffect(() => {
-        // Fetch tasks if not loaded
         fetchTasks();
     }, []);
 
     useEffect(() => {
-        // Find top priority task if none is selected
         if (!activeTask && tasks.length > 0) {
             const activeTasks = tasks.filter(t => t.status !== 'DONE' && t.status !== 'ARCHIVED');
+
+            // If a specific task was requested via URL, use it
+            const requestedId = searchParams.get('taskId');
+            if (requestedId) {
+                const requested = activeTasks.find(t => t.id === requestedId);
+                if (requested) {
+                    setActiveTask(requested);
+                    return;
+                }
+            }
 
             // Priority 1: DO_FIRST
             const doFirst = activeTasks.filter(t => t.quadrant === 'DO_FIRST');
@@ -62,7 +71,7 @@ export default function FocusPage() {
                 setActiveTask(activeTasks[0]);
             }
         }
-    }, [tasks, activeTask]);
+    }, [tasks, activeTask, searchParams]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -161,7 +170,7 @@ export default function FocusPage() {
             }}
         >
             <IconButton
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push('/tasks')}
                 sx={{ position: 'absolute', top: 24, left: 24, color: 'text.secondary' }}
             >
                 <CloseIcon fontSize="large" />

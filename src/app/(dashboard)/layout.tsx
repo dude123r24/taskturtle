@@ -41,11 +41,11 @@ const DRAWER_WIDTH = 240;
 const GOOGLE_ICON_COLORS = ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#4285F4', '#EA4335', '#34A853'];
 
 const NAV_ITEMS = [
-    { label: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
     { label: 'Tasks', icon: <ChecklistIcon />, href: '/tasks' },
     { label: 'Planner', icon: <ViewTimelineIcon />, href: '/planner' },
     { label: 'Focus', icon: <CenterFocusStrongIcon />, href: '/focus' },
     { label: 'AI Assistant', icon: <SmartToyIcon />, href: '/chat' },
+    { label: 'Analytics', icon: <DashboardIcon />, href: '/dashboard' },
     { label: 'Settings', icon: <SettingsIcon />, href: '/settings' },
 ];
 
@@ -243,7 +243,7 @@ export default function DashboardLayout({
                         </IconButton>
                         <Box sx={{ flexGrow: 1 }}>
                             <Typography variant="h6" noWrap component="div">
-                                {NAV_ITEMS.find((n) => n.href === pathname)?.label || 'Dashboard'}
+                                {NAV_ITEMS.find((n) => n.href === pathname)?.label || 'Tasks'}
                             </Typography>
                         </Box>
                         <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>

@@ -21,7 +21,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import { useTaskStore } from '@/store/taskStore';
 
 const STATIC_ACTIONS = [
-    { label: 'Go to Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
+    { label: 'Go to Analytics', path: '/dashboard', icon: <DashboardIcon /> },
     { label: 'Go to Tasks', path: '/tasks', icon: <ChecklistIcon /> },
     { label: 'Go to Planner', path: '/planner', icon: <ViewTimelineIcon /> },
     { label: 'Go to Focus Mode', path: '/focus', icon: <CenterFocusStrongIcon /> },

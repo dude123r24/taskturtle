@@ -155,7 +155,7 @@ export default function AdminPage() {
                 <Typography variant="h5" color="error" mb={2}>
                     {error}
                 </Typography>
-                <Button variant="contained" onClick={() => router.push('/dashboard')}>
+                <Button variant="contained" onClick={() => router.push('/tasks')}>
                     Back to Dashboard
                 </Button>
             </Box>
@@ -185,7 +185,7 @@ export default function AdminPage() {
                 <Stack direction="row" spacing={2} alignItems="center">
                     <Button
                         startIcon={<ArrowBackIcon />}
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => router.push('/tasks')}
                         color="inherit"
                         size="small"
                     >

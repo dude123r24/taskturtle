@@ -39,8 +39,8 @@ export function middleware(request: NextRequest) {
 
     // If user is already authenticated and trying to access login page, redirect to dashboard
     if (pathname === '/login') {
-        const dashboardUrl = new URL('/dashboard', request.url);
-        return NextResponse.redirect(dashboardUrl);
+        const tasksUrl = new URL('/tasks', request.url);
+        return NextResponse.redirect(tasksUrl);
     }
 
     return NextResponse.next();
