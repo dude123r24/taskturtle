@@ -1,0 +1,24 @@
+{
+    "name": "TaskTurtle",
+    "short_name": "TaskTurtle",
+    "description": "Eisenhower Matrix task manager — Focus on what matters",
+    "start_url": "/tasks",
+    "display": "standalone",
+    "background_color": "#0A0A14",
+    "theme_color": "#6C63FF",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icons/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "maskable"
+        }
+    ]
+}

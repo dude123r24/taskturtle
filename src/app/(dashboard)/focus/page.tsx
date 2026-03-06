@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -23,7 +23,7 @@ import confetti from 'canvas-confetti';
 const WORK_MINUTES = 25;
 const BREAK_MINUTES = 5;
 
-export default function FocusPage() {
+function FocusContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const theme = useTheme();
@@ -281,5 +281,13 @@ export default function FocusPage() {
                 </Stack>
             )}
         </Box>
+    );
+}
+
+export default function FocusPage() {
+    return (
+        <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>}>
+            <FocusContent />
+        </Suspense>
     );
 }

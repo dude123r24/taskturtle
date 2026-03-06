@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0A0A14"/>
+  <g transform="translate(256,260)">
+    <!-- Turtle shell body -->
+    <ellipse rx="140" ry="115" fill="#6C63FF" opacity="0.9"/>
+    <!-- Shell pattern - hexagonal segments -->
+    <path d="M0,-80 L40,-40 L40,30 L0,65 L-40,30 L-40,-40 Z" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.5"/>
+    <path d="M40,-40 L100,-25 L100,35 L40,30" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.4"/>
+    <path d="M-40,-40 L-100,-25 L-100,35 L-40,30" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.4"/>
+    <path d="M0,-80 L-60,-95 L-100,-25" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.3"/>
+    <path d="M0,-80 L60,-95 L100,-25" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.3"/>
+    <path d="M0,65 L-60,90 L-100,35" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.3"/>
+    <path d="M0,65 L60,90 L100,35" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.3"/>
+    <!-- Head -->
+    <ellipse cx="0" cy="-130" rx="32" ry="28" fill="#6C63FF" opacity="0.85"/>
+    <!-- Eyes -->
+    <circle cx="-10" cy="-136" r="5" fill="#0A0A14"/>
+    <circle cx="10" cy="-136" r="5" fill="#0A0A14"/>
+    <circle cx="-8" cy="-137" r="2" fill="white"/>
+    <circle cx="12" cy="-137" r="2" fill="white"/>
+    <!-- Legs -->
+    <ellipse cx="-120" cy="-50" rx="28" ry="18" fill="#6C63FF" opacity="0.7" transform="rotate(-30 -120 -50)"/>
+    <ellipse cx="120" cy="-50" rx="28" ry="18" fill="#6C63FF" opacity="0.7" transform="rotate(30 120 -50)"/>
+    <ellipse cx="-115" cy="60" rx="26" ry="16" fill="#6C63FF" opacity="0.7" transform="rotate(-20 -115 60)"/>
+    <ellipse cx="115" cy="60" rx="26" ry="16" fill="#6C63FF" opacity="0.7" transform="rotate(20 115 60)"/>
+    <!-- Tail -->
+    <ellipse cx="0" cy="120" rx="12" ry="8" fill="#6C63FF" opacity="0.6"/>
+  </g>
+  <!-- Checkmark accent -->
+  <path d="M340,120 L365,150 L410,90" fill="none" stroke="#4CAF50" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+</svg>

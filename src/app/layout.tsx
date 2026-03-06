@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import Providers from '@/components/Providers';
 import { ThemeContextProvider } from '@/components/ThemeContext';
@@ -8,6 +8,21 @@ export const metadata: Metadata = {
     title: 'TaskTurtle — Focus on What Matters',
     description:
         'Eisenhower Matrix task manager with Google Calendar integration. Manage priorities, schedule time blocks, and get things done.',
+    manifest: '/manifest.json',
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: 'black-translucent',
+        title: 'TaskTurtle',
+    },
+};
+
+export const viewport: Viewport = {
+    themeColor: '#6C63FF',
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -22,6 +37,8 @@ export default function RootLayout({
                     rel="stylesheet"
                     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
                 />
+                <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+                <link rel="apple-touch-icon" href="/icons/icon.svg" />
             </head>
             <body>
                 <Providers>
@@ -31,6 +48,17 @@ export default function RootLayout({
                         </ThemeContextProvider>
                     </AppRouterCacheProvider>
                 </Providers>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            if ('serviceWorker' in navigator) {
+                                window.addEventListener('load', () => {
+                                    navigator.serviceWorker.register('/sw.js');
+                                });
+                            }
+                        `,
+                    }}
+                />
             </body>
         </html>
     );
