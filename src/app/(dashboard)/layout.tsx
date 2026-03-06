@@ -182,6 +182,8 @@ export default function DashboardLayout({
                         bgcolor: 'background.paper',
                         borderRight: '1px solid',
                         borderRightColor: 'divider',
+                        pt: 'env(safe-area-inset-top)',
+                        pb: 'env(safe-area-inset-bottom)',
                     },
                 }}
             >
@@ -198,6 +200,8 @@ export default function DashboardLayout({
                         bgcolor: 'background.paper',
                         borderRight: '1px solid',
                         borderRightColor: 'divider',
+                        pt: 'env(safe-area-inset-top)',
+                        pb: 'env(safe-area-inset-bottom)',
                     },
                 }}
             >
@@ -212,6 +216,7 @@ export default function DashboardLayout({
                     flexDirection: 'column',
                     ml: { md: `${DRAWER_WIDTH}px` },
                     width: { xs: '100%', md: `calc(100% - ${DRAWER_WIDTH}px)` },
+                    pb: 'env(safe-area-inset-bottom)',
                 }}
             >
                 <AppBar
@@ -222,6 +227,7 @@ export default function DashboardLayout({
                         backdropFilter: 'blur(10px)',
                         borderBottom: '1px solid',
                         borderBottomColor: 'divider',
+                        pt: 'env(safe-area-inset-top)',
                     }}
                 >
                     {/* Google 4-color strip */}
