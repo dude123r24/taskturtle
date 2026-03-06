@@ -23,9 +23,21 @@ export async function GET(request: Request) {
                 status: true,
                 horizon: true,
                 estimatedMinutes: true,
+                actualMinutes: true,
                 dueDate: true,
+                calendarEventId: true,
+                sortOrder: true,
+                isChase: true,
+                archivedAt: true,
                 createdAt: true,
                 updatedAt: true,
+                updates: {
+                    select: {
+                        content: true,
+                        createdAt: true,
+                    },
+                    orderBy: { createdAt: 'desc' }
+                }
             },
         });
 
@@ -40,7 +52,13 @@ export async function GET(request: Request) {
                 'Status',
                 'Horizon',
                 'Estimated Minutes',
+                'Actual Minutes',
                 'Due Date',
+                'Calendar Event ID',
+                'Sort Order',
+                'Is Chase',
+                'Archived At',
+                'Updates',
                 'Created At',
             ];
 
@@ -54,7 +72,13 @@ export async function GET(request: Request) {
                         t.status,
                         t.horizon,
                         t.estimatedMinutes || '',
+                        t.actualMinutes || '',
                         t.dueDate ? t.dueDate.toISOString() : '',
+                        t.calendarEventId || '',
+                        t.sortOrder || 0,
+                        t.isChase ? 'true' : 'false',
+                        t.archivedAt ? t.archivedAt.toISOString() : '',
+                        t.updates?.length ? escapeCsv(JSON.stringify(t.updates)) : '',
                         t.createdAt.toISOString(),
                     ].join(',')
                 ),
