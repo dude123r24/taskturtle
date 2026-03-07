@@ -287,6 +287,7 @@ export default function TasksPage() {
                 }}
             >
                 <Tab label={`Active (${tasks.filter((t) => t.status !== 'DONE' && t.status !== 'ARCHIVED').length})`} value={0} />
+                <Tab label={`Done (${tasks.filter((t) => t.status === 'DONE').length})`} value={1} />
                 <Tab label={`All (${tasks.filter((t) => t.status !== 'ARCHIVED').length})`} value={2} />
             </Tabs>
 

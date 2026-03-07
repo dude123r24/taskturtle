@@ -45,8 +45,11 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
         if (typeof window === 'undefined') return;
 
         const checkFlash = async () => {
-            const hasFlashed = sessionStorage.getItem(`flashed_${task.id}`);
-            if (hasFlashed) return;
+            const todayStr = new Date().toDateString();
+            const flashedState = sessionStorage.getItem(`flashed_${task.id}`);
+
+            // Already flashed today in this session
+            if (flashedState === todayStr) return;
 
             try {
                 const res = await fetch('/api/settings');
@@ -57,12 +60,27 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                         const due = new Date(task.dueDate!);
                         const hoursUntilDue = (due.getTime() - now.getTime()) / (1000 * 60 * 60);
 
+                        let colorToUse: string | null = null;
                         if (hoursUntilDue < 0) {
-                            setFlashColor('rgba(239, 68, 68, 0.4)'); // Red for overdue
-                            sessionStorage.setItem(`flashed_${task.id}`, 'true');
+                            colorToUse = 'rgba(239, 68, 68, 0.25)'; // Red for overdue
                         } else if (hoursUntilDue <= 24) {
-                            setFlashColor('rgba(34, 197, 94, 0.4)'); // Green for nearing < 24 hrs
-                            sessionStorage.setItem(`flashed_${task.id}`, 'true');
+                            colorToUse = 'rgba(34, 197, 94, 0.25)'; // Green for nearing < 24 hrs
+                        }
+
+                        if (colorToUse) {
+                            sessionStorage.setItem(`flashed_${task.id}`, todayStr);
+
+                            // Flash sequence: 3 times, 30ms gap in between
+                            const flashSequence = async () => {
+                                for (let i = 0; i < 3; i++) {
+                                    setFlashColor(colorToUse);
+                                    await new Promise(r => setTimeout(r, 600)); // Subtle flash duration
+                                    setFlashColor(null);
+                                    if (i < 2) await new Promise(r => setTimeout(r, 30)); // Exact 30ms gap
+                                }
+                            };
+
+                            flashSequence();
                         }
                     }
                 }
@@ -73,14 +91,6 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
 
         checkFlash();
     }, [task.dueDate, task.id, isDone]);
-
-    // Handle clearing the flash after 2 flashes (approx 1000ms animation running twice = 2s)
-    useEffect(() => {
-        if (flashColor) {
-            const timer = setTimeout(() => setFlashColor(null), 2000); // Wait 2s then clear
-            return () => clearTimeout(timer);
-        }
-    }, [flashColor]);
 
     const toggleDone = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -94,19 +104,14 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
             onClick={() => setEditingTask(task)}
             sx={{
                 cursor: 'pointer',
-                background: (theme) => isDone
-                    ? 'rgba(67, 160, 71, 0.06)'
-                    : theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)',
+                background: (theme) => flashColor
+                    ? flashColor
+                    : (isDone
+                        ? 'rgba(67, 160, 71, 0.06)'
+                        : theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)'),
                 border: (theme) => `1px solid ${isDone ? 'rgba(67,160,71,0.2)' : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)')}`,
-                transition: 'all 0.2s ease',
+                transition: flashColor ? 'none' : 'all 0.2s ease',
                 opacity: isDone ? 0.7 : 1,
-                // Flashing animation definition
-                '@keyframes flashBackground': {
-                    '0%': { backgroundColor: 'inherit' },
-                    '50%': { backgroundColor: flashColor || 'inherit' },
-                    '100%': { backgroundColor: 'inherit' }
-                },
-                animation: flashColor ? 'flashBackground 1s ease-in-out 2' : 'none',
                 '&:hover': {
                     border: `1px solid ${quadrantInfo.color}44`,
                     transform: 'translateY(-1px)',

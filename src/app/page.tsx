@@ -2,16 +2,12 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import {
-    RocketLaunch as RocketIcon,
-    AutoAwesome as SparklesIcon,
     Timeline as TimelineIcon,
-    CheckCircle as DoneIcon,
-    ArrowForward as ArrowIcon,
-    FilterList as FilterIcon,
     Schedule as ScheduleIcon,
-    Psychology as AIIcon
+    AutoAwesome as SparklesIcon,
+    ArrowForward as ArrowIcon,
+    CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import {
     Box,
@@ -20,150 +16,128 @@ import {
     Button,
     Stack,
     Grid,
-    Card,
-    CardContent,
-    useTheme,
-    alpha,
-    Divider
+    alpha
 } from '@mui/material';
 
 const LandingPage = () => {
-    const theme = useTheme();
-
     const features = [
         {
-            title: "Prioritize with Purpose",
-            description: "Filter out the noise. Use the Eisenhower Matrix to categorize tasks by urgency and importance, focusing your energy on what truly move the needle.",
+            title: "The Eisenhower Matrix",
+            description: "Stop reacting, start prioritizing. Filter tasks by urgency and importance to discover what actually moves the needle.",
             icon: <TimelineIcon sx={{ fontSize: 40, color: '#6C63FF' }} />,
         },
         {
-            title: "Intelligent Scheduling",
-            description: "Move from 'To-Do' to 'Done'. Our Unified Planner bridges the gap between your backlog and your daily schedule with seamless drag-and-drop.",
+            title: "Unified Planning",
+            description: "Drag and drop your top priorities directly into your daily schedule. Bridge the gap between 'to-do' and 'done'.",
             icon: <ScheduleIcon sx={{ fontSize: 40, color: '#4CAF50' }} />,
         },
         {
-            title: "AI-Powered Execution",
-            description: "Your digital companion. Gemini analyzes your calendar to find focus blocks, suggests optimal task times, and helps you stay on track.",
+            title: "AI-Powered Assistance",
+            description: "Let Gemini analyze your workload and calendar. Automatically find focus blocks and keep your progress on track.",
             icon: <SparklesIcon sx={{ fontSize: 40, color: '#FFD700' }} />,
         },
     ];
 
-    const steps = [
-        {
-            number: "01",
-            title: "Categorize",
-            description: "Drop your tasks into the Matrix. Identify what to do first, what to schedule, and what to delegate."
-        },
-        {
-            number: "02",
-            title: "Plan",
-            description: "Drag tasks from your backlog into your 'This Week' or 'Today' plan. Visualization is the key to clarity."
-        },
-        {
-            number: "03",
-            title: "Execute",
-            description: "Let the AI Assistant handle the logistics. Focus on the work, not the management."
-        }
-    ];
-
     return (
         <Box
+            component="main"
             sx={{
                 minHeight: '100vh',
-                bgcolor: '#0A0A14',
+                bgcolor: '#09090E',
                 color: 'white',
                 position: 'relative',
-                overflowX: 'hidden'
+                overflowX: 'hidden',
+                fontFamily: '"Inter", sans-serif'
             }}
         >
-            {/* Background Ambience */}
+            {/* Subtle Gradient Background */}
             <Box
                 sx={{
                     position: 'absolute',
-                    top: '-10%',
-                    left: '-5%',
-                    width: '800px',
-                    height: '800px',
-                    background: 'radial-gradient(circle, rgba(108, 99, 255, 0.1) 0%, rgba(108, 99, 255, 0) 70%)',
-                    filter: 'blur(120px)',
+                    top: '-20%',
+                    left: '10%',
+                    width: '600px',
+                    height: '600px',
+                    background: 'radial-gradient(circle, rgba(108, 99, 255, 0.15) 0%, rgba(108, 99, 255, 0) 70%)',
+                    filter: 'blur(100px)',
                     zIndex: 0,
+                    pointerEvents: 'none'
                 }}
             />
 
-            {/* Navbar */}
-            <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, py: 4 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography
-                        variant="h4"
-                        fontWeight={900}
-                        sx={{
-                            background: 'linear-gradient(45deg, #6C63FF, #FF6B6B)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            letterSpacing: '-1.5px'
-                        }}
-                    >
-                        TaskTurtle
-                    </Typography>
-                    <Stack direction="row" spacing={3} alignItems="center">
+            {/* Navigation Header */}
+            <Box component="header" sx={{ position: 'relative', zIndex: 10, py: 3, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <Container maxWidth="lg">
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography
+                            variant="h5"
+                            component="div"
+                            fontWeight={900}
+                            sx={{
+                                background: 'linear-gradient(45deg, #6C63FF, #FF6B6B)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                letterSpacing: '-1px'
+                            }}
+                        >
+                            TaskTurtle
+                        </Typography>
                         <Link href="/login" passHref legacyBehavior>
                             <Button
                                 variant="contained"
                                 sx={{
-                                    bgcolor: '#6C63FF',
+                                    bgcolor: 'rgba(255,255,255,0.1)',
                                     color: 'white',
-                                    fontWeight: 700,
-                                    borderRadius: '10px',
-                                    px: 4,
-                                    py: 1,
-                                    '&:hover': { bgcolor: '#5A52D5' }
+                                    fontWeight: 600,
+                                    borderRadius: '8px',
+                                    textTransform: 'none',
+                                    px: 3,
+                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' },
+                                    boxShadow: 'none'
                                 }}
                             >
-                                Get Started
+                                Sign In
                             </Button>
                         </Link>
                     </Stack>
-                </Stack>
-            </Container>
+                </Container>
+            </Box>
 
             {/* Hero Section */}
-            <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1, pt: { xs: 10, md: 18 }, pb: 15 }}>
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                >
-                    <Typography
-                        variant="h1"
-                        align="center"
-                        sx={{
-                            fontSize: { xs: '3.5rem', md: '5.5rem' },
-                            fontWeight: 900,
-                            lineHeight: 1,
-                            mb: 4,
-                            letterSpacing: '-2px'
-                        }}
-                    >
-                        Control the chaos. <br />
-                        Focus on the <span style={{ color: '#6C63FF' }}>signal.</span>
-                    </Typography>
+            <Box component="section" sx={{ position: 'relative', zIndex: 1, pt: { xs: 8, md: 16 }, pb: { xs: 10, md: 16 } }}>
+                <Container maxWidth="md">
+                    <Box sx={{ textAlign: 'center' }}>
+                        <Typography
+                            component="h1"
+                            variant="h1"
+                            sx={{
+                                fontSize: { xs: '3rem', md: '5rem' },
+                                fontWeight: 900,
+                                lineHeight: 1.1,
+                                mb: 3,
+                                letterSpacing: '-2px'
+                            }}
+                        >
+                            Master your Focus. <br />
+                            Conquer the <Box component="span" sx={{ color: '#6C63FF' }}>Chaos.</Box>
+                        </Typography>
 
-                    <Typography
-                        variant="h6"
-                        align="center"
-                        sx={{
-                            color: 'rgba(255,255,255,0.5)',
-                            mb: 8,
-                            maxWidth: '650px',
-                            mx: 'auto',
-                            fontWeight: 400,
-                            lineHeight: 1.6
-                        }}
-                    >
-                        A professional productivity operating system that combines the Eisenhower Matrix with intelligent scheduling to help you reclaim your time.
-                    </Typography>
+                        <Typography
+                            component="p"
+                            variant="h6"
+                            sx={{
+                                color: 'rgba(255,255,255,0.6)',
+                                mb: 6,
+                                maxWidth: '600px',
+                                mx: 'auto',
+                                fontWeight: 400,
+                                lineHeight: 1.6,
+                                fontSize: { xs: '1.1rem', md: '1.25rem' }
+                            }}
+                        >
+                            TaskTurtle isn't just a list. It's a strategic system that combines the Eisenhower Matrix with intelligent scheduling to elevate your productivity.
+                        </Typography>
 
-                    <Stack direction="row" justifyContent="center" spacing={3}>
                         <Link href="/login" passHref legacyBehavior>
                             <Button
                                 variant="contained"
@@ -171,193 +145,181 @@ const LandingPage = () => {
                                 endIcon={<ArrowIcon />}
                                 sx={{
                                     bgcolor: '#6C63FF',
-                                    px: 6,
+                                    px: 5,
                                     py: 2,
-                                    borderRadius: '14px',
-                                    fontSize: '1.2rem',
+                                    borderRadius: '12px',
+                                    fontSize: '1.1rem',
                                     fontWeight: 700,
-                                    boxShadow: '0 10px 40px rgba(108, 99, 255, 0.3)',
-                                    transition: 'transform 0.2s',
+                                    textTransform: 'none',
+                                    boxShadow: '0 8px 30px rgba(108, 99, 255, 0.4)',
+                                    transition: 'transform 0.2s, box-shadow 0.2s',
                                     '&:hover': {
                                         bgcolor: '#5A52D5',
-                                        transform: 'translateY(-2px)'
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 12px 40px rgba(108, 99, 255, 0.5)',
                                     }
                                 }}
                             >
-                                Start for Free
+                                Start Organizing Free
                             </Button>
                         </Link>
-                    </Stack>
-                </motion.div>
-            </Container>
+                    </Box>
+                </Container>
+            </Box>
 
-            {/* Features - About Section */}
-            <Box sx={{ py: 15, bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            {/* Features Section */}
+            <Box component="section" sx={{ py: 12, bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                 <Container maxWidth="lg">
-                    <Typography variant="overline" sx={{ color: '#6C63FF', fontWeight: 800, letterSpacing: '4px', display: 'block', textAlign: 'center', mb: 2 }}>
-                        THE PLATFORM
+                    <Typography component="h2" variant="overline" sx={{ color: '#6C63FF', fontWeight: 800, letterSpacing: '3px', display: 'block', textAlign: 'center', mb: 2 }}>
+                        CORE PILLARS
                     </Typography>
-                    <Typography variant="h3" align="center" fontWeight={800} sx={{ mb: 10 }}>
-                        Everything you need to <br /> stay in the flow.
+                    <Typography component="h3" variant="h3" align="center" fontWeight={800} sx={{ mb: 8, fontSize: { xs: '2rem', md: '2.5rem' } }}>
+                        A system designed for builders.
                     </Typography>
 
-                    <Grid container spacing={6}>
+                    <Grid container spacing={4}>
                         {features.map((feature, index) => (
                             <Grid item xs={12} md={4} key={index}>
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                                <Box
+                                    sx={{
+                                        p: 4,
+                                        height: '100%',
+                                        borderRadius: '24px',
+                                        bgcolor: 'rgba(255,255,255,0.03)',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        transition: 'background-color 0.3s',
+                                        '&:hover': {
+                                            bgcolor: 'rgba(255,255,255,0.05)'
+                                        }
+                                    }}
                                 >
-                                    <Box sx={{ textAlign: 'center', p: 2 }}>
-                                        <Box
-                                            sx={{
-                                                display: 'inline-flex',
-                                                p: 3,
-                                                borderRadius: '24px',
-                                                bgcolor: 'rgba(255,255,255,0.03)',
-                                                border: '1px solid rgba(255,255,255,0.08)',
-                                                mb: 4
-                                            }}
-                                        >
-                                            {feature.icon}
-                                        </Box>
-                                        <Typography variant="h5" fontWeight={700} sx={{ mb: 2 }}>{feature.title}</Typography>
-                                        <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, fontSize: '1.1rem' }}>
-                                            {feature.description}
-                                        </Typography>
+                                    <Box sx={{ mb: 3 }}>
+                                        {feature.icon}
                                     </Box>
-                                </motion.div>
+                                    <Typography component="h4" variant="h5" fontWeight={700} sx={{ mb: 2 }}>
+                                        {feature.title}
+                                    </Typography>
+                                    <Typography component="p" variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
+                                        {feature.description}
+                                    </Typography>
+                                </Box>
                             </Grid>
                         ))}
                     </Grid>
                 </Container>
             </Box>
 
-            {/* How it Works */}
-            <Container maxWidth="lg" sx={{ py: 20 }}>
-                <Grid container spacing={10} alignItems="center">
-                    <Grid item xs={12} md={5}>
-                        <Typography variant="overline" sx={{ color: '#6C63FF', fontWeight: 800, letterSpacing: '4px', display: 'block', mb: 2 }}>
-                            WORKFLOW
-                        </Typography>
-                        <Typography variant="h3" fontWeight={800} sx={{ mb: 4, lineHeight: 1.2 }}>
-                            A smarter way <br /> to manage tasks.
-                        </Typography>
-                        <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', mb: 6, fontSize: '1.1rem' }}>
-                            Unlike traditional lists that just grow, TaskTurtle provides a structured framework to process your input and turn it into action.
-                        </Typography>
+            {/* Workflow Section */}
+            <Box component="section" sx={{ py: { xs: 12, md: 16 } }}>
+                <Container maxWidth="lg">
+                    <Grid container spacing={8} alignItems="center">
+                        <Grid item xs={12} md={6}>
+                            <Box sx={{ position: 'relative' }}>
+                                {/* Decorative elements */}
+                                <Box sx={{ position: 'absolute', top: -20, left: -20, width: 100, height: 100, bgcolor: 'rgba(108, 99, 255, 0.1)', borderRadius: '50%', filter: 'blur(30px)' }} />
 
-                        <Stack spacing={4}>
-                            {steps.map((step, index) => (
-                                <Stack key={index} direction="row" spacing={3}>
-                                    <Typography variant="h4" fontWeight={900} sx={{ color: alpha('#6C63FF', 0.2), lineHeight: 1 }}>
-                                        {step.number}
-                                    </Typography>
-                                    <Box>
-                                        <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>{step.title}</Typography>
-                                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>{step.description}</Typography>
-                                    </Box>
-                                </Stack>
-                            ))}
-                        </Stack>
-                    </Grid>
+                                <Typography component="h2" variant="h3" fontWeight={800} sx={{ mb: 4, position: 'relative', zIndex: 1 }}>
+                                    Stop writing infinite lists.
+                                </Typography>
+                                <Typography component="p" variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', mb: 4, fontSize: '1.1rem', lineHeight: 1.8 }}>
+                                    Most task managers fail because they treat all tasks equally. TaskTurtle forces you to make decisions early, so execution becomes effortless.
+                                </Typography>
 
-                    <Grid item xs={12} md={7}>
-                        <Box
-                            sx={{
-                                position: 'relative',
-                                p: 2,
-                                borderRadius: '32px',
-                                bgcolor: 'rgba(255,255,255,0.02)',
-                                border: '1px solid rgba(255,255,255,0.05)',
-                                boxShadow: '0 40px 100px rgba(0,0,0,0.5)'
-                            }}
-                        >
-                            <Box
-                                component="img"
-                                src="https://images.unsplash.com/photo-1484480974693-6db0a01adbc3?auto=format&fit=crop&q=80&w=1200"
-                                alt="Productivity UI Preview"
-                                sx={{
-                                    width: '100%',
-                                    borderRadius: '24px',
-                                    display: 'block',
-                                    opacity: 0.8
-                                }}
-                            />
-                            {/* Floating UI micro-component mockup */}
-                            <Box
-                                sx={{
-                                    position: 'absolute',
-                                    bottom: -30,
-                                    right: -30,
-                                    p: 3,
-                                    bgcolor: '#12121F',
-                                    borderRadius: '20px',
-                                    border: '1px solid #6C63FF',
-                                    boxShadow: '0 20px 40px rgba(108, 99, 255, 0.2)',
-                                    display: { xs: 'none', md: 'block' }
-                                }}
-                            >
-                                <Stack direction="row" spacing={2} alignItems="center">
-                                    <DoneIcon sx={{ color: '#4CAF50' }} />
-                                    <Typography variant="subtitle2" fontWeight={700}>Daily Goal Achieved</Typography>
+                                <Stack spacing={2}>
+                                    {['Identify immediate priorities', 'Visual timeline planning', 'Track focused deep work', 'Review progress insights'].map((item, i) => (
+                                        <Stack key={i} direction="row" spacing={2} alignItems="center">
+                                            <CheckCircleIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
+                                            <Typography variant="body1" fontWeight={500}>{item}</Typography>
+                                        </Stack>
+                                    ))}
                                 </Stack>
                             </Box>
-                        </Box>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Box
+                                sx={{
+                                    p: 2,
+                                    borderRadius: '24px',
+                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+                                }}
+                            >
+                                <Box
+                                    component="img"
+                                    src="https://images.unsplash.com/photo-1507925922888-508782a9d80d?auto=format&fit=crop&q=80&w=1200"
+                                    alt="Productivity Workspace"
+                                    sx={{
+                                        width: '100%',
+                                        borderRadius: '16px',
+                                        display: 'block',
+                                        objectFit: 'cover',
+                                        aspectRatio: '4/3',
+                                        opacity: 0.9
+                                    }}
+                                />
+                            </Box>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </Container>
+                </Container>
+            </Box>
 
-            {/* Final CTA */}
-            <Container maxWidth="md" sx={{ pb: 20, textAlign: 'center' }}>
-                <Box
-                    sx={{
-                        p: { xs: 6, md: 10 },
-                        borderRadius: '40px',
-                        background: 'linear-gradient(180deg, rgba(108, 99, 255, 0.1) 0%, rgba(108, 99, 255, 0.03) 100%)',
-                        border: '1px solid rgba(108, 99, 255, 0.2)'
-                    }}
-                >
-                    <Typography variant="h3" fontWeight={800} sx={{ mb: 3 }}>Ready to dive in?</Typography>
-                    <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.5)', mb: 6, maxWidth: '500px', mx: 'auto' }}>
-                        Join a new wave of thinkers who prioritize quality of work over quantity of noise.
-                    </Typography>
-                    <Link href="/login" passHref legacyBehavior>
-                        <Button
-                            variant="contained"
-                            size="large"
-                            sx={{
-                                bgcolor: 'white',
-                                color: 'black',
-                                px: 5,
-                                py: 2,
-                                borderRadius: '12px',
-                                fontWeight: 800,
-                                fontSize: '1.1rem',
-                                '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
-                            }}
-                        >
-                            Get Started Now
-                        </Button>
-                    </Link>
-                </Box>
-            </Container>
+            {/* CTA Section */}
+            <Box component="section" sx={{ pb: 16 }}>
+                <Container maxWidth="md">
+                    <Box
+                        sx={{
+                            textAlign: 'center',
+                            p: { xs: 6, md: 8 },
+                            borderRadius: '32px',
+                            background: 'linear-gradient(180deg, rgba(108, 99, 255, 0.1) 0%, rgba(108, 99, 255, 0.05) 100%)',
+                            border: '1px solid rgba(108, 99, 255, 0.2)'
+                        }}
+                    >
+                        <Typography component="h2" variant="h3" fontWeight={800} sx={{ mb: 3 }}>
+                            Reclaim your time.
+                        </Typography>
+                        <Typography component="p" variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', mb: 5, fontSize: '1.1rem' }}>
+                            Join the productivity system built for intentional execution.
+                        </Typography>
+                        <Link href="/login" passHref legacyBehavior>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                sx={{
+                                    bgcolor: 'white',
+                                    color: 'black',
+                                    px: 6,
+                                    py: 2,
+                                    borderRadius: '12px',
+                                    fontWeight: 800,
+                                    fontSize: '1.1rem',
+                                    textTransform: 'none',
+                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
+                                }}
+                            >
+                                Enter Workspace
+                            </Button>
+                        </Link>
+                    </Box>
+                </Container>
+            </Box>
 
             {/* Footer */}
-            <Box sx={{ py: 10, borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-                <Stack direction="row" spacing={4} justifyContent="center" sx={{ mb: 4 }}>
-                    <Link href="/privacy" style={{ textDecoration: 'none' }}>
-                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', '&:hover': { color: 'white' } }}>Privacy Policy</Typography>
-                    </Link>
-                    <Link href="/terms" style={{ textDecoration: 'none' }}>
-                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', '&:hover': { color: 'white' } }}>Terms of Service</Typography>
-                    </Link>
-                </Stack>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.2)' }}>
-                    © 2026 TaskTurtle. Precision tools for modern builders.
-                </Typography>
+            <Box component="footer" sx={{ py: 6, borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                <Container>
+                    <Stack direction="row" spacing={3} justifyContent="center" sx={{ mb: 3 }}>
+                        <Link href="/privacy" style={{ textDecoration: 'none' }}>
+                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', '&:hover': { color: 'white' } }}>Privacy</Typography>
+                        </Link>
+                        <Link href="/terms" style={{ textDecoration: 'none' }}>
+                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', '&:hover': { color: 'white' } }}>Terms</Typography>
+                        </Link>
+                    </Stack>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.2)' }}>
+                        © 2026 TaskTurtle. Engineered for focus.
+                    </Typography>
+                </Container>
             </Box>
         </Box>
     );
