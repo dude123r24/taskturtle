@@ -13,13 +13,19 @@ export async function PATCH(
     }
 
     try {
+        const isAdmin = session.user.email === 'sanghviamit@gmail.com';
         const idea = await prisma.featureRequest.findUnique({ where: { id: params.id } });
-        if (!idea || idea.userId !== session.user.id) {
+        if (!idea || (!isAdmin && idea.userId !== session.user.id)) {
             return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
 
         const body = await request.json();
         const { title, description, impact, effort, status } = body;
+
+        // Ensure only admin can change the status
+        if (status !== undefined && status !== idea.status && !isAdmin) {
+            return NextResponse.json({ error: 'Only admins can update status' }, { status: 403 });
+        }
 
         const updated = await prisma.featureRequest.update({
             where: { id: params.id },
@@ -49,8 +55,9 @@ export async function DELETE(
     }
 
     try {
+        const isAdmin = session.user.email === 'sanghviamit@gmail.com';
         const idea = await prisma.featureRequest.findUnique({ where: { id: params.id } });
-        if (!idea || idea.userId !== session.user.id) {
+        if (!idea || (!isAdmin && idea.userId !== session.user.id)) {
             return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
 

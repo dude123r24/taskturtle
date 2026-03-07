@@ -47,8 +47,7 @@ const NAV_ITEMS = [
     { label: 'Focus', icon: <CenterFocusStrongIcon />, href: '/focus' },
     { label: 'AI Assistant', icon: <SmartToyIcon />, href: '/chat' },
     { label: 'Analytics', icon: <DashboardIcon />, href: '/dashboard' },
-    { label: 'Settings', icon: <SettingsIcon />, href: '/settings' },
-    { label: 'SuggestAFeature', icon: <LightbulbOutlinedIcon />, href: '/ideas' },
+    { label: 'Features', icon: <LightbulbOutlinedIcon />, href: '/ideas' },
 ];
 
 export default function DashboardLayout({

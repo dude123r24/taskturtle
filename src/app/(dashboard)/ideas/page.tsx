@@ -22,9 +22,11 @@ import SpeedIcon from '@mui/icons-material/Speed'; // For Impact
 import HandymanIcon from '@mui/icons-material/Handyman'; // For Effort
 import AutoGraphIcon from '@mui/icons-material/AutoGraph'; // For Priority Score
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
+import { useSession } from 'next-auth/react';
 import { useIdeaStore, type Idea, type IdeaStatus } from '@/store/ideaStore';
 
 const STATUS_COLORS: Record<IdeaStatus, 'default' | 'info' | 'primary' | 'success' | 'error'> = {
+
     NEW: 'info',
     PLANNED: 'primary',
     IN_PROGRESS: 'primary',
@@ -33,6 +35,8 @@ const STATUS_COLORS: Record<IdeaStatus, 'default' | 'info' | 'primary' | 'succes
 };
 
 function IdeasContent() {
+    const { data: session } = useSession();
+    const isAdmin = session?.user?.email === 'sanghviamit@gmail.com';
     const { ideas, fetchIdeas, addIdea, updateIdea, removeIdea, isLoading } = useIdeaStore();
     const [filteredStatus, setFilteredStatus] = useState<IdeaStatus | 'ALL'>('ALL');
     const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -94,11 +98,11 @@ function IdeasContent() {
                 <Stack direction="row" alignItems="center" spacing={2}>
                     <LightbulbOutlinedIcon sx={{ fontSize: 32, color: 'primary.main' }} />
                     <Typography variant="h4" fontWeight={700}>
-                        Ideas
+                        Features
                     </Typography>
                 </Stack>
                 <Button variant="contained" onClick={handleOpenAddDialog}>
-                    Add Idea
+                    Request feature
                 </Button>
             </Stack>
 
@@ -114,10 +118,10 @@ function IdeasContent() {
                 ))}
             </Stack>
 
-            {isLoading && <Typography>Loading ideas...</Typography>}
+            {isLoading && <Typography>Loading features...</Typography>}
             {!isLoading && sortedAndFilteredIdeas.length === 0 && (
                 <Card sx={{ p: 4, textAlign: 'center', bgcolor: 'transparent', border: '1px dashed', borderColor: 'divider' }}>
-                    <Typography color="text.secondary">No ideas found in this category.</Typography>
+                    <Typography color="text.secondary">No features found in this category.</Typography>
                 </Card>
             )}
 
@@ -151,19 +155,30 @@ function IdeasContent() {
                                 </IconButton>
                             </Stack>
 
-                            <TextField
-                                select
-                                size="small"
-                                variant="standard"
-                                value={idea.status}
-                                onChange={(e) => handleQuickUpdate(idea.id, 'status', e.target.value)}
-                                InputProps={{ disableUnderline: true, sx: { fontSize: '0.75rem', fontWeight: 600, color: (theme) => STATUS_COLORS[idea.status] === 'default' ? theme.palette.text.primary : theme.palette[STATUS_COLORS[idea.status] as 'info' | 'primary' | 'success' | 'error'].main } }}
-                                sx={{ mb: 2 }}
-                            >
-                                {['NEW', 'PLANNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'].map((s) => (
-                                    <MenuItem key={s} value={s} sx={{ fontSize: '0.8rem' }}>{s.replace('_', ' ')}</MenuItem>
-                                ))}
-                            </TextField>
+                            {isAdmin ? (
+                                <TextField
+                                    select
+                                    size="small"
+                                    variant="standard"
+                                    value={idea.status}
+                                    onChange={(e) => handleQuickUpdate(idea.id, 'status', e.target.value)}
+                                    InputProps={{ disableUnderline: true, sx: { fontSize: '0.75rem', fontWeight: 600, color: (theme) => STATUS_COLORS[idea.status] === 'default' ? theme.palette.text.primary : theme.palette[STATUS_COLORS[idea.status] as 'info' | 'primary' | 'success' | 'error'].main } }}
+                                    sx={{ mb: 2 }}
+                                >
+                                    {['NEW', 'PLANNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'].map((s) => (
+                                        <MenuItem key={s} value={s} sx={{ fontSize: '0.8rem' }}>{s.replace('_', ' ')}</MenuItem>
+                                    ))}
+                                </TextField>
+                            ) : (
+                                <Box sx={{ mb: 2 }}>
+                                    <Chip
+                                        size="small"
+                                        label={idea.status.replace('_', ' ')}
+                                        color={STATUS_COLORS[idea.status] === 'default' ? 'default' : STATUS_COLORS[idea.status] as 'info' | 'primary' | 'success' | 'error'}
+                                        sx={{ fontWeight: 600, fontSize: '0.75rem', height: 24 }}
+                                    />
+                                </Box>
+                            )}
 
                             {idea.description && (
                                 <Typography variant="body2" color="text.secondary" mb={3} sx={{
@@ -223,11 +238,11 @@ function IdeasContent() {
             </Stack>
 
             <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>{editingIdea?.id ? 'Edit Idea' : 'New Idea'}</DialogTitle>
+                <DialogTitle>{editingIdea?.id ? 'Edit Feature' : 'New Feature'}</DialogTitle>
                 <DialogContent>
                     <Stack spacing={3} sx={{ mt: 1 }}>
                         <TextField
-                            label="Idea Title"
+                            label="Feature Title"
                             value={editingIdea?.title || ''}
                             onChange={(e) => setEditingIdea(prev => ({ ...prev, title: e.target.value }))}
                             fullWidth
@@ -278,7 +293,7 @@ function IdeasContent() {
                             removeIdea(editingIdea.id!);
                             setEditDialogOpen(false);
                         }}>
-                            Delete Idea
+                            Delete Feature
                         </Button>
                     ) : (
                         <Box />
@@ -286,7 +301,7 @@ function IdeasContent() {
                     <Box>
                         <Button onClick={() => setEditDialogOpen(false)} sx={{ mr: 1 }}>Cancel</Button>
                         <Button variant="contained" onClick={handleSaveIdea} disabled={!editingIdea?.title}>
-                            Save Idea
+                            Save Feature
                         </Button>
                     </Box>
                 </DialogActions>
@@ -297,7 +312,7 @@ function IdeasContent() {
 
 export default function IdeasPage() {
     return (
-        <Suspense fallback={<Typography>Loading ideas...</Typography>}>
+        <Suspense fallback={<Typography>Loading features...</Typography>}>
             <IdeasContent />
         </Suspense>
     );
