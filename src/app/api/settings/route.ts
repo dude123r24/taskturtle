@@ -34,7 +34,7 @@ export async function PATCH(request: Request) {
     const allowedFields = [
         'maxDailyTasks', 'maxWeeklyTasks', 'maxDailyMinutes',
         'defaultView', 'calendarSyncEnabled',
-        'autoClearArchivedEnabled', 'autoClearArchivedDays'
+        'autoClearArchivedEnabled', 'autoClearArchivedDays', 'flashOnDue'
     ];
 
     const data: Record<string, unknown> = {};

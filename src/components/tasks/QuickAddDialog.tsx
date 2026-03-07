@@ -38,6 +38,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
     const [quadrant, setQuadrant] = useState<EisenhowerQuadrant>('SCHEDULE');
     const [status, setStatus] = useState<TaskStatus>('TODO');
     const [estimatedMinutes, setEstimatedMinutes] = useState('');
+    const [dueDate, setDueDate] = useState('');
     const [isChase, setIsChase] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -68,6 +69,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
             setQuadrant(editingTask.quadrant);
             setStatus(editingTask.status);
             setEstimatedMinutes(editingTask.estimatedMinutes?.toString() || '');
+            setDueDate(editingTask.dueDate ? editingTask.dueDate.slice(0, 16) : '');
             setIsChase(editingTask.isChase || false);
             fetchUpdates(editingTask.id);
         } else {
@@ -76,6 +78,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
             setQuadrant(draftQuadrant || 'SCHEDULE');
             setStatus('TODO');
             setEstimatedMinutes('');
+            setDueDate('');
             setIsChase(false);
             setUpdates([]);
             setNewUpdate('');
@@ -106,6 +109,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
             quadrant,
             status,
             estimatedMinutes: estimatedMinutes ? parseInt(estimatedMinutes) : undefined,
+            dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
             isChase,
         };
 
@@ -227,6 +231,30 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                             </ToggleButtonGroup>
                         </Box>
                     )}
+
+                    <Stack direction="row" spacing={2}>
+                        <TextField
+                            label="Due Date (optional)"
+                            type="datetime-local"
+                            fullWidth
+                            value={dueDate}
+                            onChange={(e) => setDueDate(e.target.value)}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                        <TextField
+                            label="Estimated Time (min)"
+                            type="number"
+                            fullWidth
+                            value={estimatedMinutes}
+                            onChange={(e) => setEstimatedMinutes(e.target.value)}
+                            inputProps={{
+                                min: 5,
+                                step: 5,
+                            }}
+                        />
+                    </Stack>
 
                     <Box>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>

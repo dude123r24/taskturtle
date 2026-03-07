@@ -176,6 +176,7 @@ model UserSettings {
   calendarSyncEnabled Boolean @default(true)
   autoClearArchivedEnabled Boolean @default(true)
   autoClearArchivedDays    Int     @default(30)
+  flashOnDue               Boolean @default(true)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

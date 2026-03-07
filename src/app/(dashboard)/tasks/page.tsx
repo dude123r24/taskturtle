@@ -14,6 +14,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestoreIcon from '@mui/icons-material/Restore';
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
+import Tooltip from '@mui/material/Tooltip';
 import Link from 'next/link';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -232,22 +233,27 @@ export default function TasksPage() {
                     onChange={(_, val) => val && setQuadrantFilter(val)}
                     size="small"
                 >
-                    <ToggleButton value="ALL" sx={{ fontSize: '0.7rem' }}>All</ToggleButton>
-                    {Object.entries(QUADRANT_LABELS).map(([key, q]) => (
-                        <ToggleButton
-                            key={key}
-                            value={key}
-                            sx={{
-                                fontSize: '0.7rem',
-                                '&.Mui-selected': {
-                                    bgcolor: `${q.color}22`,
-                                    color: q.color,
-                                },
-                            }}
-                        >
-                            {q.icon}
-                        </ToggleButton>
-                    ))}
+                    <Tooltip title="Show All">
+                        <ToggleButton value="ALL" sx={{ fontSize: '0.7rem' }}>All</ToggleButton>
+                    </Tooltip>
+                    {Object.entries(QUADRANT_LABELS)
+                        .filter(([key]) => key !== 'UNASSIGNED')
+                        .map(([key, q]) => (
+                            <Tooltip key={key} title={q.label}>
+                                <ToggleButton
+                                    value={key}
+                                    sx={{
+                                        fontSize: '0.7rem',
+                                        '&.Mui-selected': {
+                                            bgcolor: `${q.color}22`,
+                                            color: q.color,
+                                        },
+                                    }}
+                                >
+                                    {q.icon}
+                                </ToggleButton>
+                            </Tooltip>
+                        ))}
                 </ToggleButtonGroup>
 
                 <ToggleButtonGroup
@@ -256,13 +262,17 @@ export default function TasksPage() {
                     onChange={(_, val) => val && setHorizonFilter(val)}
                     size="small"
                 >
-                    <ToggleButton value="ALL" sx={{ fontSize: '0.7rem' }}>All</ToggleButton>
+                    <Tooltip title="Show All Horizons">
+                        <ToggleButton value="ALL" sx={{ fontSize: '0.7rem' }}>All</ToggleButton>
+                    </Tooltip>
                     {Object.entries(HORIZON_LABELS)
                         .filter(([key]) => key !== 'LONG_TERM')
                         .map(([key, label]) => (
-                            <ToggleButton key={key} value={key} sx={{ fontSize: '0.7rem' }}>
-                                {label}
-                            </ToggleButton>
+                            <Tooltip key={key} title={`Limit to ${label}`}>
+                                <ToggleButton value={key} sx={{ fontSize: '0.7rem' }}>
+                                    {label}
+                                </ToggleButton>
+                            </Tooltip>
                         ))}
                 </ToggleButtonGroup>
             </Stack>
@@ -276,9 +286,8 @@ export default function TasksPage() {
                     mb: 2
                 }}
             >
-                <Tab label={`Active (${tasks.filter((t) => t.status !== 'DONE' && t.status !== 'ARCHIVED').length})`} />
-                <Tab label={`Done (${tasks.filter((t) => t.status === 'DONE').length})`} />
-                <Tab label={`All (${tasks.filter((t) => t.status !== 'ARCHIVED').length})`} />
+                <Tab label={`Active (${tasks.filter((t) => t.status !== 'DONE' && t.status !== 'ARCHIVED').length})`} value={0} />
+                <Tab label={`All (${tasks.filter((t) => t.status !== 'ARCHIVED').length})`} value={2} />
             </Tabs>
 
             <Box sx={{ mt: 2 }}>

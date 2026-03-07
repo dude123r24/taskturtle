@@ -79,8 +79,9 @@ function BacklogList({ tasks }: { tasks: Task[] }) {
                 background: isOver
                     ? `rgba(158, 158, 158, 0.1)`
                     : `linear-gradient(135deg, rgba(158, 158, 158, 0.05), transparent)`,
-                height: { xs: 400, md: 'calc(90vh - 100px)' },
-                minHeight: 400,
+                height: { xs: 300, md: 'calc(40vh - 100px)' },
+                minHeight: 250,
+                maxHeight: 500,
                 overflowY: 'auto',
                 transition: 'all 0.2s',
                 cursor: 'pointer',
@@ -399,17 +400,12 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <Box sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr', lg: '300px 1fr' },
+                display: 'flex',
+                flexDirection: 'column',
                 gap: 3,
                 width: '100%'
             }}>
-                {/* Left Column: Backlog */}
-                <Box>
-                    <BacklogList tasks={tasks.filter((t) => t.quadrant === 'UNASSIGNED' && t.status !== 'ARCHIVED')} />
-                </Box>
-
-                {/* Right Column: Matrix */}
+                {/* Top Section: Matrix */}
                 <Box
                     sx={{
                         display: 'grid',
@@ -427,6 +423,11 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
                             )}
                         />
                     ))}
+                </Box>
+
+                {/* Bottom Section: Backlog */}
+                <Box>
+                    <BacklogList tasks={tasks.filter((t) => t.quadrant === 'UNASSIGNED' && t.status !== 'ARCHIVED')} />
                 </Box>
 
                 <AnimatePresence>

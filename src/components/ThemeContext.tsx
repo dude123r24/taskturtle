@@ -3,15 +3,15 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { darkTheme, lightTheme, googleTheme, appleTheme } from '@/lib/theme';
+import { darkTheme, lightTheme, googleTheme, appleTheme, raspberryTheme, midnightVioletTheme, dubaiGoldTheme } from '@/lib/theme';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-export type ThemeMode = 'light' | 'dark' | 'system' | 'google' | 'apple';
+export type ThemeMode = 'light' | 'dark' | 'system' | 'google' | 'apple' | 'raspberry' | 'midnight' | 'dubai';
 
 interface ThemeContextType {
     mode: ThemeMode;
     setMode: (mode: ThemeMode) => void;
-    resolvedMode: 'light' | 'dark' | 'google' | 'apple';
+    resolvedMode: 'light' | 'dark' | 'google' | 'apple' | 'raspberry' | 'midnight' | 'dubai';
 }
 
 const ThemeContext = createContext<ThemeContextType>({
@@ -32,7 +32,7 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
     // Load saved preference on mount
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
-        if (saved && ['light', 'dark', 'system', 'google', 'apple'].includes(saved)) {
+        if (saved && ['light', 'dark', 'system', 'google', 'apple', 'raspberry', 'midnight', 'dubai'].includes(saved)) {
             setModeState(saved);
         }
         setMounted(true);
@@ -43,18 +43,27 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, newMode);
     };
 
-    const resolvedMode: 'light' | 'dark' | 'google' | 'apple' = mode === 'google'
+    const resolvedMode: 'light' | 'dark' | 'google' | 'apple' | 'raspberry' | 'midnight' | 'dubai' = mode === 'google'
         ? 'google'
         : mode === 'apple'
             ? 'apple'
-            : mode === 'system'
-                ? (prefersDark ? 'dark' : 'light')
-                : mode as 'light' | 'dark';
+            : mode === 'raspberry'
+                ? 'raspberry'
+                : mode === 'midnight'
+                    ? 'midnight'
+                    : mode === 'dubai'
+                        ? 'dubai'
+                        : mode === 'system'
+                            ? (prefersDark ? 'dark' : 'light')
+                            : mode as 'light' | 'dark';
 
     const theme = useMemo(() => {
         switch (resolvedMode) {
             case 'google': return googleTheme;
             case 'apple': return appleTheme;
+            case 'raspberry': return raspberryTheme;
+            case 'midnight': return midnightVioletTheme;
+            case 'dubai': return dubaiGoldTheme;
             case 'light': return lightTheme;
             default: return darkTheme;
         }

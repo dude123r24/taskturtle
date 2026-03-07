@@ -42,6 +42,7 @@ interface Settings {
     calendarSyncEnabled: boolean;
     autoClearArchivedEnabled: boolean;
     autoClearArchivedDays: number;
+    flashOnDue: boolean;
 }
 
 interface CalendarAccount {
@@ -70,6 +71,7 @@ function SettingsContent() {
         calendarSyncEnabled: true,
         autoClearArchivedEnabled: true,
         autoClearArchivedDays: 30,
+        flashOnDue: true,
     });
     const [calendarAccounts, setCalendarAccounts] = useState<CalendarAccount[]>([]);
     const [isSaving, setIsSaving] = useState(false);
@@ -234,6 +236,8 @@ function SettingsContent() {
                         size="small"
                         sx={{
                             backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'transparent',
+                            display: 'flex',
+                            flexWrap: 'wrap',
                         }}
                     >
                         <ToggleButton value="light" sx={{ gap: 1, color: 'text.primary' }}>
@@ -253,7 +257,16 @@ function SettingsContent() {
                             </Box>
                         </ToggleButton>
                         <ToggleButton value="apple" sx={{ gap: 0.5, color: 'text.primary' }}>
-                            <Box component="span" sx={{ fontSize: '1rem', lineHeight: 1 }}></Box> Apple
+                            Apple
+                        </ToggleButton>
+                        <ToggleButton value="raspberry" sx={{ gap: 1, color: 'text.primary' }}>
+                            Raspberry
+                        </ToggleButton>
+                        <ToggleButton value="midnight" sx={{ gap: 1, color: 'text.primary' }}>
+                            Midnight
+                        </ToggleButton>
+                        <ToggleButton value="dubai" sx={{ gap: 1, color: 'text.primary' }}>
+                            Dubai Gold
                         </ToggleButton>
                         <ToggleButton value="system" sx={{ gap: 1, color: 'text.primary' }}>
                             <SettingsBrightnessIcon fontSize="small" /> System
@@ -434,6 +447,27 @@ function SettingsContent() {
                                     />
                                 )}
                             </Stack>
+                        </Box>
+
+                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderTopColor: 'divider' }}>
+                            <Typography variant="subtitle1" fontWeight={500} mb={1}>
+                                Due Date Alerts
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" mb={2}>
+                                Flash task cards with upcoming due dates on dashboard load to capture attention.
+                            </Typography>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={settings.flashOnDue}
+                                        onChange={(e) =>
+                                            setSettings({ ...settings, flashOnDue: e.target.checked })
+                                        }
+                                        color="primary"
+                                    />
+                                }
+                                label="Flash on Due Tasks"
+                            />
                         </Box>
                     </Stack>
                 </CardContent>

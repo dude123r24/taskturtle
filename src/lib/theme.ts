@@ -448,5 +448,196 @@ export const appleTheme = createTheme({
     },
 });
 
+// Phase 6 Custom Themes
+
+export const raspberryTheme = createTheme({
+    palette: {
+        mode: 'dark',
+        primary: {
+            main: '#DB2955', // Raspberry
+            light: '#E5567A',
+            dark: '#A31C3C',
+        },
+        secondary: {
+            main: '#B98389', // Muted pink
+            light: '#D4A8AE',
+            dark: '#926167',
+        },
+        background: {
+            default: '#54494B', // Dark greyish-brown
+            paper: '#423A3C',
+        },
+        error: { main: '#DB2955' },
+        warning: { main: '#B98389' },
+        info: { main: '#7E8287' },
+        success: { main: '#9DA39A' }, // Light Sage/Grey
+        text: {
+            primary: '#FFFFFF',
+            secondary: '#E0E0E0',
+        },
+        divider: 'rgba(255, 255, 255, 0.12)',
+    },
+    typography: sharedTypography,
+    shape: sharedShape,
+    components: {
+        ...sharedComponents,
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'none',
+                    backgroundColor: '#423A3C',
+                    border: '1px solid #7E8287',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
+                },
+            },
+        },
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'none',
+                    backgroundColor: '#423A3C',
+                },
+            },
+        },
+        MuiButton: {
+            styleOverrides: {
+                ...sharedComponents.MuiButton.styleOverrides,
+                contained: {
+                    boxShadow: '0 4px 14px 0 rgba(219, 41, 85, 0.39)',
+                },
+            },
+        },
+    },
+});
+
+export const midnightVioletTheme = createTheme({
+    palette: {
+        mode: 'dark',
+        primary: {
+            main: '#82204A', // Plum/Magenta
+            light: '#A83264',
+            dark: '#5C1431',
+        },
+        secondary: {
+            main: '#558C8C', // Teal
+            light: '#76AAAA',
+            dark: '#386363',
+        },
+        background: {
+            default: '#231123', // Very dark violet
+            paper: '#331B33',
+        },
+        error: { main: '#E8456B' },
+        warning: { main: '#E8DB7D' }, // Pale yellow
+        info: { main: '#558C8C' },
+        success: { main: '#68B36B' },
+        text: {
+            primary: '#EFF7FF', // Light blue/white
+            secondary: '#A6BCCD',
+        },
+        divider: 'rgba(239, 247, 255, 0.12)',
+    },
+    typography: sharedTypography,
+    shape: sharedShape,
+    components: {
+        ...sharedComponents,
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'none',
+                    backgroundColor: '#331B33',
+                    border: '1px solid rgba(85, 140, 140, 0.3)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+                },
+            },
+        },
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'none',
+                    backgroundColor: '#331B33',
+                },
+            },
+        },
+        MuiButton: {
+            styleOverrides: {
+                ...sharedComponents.MuiButton.styleOverrides,
+                contained: {
+                    boxShadow: '0 4px 14px 0 rgba(130, 32, 74, 0.39)',
+                },
+            },
+        },
+    },
+});
+
+export const dubaiGoldTheme = createTheme({
+    palette: {
+        mode: 'dark',
+        primary: {
+            main: '#D4AF37', // Gold
+            light: '#F3E5AB',
+            dark: '#AA8C2C',
+        },
+        secondary: {
+            main: '#C0C0C0', // Silver
+            light: '#E0E0E0',
+            dark: '#808080',
+        },
+        background: {
+            default: '#0A0A0A', // Almost black
+            paper: '#141414',
+        },
+        error: { main: '#CF6679' },
+        warning: { main: '#D4AF37' },
+        info: { main: '#64B5F6' },
+        success: { main: '#81C784' },
+        text: {
+            primary: '#FFFFFF',
+            secondary: '#B3B3B3',
+        },
+        divider: 'rgba(212, 175, 55, 0.2)',
+    },
+    typography: sharedTypography,
+    shape: sharedShape,
+    components: {
+        ...sharedComponents,
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'none',
+                    backgroundColor: '#141414',
+                    border: '1px solid rgba(212, 175, 55, 0.3)',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)',
+                },
+            },
+        },
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    backgroundImage: 'none',
+                    backgroundColor: '#141414',
+                },
+            },
+        },
+        MuiButton: {
+            styleOverrides: {
+                ...sharedComponents.MuiButton.styleOverrides,
+                contained: {
+                    boxShadow: '0 4px 14px 0 rgba(212, 175, 55, 0.25)',
+                    color: '#0A0A0A', // Dark text on gold buttons
+                },
+            },
+        },
+        MuiChip: {
+            styleOverrides: {
+                ...sharedComponents.MuiChip.styleOverrides,
+                filled: {
+                    boxShadow: '0 1px 3px rgba(212, 175, 55, 0.1)',
+                },
+            },
+        },
+    },
+});
+
 // Keep backwards compat — default to dark
 export const theme = darkTheme;

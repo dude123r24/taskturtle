@@ -18,8 +18,10 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
+import EventIcon from '@mui/icons-material/Event';
 import { type Task, useTaskStore } from '@/store/taskStore';
 import { formatMinutes, HORIZON_LABELS, QUADRANT_LABELS } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 interface TaskCardProps {
     task: Task;
@@ -32,6 +34,53 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
 
     const quadrantInfo = QUADRANT_LABELS[task.quadrant];
     const isDone = task.status === 'DONE';
+    const isDoFirst = task.quadrant === 'DO_FIRST';
+
+    const [flashColor, setFlashColor] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!task.dueDate || isDone) return;
+
+        // Ensure this only runs on the client to check sessionStorage
+        if (typeof window === 'undefined') return;
+
+        const checkFlash = async () => {
+            const hasFlashed = sessionStorage.getItem(`flashed_${task.id}`);
+            if (hasFlashed) return;
+
+            try {
+                const res = await fetch('/api/settings');
+                if (res.ok) {
+                    const settings = await res.json();
+                    if (settings.flashOnDue) {
+                        const now = new Date();
+                        const due = new Date(task.dueDate!);
+                        const hoursUntilDue = (due.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+                        if (hoursUntilDue < 0) {
+                            setFlashColor('rgba(239, 68, 68, 0.4)'); // Red for overdue
+                            sessionStorage.setItem(`flashed_${task.id}`, 'true');
+                        } else if (hoursUntilDue <= 24) {
+                            setFlashColor('rgba(34, 197, 94, 0.4)'); // Green for nearing < 24 hrs
+                            sessionStorage.setItem(`flashed_${task.id}`, 'true');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to check flash setting:', error);
+            }
+        };
+
+        checkFlash();
+    }, [task.dueDate, task.id, isDone]);
+
+    // Handle clearing the flash after 2 flashes (approx 1000ms animation running twice = 2s)
+    useEffect(() => {
+        if (flashColor) {
+            const timer = setTimeout(() => setFlashColor(null), 2000); // Wait 2s then clear
+            return () => clearTimeout(timer);
+        }
+    }, [flashColor]);
 
     const toggleDone = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -51,6 +100,13 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                 border: (theme) => `1px solid ${isDone ? 'rgba(67,160,71,0.2)' : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)')}`,
                 transition: 'all 0.2s ease',
                 opacity: isDone ? 0.7 : 1,
+                // Flashing animation definition
+                '@keyframes flashBackground': {
+                    '0%': { backgroundColor: 'inherit' },
+                    '50%': { backgroundColor: flashColor || 'inherit' },
+                    '100%': { backgroundColor: 'inherit' }
+                },
+                animation: flashColor ? 'flashBackground 1s ease-in-out 2' : 'none',
                 '&:hover': {
                     border: `1px solid ${quadrantInfo.color}44`,
                     transform: 'translateY(-1px)',
@@ -145,6 +201,15 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                                 </Stack>
                             )}
 
+                            {task.dueDate && (
+                                <Stack direction="row" alignItems="center" spacing={0.25} sx={{ color: 'text.secondary' }}>
+                                    <EventIcon sx={{ fontSize: '0.75rem' }} />
+                                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 500 }}>
+                                        {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </Typography>
+                                </Stack>
+                            )}
+
                             {task.actualMinutes !== null && task.actualMinutes !== undefined && task.estimatedMinutes && (
                                 <Stack
                                     direction="row"
@@ -166,48 +231,50 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                         </Stack>
                     </Box>
 
-                    {!compact && (
-                        <Stack direction="row" spacing={0} sx={{ ml: 1 }}>
-                            {task.quadrant === 'DO_FIRST' && !isDone && (
-                                <Tooltip title="Focus on this">
+                    <Stack direction="row" spacing={0} sx={{ ml: 1 }}>
+                        {isDoFirst && !isDone && (
+                            <Tooltip title="Focus on this">
+                                <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        router.push(`/focus?taskId=${task.id}`);
+                                    }}
+                                    sx={{ color: '#6C63FF', p: 0.5, '&:hover': { color: '#5A52D5', bgcolor: 'rgba(108,99,255,0.1)' } }}
+                                >
+                                    <CenterFocusStrongIcon sx={{ fontSize: '1rem' }} />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                        {!compact && (
+                            <>
+                                <Tooltip title="Edit">
                                     <IconButton
                                         size="small"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            router.push(`/focus?taskId=${task.id}`);
+                                            setEditingTask(task);
                                         }}
-                                        sx={{ color: '#6C63FF', p: 0.5, '&:hover': { color: '#5A52D5', bgcolor: 'rgba(108,99,255,0.1)' } }}
+                                        sx={{ color: 'text.secondary', p: 0.5 }}
                                     >
-                                        <CenterFocusStrongIcon sx={{ fontSize: '1rem' }} />
+                                        <EditIcon sx={{ fontSize: '1rem' }} />
                                     </IconButton>
                                 </Tooltip>
-                            )}
-                            <Tooltip title="Edit">
-                                <IconButton
-                                    size="small"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setEditingTask(task);
-                                    }}
-                                    sx={{ color: 'text.secondary', p: 0.5 }}
-                                >
-                                    <EditIcon sx={{ fontSize: '1rem' }} />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Delete">
-                                <IconButton
-                                    size="small"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        patchTask(task.id, { status: 'ARCHIVED' });
-                                    }}
-                                    sx={{ color: 'text.secondary', p: 0.5, '&:hover': { color: 'error.main' } }}
-                                >
-                                    <DeleteOutlineIcon sx={{ fontSize: '1rem' }} />
-                                </IconButton>
-                            </Tooltip>
-                        </Stack>
-                    )}
+                                <Tooltip title="Delete">
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            patchTask(task.id, { status: 'ARCHIVED' });
+                                        }}
+                                        sx={{ color: 'text.secondary', p: 0.5, '&:hover': { color: 'error.main' } }}
+                                    >
+                                        <DeleteOutlineIcon sx={{ fontSize: '1rem' }} />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                        )}
+                    </Stack>
                 </Stack>
             </CardContent>
         </Card>
