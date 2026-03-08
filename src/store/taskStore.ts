@@ -13,6 +13,7 @@ export interface TaskUpdate {
 
 export interface Task {
     id: string;
+    parentId?: string | null;
     title: string;
     description?: string;
     quadrant: EisenhowerQuadrant;
@@ -129,13 +130,18 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     },
 
     patchTask: async (id, data) => {
+        const previousTask = get().tasks.find((t) => t.id === id);
+        get().updateTask(id, data);
         try {
             const res = await fetch(`/api/tasks/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-            if (!res.ok) throw new Error('Failed to update task');
+            if (!res.ok) {
+                if (previousTask) get().updateTask(id, previousTask);
+                throw new Error('Failed to update task');
+            }
             const updated = await res.json();
             get().updateTask(id, updated);
         } catch (e) {

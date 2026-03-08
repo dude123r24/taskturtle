@@ -34,13 +34,16 @@ export async function PATCH(request: Request) {
     const allowedFields = [
         'maxDailyTasks', 'maxWeeklyTasks', 'maxDailyMinutes',
         'defaultView', 'calendarSyncEnabled',
-        'autoClearArchivedEnabled', 'autoClearArchivedDays', 'flashOnDue'
+        'autoClearArchivedEnabled', 'autoClearArchivedDays', 'flashOnDue',
+        'onboardingCompletedAt'
     ];
 
     const data: Record<string, unknown> = {};
     for (const field of allowedFields) {
         if (body[field] !== undefined) {
-            data[field] = body[field];
+            data[field] = field === 'onboardingCompletedAt' && body[field]
+                ? new Date(body[field])
+                : body[field];
         }
     }
 

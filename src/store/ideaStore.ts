@@ -49,7 +49,7 @@ export const useIdeaStore = create<IdeaStore>((set, get) => ({
     fetchIdeas: async () => {
         set({ isLoading: true, error: null });
         try {
-            const res = await fetch('/api/ideas');
+            const res = await fetch('/api/features');
             if (!res.ok) throw new Error('Failed to fetch ideas');
             const ideas = await res.json();
             set({ ideas, isLoading: false });
@@ -60,7 +60,7 @@ export const useIdeaStore = create<IdeaStore>((set, get) => ({
 
     createIdea: async (data) => {
         try {
-            const res = await fetch('/api/ideas', {
+            const res = await fetch('/api/features', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -77,7 +77,7 @@ export const useIdeaStore = create<IdeaStore>((set, get) => ({
 
     patchIdea: async (id, data) => {
         try {
-            const res = await fetch(`/api/ideas/${id}`, {
+            const res = await fetch(`/api/features/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -92,7 +92,7 @@ export const useIdeaStore = create<IdeaStore>((set, get) => ({
 
     deleteIdea: async (id) => {
         try {
-            const res = await fetch(`/api/ideas/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/features/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error('Failed to delete idea');
             get().removeIdea(id);
         } catch (e) {

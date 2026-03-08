@@ -24,7 +24,7 @@ export async function PATCH(
     const allowedFields = [
         'title', 'description', 'quadrant', 'horizon',
         'status', 'estimatedMinutes', 'actualMinutes',
-        'dueDate', 'calendarEventId', 'sortOrder', 'isChase',
+        'dueDate', 'calendarEventId', 'sortOrder', 'isChase', 'parentId',
     ];
 
     const data: Record<string, unknown> = {};

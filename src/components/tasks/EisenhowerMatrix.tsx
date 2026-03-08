@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo, useCallback, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -18,6 +18,7 @@ import {
     DragOverlay,
     useDroppable,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     type DragEndEvent,
@@ -43,11 +44,9 @@ const quadrantDescriptions: Record<string, string> = {
     ELIMINATE: 'Neither Urgent nor Important',
 };
 
-function BacklogList({ tasks }: { tasks: Task[] }) {
-    const { setNodeRef, isOver } = useDroppable({
-        id: 'UNASSIGNED',
-    });
-    const { setQuickAddOpen, createTask, fetchTasks } = useTaskStore();
+const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
+    const { setNodeRef, isOver } = useDroppable({ id: 'UNASSIGNED' });
+    const { setQuickAddOpen, createTask } = useTaskStore();
     const [bulkMode, setBulkMode] = useState(false);
     const [bulkText, setBulkText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,10 +74,10 @@ function BacklogList({ tasks }: { tasks: Task[] }) {
             sx={{
                 p: 2,
                 borderRadius: 3,
-                border: isOver ? `2px dashed rgba(255, 255, 255, 0.4)` : `1px solid rgba(158, 158, 158, 0.2)`,
+                border: isOver ? '2px dashed rgba(255, 255, 255, 0.4)' : '1px solid rgba(158, 158, 158, 0.2)',
                 background: isOver
-                    ? `rgba(158, 158, 158, 0.1)`
-                    : `linear-gradient(135deg, rgba(158, 158, 158, 0.05), transparent)`,
+                    ? 'rgba(158, 158, 158, 0.1)'
+                    : 'linear-gradient(135deg, rgba(158, 158, 158, 0.05), transparent)',
                 height: { xs: 300, md: 'calc(40vh - 100px)' },
                 minHeight: 250,
                 maxHeight: 500,
@@ -87,17 +86,10 @@ function BacklogList({ tasks }: { tasks: Task[] }) {
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                '&:hover': {
-                    borderColor: `rgba(158, 158, 158, 0.4)`,
-                },
+                '&:hover': { borderColor: 'rgba(158, 158, 158, 0.4)' },
             }}
         >
-            <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ mb: 2 }}
-            >
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Box>
                     <Typography
                         variant="h6"
@@ -114,10 +106,7 @@ function BacklogList({ tasks }: { tasks: Task[] }) {
                         <IconButton
                             size="small"
                             className="bulk-add-area"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setBulkMode(!bulkMode);
-                            }}
+                            onClick={(e) => { e.stopPropagation(); setBulkMode(!bulkMode); }}
                             sx={{
                                 color: bulkMode ? 'primary.main' : 'text.secondary',
                                 bgcolor: bulkMode ? 'rgba(108,99,255,0.1)' : 'transparent',
@@ -130,55 +119,28 @@ function BacklogList({ tasks }: { tasks: Task[] }) {
                     <Chip
                         label={tasks.length}
                         size="small"
-                        sx={{
-                            bgcolor: `rgba(158, 158, 158, 0.2)`,
-                            color: 'text.secondary',
-                            fontWeight: 600,
-                            fontSize: '0.75rem',
-                        }}
+                        sx={{ bgcolor: 'rgba(158, 158, 158, 0.2)', color: 'text.secondary', fontWeight: 600, fontSize: '0.75rem' }}
                     />
                 </Stack>
             </Stack>
 
-            {/* Bulk Add Area */}
             {bulkMode && (
-                <Box
-                    className="bulk-add-area"
-                    onClick={(e) => e.stopPropagation()}
-                    sx={{ mb: 2 }}
-                >
+                <Box className="bulk-add-area" onClick={(e) => e.stopPropagation()} sx={{ mb: 2 }}>
                     <TextField
-                        fullWidth
-                        multiline
-                        minRows={3}
-                        maxRows={8}
-                        size="small"
+                        fullWidth multiline minRows={3} maxRows={8} size="small"
                         placeholder={"Enter tasks, one per line...\ne.g.\nBuy milk\nCall dentist\nReview report"}
                         value={bulkText}
                         onChange={(e) => setBulkText(e.target.value)}
                         autoFocus
-                        sx={{
-                            mb: 1,
-                            '& .MuiOutlinedInput-root': {
-                                fontSize: '0.85rem',
-                            },
-                        }}
+                        sx={{ mb: 1, '& .MuiOutlinedInput-root': { fontSize: '0.85rem' } }}
                     />
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
-                        <Button
-                            size="small"
-                            color="inherit"
-                            onClick={() => { setBulkMode(false); setBulkText(''); }}
-                            disabled={isSubmitting}
-                        >
+                        <Button size="small" color="inherit" onClick={() => { setBulkMode(false); setBulkText(''); }} disabled={isSubmitting}>
                             Cancel
                         </Button>
                         <Button
-                            size="small"
-                            variant="contained"
-                            onClick={handleBulkAdd}
-                            disabled={!bulkText.trim() || isSubmitting}
-                            startIcon={<PlaylistAddIcon />}
+                            size="small" variant="contained" onClick={handleBulkAdd}
+                            disabled={!bulkText.trim() || isSubmitting} startIcon={<PlaylistAddIcon />}
                         >
                             {isSubmitting ? 'Adding...' : `Add ${bulkText.split('\n').filter((l) => l.trim()).length} Tasks`}
                         </Button>
@@ -188,32 +150,19 @@ function BacklogList({ tasks }: { tasks: Task[] }) {
 
             <Stack spacing={1} sx={{ flex: 1 }}>
                 {tasks.length === 0 && !bulkMode ? (
-                    <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                            textAlign: 'center',
-                            py: 3,
-                            fontStyle: 'italic',
-                            opacity: 0.5,
-                        }}
-                    >
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3, fontStyle: 'italic', opacity: 0.5 }}>
                         No tasks in backlog
                     </Typography>
                 ) : (
-                    tasks.map((task) => (
-                        <DraggableTaskCard key={task.id} task={task} compact disableSwipe />
-                    ))
+                    tasks.map((task) => <DraggableTaskCard key={task.id} task={task} compact disableSwipe />)
                 )}
             </Stack>
         </Box>
     );
-}
+});
 
-function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }) {
-    const { setNodeRef, isOver } = useDroppable({
-        id: quadrant,
-    });
+const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }) {
+    const { setNodeRef, isOver } = useDroppable({ id: quadrant });
     const q = QUADRANT_LABELS[quadrant];
     const { setQuickAddOpen } = useTaskStore();
 
@@ -229,31 +178,19 @@ function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }
                 p: 2,
                 borderRadius: 3,
                 border: isOver ? `2px dashed ${q.color}` : `1px solid ${q.color}22`,
-                background: isOver
-                    ? `${q.color}11`
-                    : `linear-gradient(135deg, ${q.color}08, transparent)`,
+                background: isOver ? `${q.color}11` : `linear-gradient(135deg, ${q.color}08, transparent)`,
                 height: { xs: 300, md: 'calc(45vh - 100px)' },
                 minHeight: 250,
                 maxHeight: 500,
                 overflowY: 'auto',
                 transition: 'all 0.2s',
                 cursor: 'pointer',
-                '&:hover': {
-                    borderColor: `${q.color}44`,
-                },
+                '&:hover': { borderColor: `${q.color}44` },
             }}
         >
-            <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ mb: 2 }}
-            >
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Box>
-                    <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 600, color: q.color, fontSize: '1rem' }}
-                    >
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: q.color, fontSize: '1rem' }}>
                         {q.icon} {q.label}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -266,55 +203,25 @@ function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }
                     </Typography>
                 </Box>
                 <Chip
-                    label={tasks.length}
-                    size="small"
-                    sx={{
-                        bgcolor: `${q.color}22`,
-                        color: q.color,
-                        fontWeight: 600,
-                        fontSize: '0.75rem',
-                    }}
+                    label={tasks.length} size="small"
+                    sx={{ bgcolor: `${q.color}22`, color: q.color, fontWeight: 600, fontSize: '0.75rem' }}
                 />
             </Stack>
 
             <Stack spacing={1} sx={{ minHeight: 100 }}>
                 {tasks.length === 0 ? (
-                    <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                            textAlign: 'center',
-                            py: 3,
-                            fontStyle: 'italic',
-                            opacity: 0.5,
-                        }}
-                    >
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3, fontStyle: 'italic', opacity: 0.5 }}>
                         No tasks yet
                     </Typography>
                 ) : (
-                    tasks.map((task) => (
-                        <DraggableTaskCard key={task.id} task={task} compact disableSwipe />
-                    ))
+                    tasks.map((task) => <DraggableTaskCard key={task.id} task={task} compact disableSwipe />)
                 )}
             </Stack>
         </Box>
     );
-}
+});
 
-
-function DroppableAction({
-    id,
-    icon: Icon,
-    label,
-    color,
-    active
-}: {
-    id: string;
-    icon: any;
-    label: string;
-    color: string;
-    active: boolean;
-}) {
+function DroppableAction({ id, icon: Icon, label, color }: { id: string; icon: any; label: string; color: string }) {
     const { setNodeRef, isOver } = useDroppable({ id });
 
     return (
@@ -325,15 +232,8 @@ function DroppableAction({
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 20, opacity: 0, scale: 0.8 }}
             sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 1,
-                p: 2,
-                borderRadius: '50%',
-                width: 100,
-                height: 100,
-                justifyContent: 'center',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                p: 2, borderRadius: '50%', width: 100, height: 100, justifyContent: 'center',
                 bgcolor: isOver ? `${color}22` : 'background.paper',
                 border: `2px solid ${isOver ? color : 'divider'}`,
                 boxShadow: isOver ? `0 0 20px ${color}44` : 3,
@@ -346,13 +246,7 @@ function DroppableAction({
             <Icon sx={{ fontSize: 32, color: isOver ? color : 'text.secondary' }} />
             <Typography
                 variant="caption"
-                sx={{
-                    fontWeight: 700,
-                    color: isOver ? color : 'text.secondary',
-                    fontSize: '0.65rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                }}
+                sx={{ fontWeight: 700, color: isOver ? color : 'text.secondary', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}
             >
                 {label}
             </Typography>
@@ -365,23 +259,18 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
     const [activeId, setActiveId] = useState<string | null>(null);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 8,
-            },
-        })
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
     );
 
-    const handleDragStart = (event: DragStartEvent) => {
+    const handleDragStart = useCallback((event: DragStartEvent) => {
         setActiveId(event.active.id as string);
-    };
+    }, []);
 
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleDragEnd = useCallback((event: DragEndEvent) => {
         const { active, over } = event;
-
         if (over) {
             const overId = over.id as string;
-
             if (overId === 'ARCHIVE_ACTION') {
                 patchTask(active.id as string, { status: 'ARCHIVED' });
             } else if (overId === 'DONE_ACTION') {
@@ -393,83 +282,52 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
             }
         }
         setActiveId(null);
-    };
+    }, [patchTask]);
 
-    const activeTask = tasks.find((t) => t.id === activeId);
+    const activeTask = useMemo(() => tasks.find((t) => t.id === activeId), [tasks, activeId]);
+
+    const quadrantTasks = useMemo(() => {
+        const result: Record<string, Task[]> = {};
+        for (const q of quadrantOrder) {
+            result[q] = tasks.filter((t) => t.quadrant === q && t.status !== 'ARCHIVED');
+        }
+        result['UNASSIGNED'] = tasks.filter((t) => t.quadrant === 'UNASSIGNED' && t.status !== 'ARCHIVED');
+        return result;
+    }, [tasks]);
 
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 3,
-                width: '100%'
-            }}>
-                {/* Top Section: Matrix */}
-                <Box
-                    sx={{
-                        display: 'grid',
-                        gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                        gap: 2,
-                        alignContent: 'start',
-                    }}
-                >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, alignContent: 'start' }}>
                     {quadrantOrder.map((quadrant) => (
-                        <MatrixQuadrant
-                            key={quadrant}
-                            quadrant={quadrant}
-                            tasks={tasks.filter(
-                                (t) => t.quadrant === quadrant && t.status !== 'ARCHIVED'
-                            )}
-                        />
+                        <MatrixQuadrant key={quadrant} quadrant={quadrant} tasks={quadrantTasks[quadrant]} />
                     ))}
                 </Box>
 
-                {/* Bottom Section: Backlog */}
                 <Box>
-                    <BacklogList tasks={tasks.filter((t) => t.quadrant === 'UNASSIGNED' && t.status !== 'ARCHIVED')} />
+                    <BacklogList tasks={quadrantTasks['UNASSIGNED']} />
                 </Box>
 
                 <AnimatePresence>
                     {activeId && (
                         <Stack
-                            direction="row"
-                            spacing={4}
-                            sx={{
-                                position: 'fixed',
-                                bottom: 40,
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                zIndex: 1000,
-                            }}
+                            direction="row" spacing={4}
+                            sx={{ position: 'fixed', bottom: 40, left: '50%', transform: 'translateX(-50%)', zIndex: 1000 }}
                         >
-                            <DroppableAction
-                                id="ARCHIVE_ACTION"
-                                label="Archive"
-                                icon={DeleteIcon}
-                                color="#ff4444"
-                                active={true}
-                            />
-                            <DroppableAction
-                                id="DONE_ACTION"
-                                label="Done"
-                                icon={CheckCircleIcon}
-                                color="#00C853"
-                                active={true}
-                            />
+                            <DroppableAction id="ARCHIVE_ACTION" label="Archive" icon={DeleteIcon} color="#ff4444" />
+                            <DroppableAction id="DONE_ACTION" label="Done" icon={CheckCircleIcon} color="#00C853" />
                         </Stack>
                     )}
                 </AnimatePresence>
             </Box>
 
-            <DragOverlay>
+            <DragOverlay dropAnimation={{ duration: 200, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
                 {activeId && activeTask ? (
-                    <div style={{ opacity: 0.8, transform: 'scale(1.05)', cursor: 'grabbing' }}>
+                    <div style={{ opacity: 0.85, transform: 'scale(1.03)', cursor: 'grabbing', pointerEvents: 'none' }}>
                         <TaskCard task={activeTask} compact />
                     </div>
                 ) : null}
             </DragOverlay>
-        </DndContext >
+        </DndContext>
     );
 }
-

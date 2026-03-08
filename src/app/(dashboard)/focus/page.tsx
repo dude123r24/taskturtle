@@ -33,10 +33,15 @@ function FocusContent() {
     const [timeLeft, setTimeLeft] = useState(WORK_MINUTES * 60);
     const [isActive, setIsActive] = useState(false);
     const [mode, setMode] = useState<'work' | 'break'>('work');
+    const [elapsedWorkSeconds, setElapsedWorkSeconds] = useState(0);
 
     useEffect(() => {
         fetchTasks();
     }, []);
+
+    useEffect(() => {
+        setElapsedWorkSeconds(0);
+    }, [activeTask?.id]);
 
     useEffect(() => {
         if (!activeTask && tasks.length > 0) {
@@ -79,16 +84,22 @@ function FocusContent() {
         if (isActive && timeLeft > 0) {
             interval = setInterval(() => {
                 setTimeLeft((time) => time - 1);
+                if (mode === 'work') {
+                    setElapsedWorkSeconds((e) => e + 1);
+                }
             }, 1000);
         } else if (timeLeft === 0) {
             setIsActive(false);
             if (mode === 'work') {
-                // Work done, start break
+                if (activeTask) {
+                    const newActual = (activeTask.actualMinutes ?? 0) + WORK_MINUTES;
+                    patchTask(activeTask.id, { actualMinutes: newActual });
+                }
+                setElapsedWorkSeconds(0);
                 setMode('break');
                 setTimeLeft(BREAK_MINUTES * 60);
                 new window.Notification('Pomodoro Complete!', { body: 'Time for a 5 minute break.' });
             } else {
-                // Break done, start work
                 setMode('work');
                 setTimeLeft(WORK_MINUTES * 60);
                 new window.Notification('Break Over!', { body: 'Time to focus.' });
@@ -96,7 +107,7 @@ function FocusContent() {
         }
 
         return () => clearInterval(interval);
-    }, [isActive, timeLeft, mode]);
+    }, [isActive, timeLeft, mode, activeTask, patchTask]);
 
     // Request notification permission on mount
     useEffect(() => {
@@ -114,6 +125,10 @@ function FocusContent() {
 
     const handleCompleteTask = async () => {
         if (!activeTask) return;
+        const minutesToAdd = Math.ceil(elapsedWorkSeconds / 60);
+        const newActual = (activeTask.actualMinutes ?? 0) + minutesToAdd;
+        await patchTask(activeTask.id, { actualMinutes: newActual, status: 'DONE' });
+
         confetti({
             particleCount: 100,
             spread: 70,
@@ -121,10 +136,8 @@ function FocusContent() {
             colors: [theme.palette.primary.main, theme.palette.secondary.main]
         });
 
-        await patchTask(activeTask.id, { status: 'DONE' });
-
-        // Timer resets and selects next task
-        setActiveTask(null); // will trigger useEffect to find next
+        setElapsedWorkSeconds(0);
+        setActiveTask(null);
         setMode('break');
         setTimeLeft(BREAK_MINUTES * 60);
         setIsActive(false);
@@ -166,12 +179,27 @@ function FocusContent() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                p: 4
+                p: { xs: 2, md: 4 },
+                pt: { xs: 'calc(env(safe-area-inset-top, 0px) + 16px)', md: 4 },
+                pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 16px)', md: 4 },
+                overflowY: 'auto',
             }}
         >
             <IconButton
                 onClick={() => router.push('/tasks')}
-                sx={{ position: 'absolute', top: 24, left: 24, color: 'text.secondary' }}
+                sx={{
+                    position: 'absolute',
+                    top: { xs: 'calc(env(safe-area-inset-top, 0px) + 12px)', md: 24 },
+                    left: { xs: 12, md: 24 },
+                    color: 'text.secondary',
+                    width: { xs: 48, md: 40 },
+                    height: { xs: 48, md: 40 },
+                    zIndex: 10,
+                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                    '&:hover': {
+                        bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                    },
+                }}
             >
                 <CloseIcon fontSize="large" />
             </IconButton>
@@ -244,6 +272,11 @@ function FocusContent() {
                             <Typography variant="h1" fontWeight={700} sx={{ fontSize: '6rem', letterSpacing: -2 }}>
                                 {formatTime(timeLeft)}
                             </Typography>
+                            {mode === 'work' && (
+                                <Typography variant="body2" color="text.secondary" sx={{ position: 'absolute', bottom: -28 }}>
+                                    Elapsed: {Math.floor(elapsedWorkSeconds / 60)}:{String(elapsedWorkSeconds % 60).padStart(2, '0')}
+                                </Typography>
+                            )}
                         </Box>
                     </Box>
 

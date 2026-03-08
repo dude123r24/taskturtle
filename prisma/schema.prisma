@@ -70,6 +70,7 @@ model VerificationToken {
 model Task {
   id               String             @id @default(cuid())
   userId           String
+  parentId         String?
   title            String
   description      String?            @db.Text
   quadrant         EisenhowerQuadrant
@@ -82,6 +83,8 @@ model Task {
   sortOrder        Int                @default(0)
   isChase          Boolean            @default(false)
 
+  parent   Task?   @relation("TaskSubtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  children Task[]  @relation("TaskSubtasks")
   user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   estimateLogs   TimeEstimateLog[]
   dailyPlanTasks DailyPlanTask[]
@@ -95,6 +98,7 @@ model Task {
   @@index([userId, quadrant])
   @@index([userId, horizon])
   @@index([userId, isChase])
+  @@index([parentId])
 }
 
 model TimeSlot {
@@ -167,16 +171,17 @@ model TaskUpdate {
 }
 
 model UserSettings {
-  id                  String  @id @default(cuid())
-  userId              String  @unique
-  maxDailyTasks       Int     @default(8)
-  maxWeeklyTasks      Int     @default(25)
-  maxDailyMinutes     Int     @default(480)
-  defaultView         String  @default("matrix")
-  calendarSyncEnabled Boolean @default(true)
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  maxDailyTasks       Int       @default(8)
+  maxWeeklyTasks      Int       @default(25)
+  maxDailyMinutes     Int       @default(480)
+  defaultView         String    @default("matrix")
+  calendarSyncEnabled Boolean   @default(true)
   autoClearArchivedEnabled Boolean @default(true)
   autoClearArchivedDays    Int     @default(30)
   flashOnDue               Boolean @default(true)
+  onboardingCompletedAt    DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

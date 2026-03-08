@@ -136,17 +136,132 @@ function RecycleBinDialog({ open, onClose }: { open: boolean; onClose: () => voi
     );
 }
 
+const SAMPLE_TASKS: { title: string; quadrant: EisenhowerQuadrant }[] = [
+    { title: 'Schedule a meeting', quadrant: 'DO_FIRST' },
+    { title: 'Pay bills', quadrant: 'SCHEDULE' },
+    { title: 'Reply to low-priority emails', quadrant: 'DELEGATE' },
+    { title: 'Browse social media', quadrant: 'ELIMINATE' },
+];
+
+function OnboardingWalkthroughDialog({
+    open,
+    onComplete,
+}: {
+    open: boolean;
+    onComplete: () => void;
+}) {
+    const [step, setStep] = useState(0);
+    const steps = [
+        { title: 'Welcome to the Eisenhower Matrix', body: 'We\'ve added a few sample tasks in each quadrant. Drag tasks between quadrants to reprioritize.' },
+        { title: 'Do First', body: 'Urgent & important. Drop tasks here when they need immediate attention.' },
+        { title: 'Schedule', body: 'Important but not urgent. Plan these for later so they don\'t become last-minute fires.' },
+        { title: 'You\'re all set', body: 'Use the + button or Cmd+N to add tasks. Drag to reorder. Click "Focus" on a Do First task to start a Pomodoro.' },
+    ];
+
+    const handleClose = () => {
+        setStep(0);
+        onComplete();
+    };
+
+    return (
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            maxWidth="sm"
+            fullWidth
+            PaperProps={{
+                sx: {
+                    borderRadius: 3,
+                    p: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                },
+            }}
+        >
+            <DialogTitle sx={{ fontWeight: 700, pb: 0 }}>
+                {steps[step].title}
+            </DialogTitle>
+            <DialogContent>
+                <Typography color="text.secondary" sx={{ pt: 1 }}>
+                    {steps[step].body}
+                </Typography>
+            </DialogContent>
+            <Stack direction="row" justifyContent="space-between" sx={{ px: 3, pb: 2 }}>
+                <Button
+                    color="inherit"
+                    onClick={() => setStep((s) => Math.max(0, s - 1))}
+                    disabled={step === 0}
+                >
+                    Back
+                </Button>
+                {step < steps.length - 1 ? (
+                    <Button variant="contained" onClick={() => setStep((s) => s + 1)}>
+                        Next
+                    </Button>
+                ) : (
+                    <Button variant="contained" onClick={handleClose}>
+                        Got it
+                    </Button>
+                )}
+            </Stack>
+        </Dialog>
+    );
+}
+
 export default function TasksPage() {
-    const { tasks, isLoading, fetchTasks } = useTaskStore();
+    const { tasks, isLoading, fetchTasks, createTask } = useTaskStore();
     const [search, setSearch] = useState('');
     const [statusTab, setStatusTab] = useState(0); // 0=Active, 1=Done, 2=All
     const [quadrantFilter, setQuadrantFilter] = useState<EisenhowerQuadrant | 'ALL'>('ALL');
     const [horizonFilter, setHorizonFilter] = useState<TaskHorizon | 'ALL'>('ALL');
     const [recycleBinOpen, setRecycleBinOpen] = useState(false);
+    const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
+    const [onboardingChecked, setOnboardingChecked] = useState(false);
 
     useEffect(() => {
         fetchTasks();
-    }, []);
+    }, [fetchTasks]);
+
+    // First-login onboarding: create sample tasks and show walkthrough
+    useEffect(() => {
+        if (isLoading || onboardingChecked || tasks.length > 0) return;
+
+        const runOnboarding = async () => {
+            try {
+                const res = await fetch('/api/settings');
+                if (!res.ok) return;
+                const settings = await res.json();
+                if (settings.onboardingCompletedAt) {
+                    setOnboardingChecked(true);
+                    return;
+                }
+                for (const sample of SAMPLE_TASKS) {
+                    await createTask({
+                        title: sample.title,
+                        quadrant: sample.quadrant,
+                        horizon: 'SHORT_TERM',
+                    });
+                }
+                setOnboardingDialogOpen(true);
+                setOnboardingChecked(true);
+            } catch {
+                setOnboardingChecked(true);
+            }
+        };
+
+        runOnboarding();
+    }, [isLoading, tasks.length, onboardingChecked, createTask]);
+
+    const handleOnboardingComplete = async () => {
+        setOnboardingDialogOpen(false);
+        try {
+            await fetch('/api/settings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ onboardingCompletedAt: new Date().toISOString() }),
+            });
+        } catch { /* ignore */ }
+    };
 
     const filteredTasks = tasks.filter((t) => {
         // Exclude archived tasks from all normal views
@@ -296,6 +411,10 @@ export default function TasksPage() {
             </Box>
 
             <RecycleBinDialog open={recycleBinOpen} onClose={() => setRecycleBinOpen(false)} />
+            <OnboardingWalkthroughDialog
+                open={onboardingDialogOpen}
+                onComplete={handleOnboardingComplete}
+            />
         </Stack>
     );
 }

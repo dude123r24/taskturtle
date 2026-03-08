@@ -175,7 +175,7 @@ export default function DashboardPage() {
 
     const fetchFeatureRequests = async () => {
         try {
-            const res = await fetch('/api/ideas');
+            const res = await fetch('/api/features');
             if (res.ok) setFeatureRequests(await res.json());
         } catch { /* graceful */ }
     };

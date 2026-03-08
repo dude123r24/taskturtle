@@ -14,10 +14,14 @@ import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import SendIcon from '@mui/icons-material/Send';
-import { useTaskStore, type EisenhowerQuadrant, type TaskStatus, type TaskUpdate } from '@/store/taskStore';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import { useTaskStore, type EisenhowerQuadrant, type TaskStatus, type TaskUpdate, type Task } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
 
 interface QuickAddDialogProps {
@@ -48,6 +52,12 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
     const [newUpdate, setNewUpdate] = useState('');
     const [isLoadingUpdates, setIsLoadingUpdates] = useState(false);
 
+    // Subtasks (when editing a task)
+    const [subtasks, setSubtasks] = useState<Task[]>([]);
+    const [subtaskTitle, setSubtaskTitle] = useState('');
+    const [isLoadingSubtasks, setIsLoadingSubtasks] = useState(false);
+    const [isAddingSubtask, setIsAddingSubtask] = useState(false);
+
     const isEditing = !!editingTask;
 
     const fetchUpdates = useCallback(async (taskId: string) => {
@@ -62,6 +72,18 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
         setIsLoadingUpdates(false);
     }, []);
 
+    const fetchSubtasks = useCallback(async (parentId: string) => {
+        setIsLoadingSubtasks(true);
+        try {
+            const res = await fetch(`/api/tasks?parentId=${encodeURIComponent(parentId)}`);
+            if (res.ok) {
+                const data = await res.json();
+                setSubtasks(data);
+            }
+        } catch { /* ignore */ }
+        setIsLoadingSubtasks(false);
+    }, []);
+
     useEffect(() => {
         if (editingTask) {
             setTitle(editingTask.title);
@@ -72,6 +94,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
             setDueDate(editingTask.dueDate ? editingTask.dueDate.slice(0, 16) : '');
             setIsChase(editingTask.isChase || false);
             fetchUpdates(editingTask.id);
+            fetchSubtasks(editingTask.id);
         } else {
             setTitle('');
             setDescription('');
@@ -82,8 +105,10 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
             setIsChase(false);
             setUpdates([]);
             setNewUpdate('');
+            setSubtasks([]);
+            setSubtaskTitle('');
         }
-    }, [editingTask, open, draftQuadrant, fetchUpdates]);
+    }, [editingTask, open, draftQuadrant, fetchUpdates, fetchSubtasks]);
 
     useEffect(() => {
         if (open) {
@@ -145,6 +170,30 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                 setNewUpdate('');
             }
         } catch { /* ignore */ }
+    };
+
+    const handleAddSubtask = async () => {
+        if (!editingTask || !subtaskTitle.trim()) return;
+        setIsAddingSubtask(true);
+        const newTask = await createTask({
+            title: subtaskTitle.trim(),
+            quadrant: editingTask.quadrant,
+            horizon: editingTask.horizon,
+            parentId: editingTask.id,
+        });
+        if (newTask) {
+            setSubtasks((prev) => [...prev, newTask].sort((a, b) => a.sortOrder - b.sortOrder));
+            setSubtaskTitle('');
+        }
+        setIsAddingSubtask(false);
+    };
+
+    const handleSubtaskToggleDone = (subtask: Task) => {
+        const newStatus = subtask.status === 'DONE' ? 'TODO' : 'DONE';
+        patchTask(subtask.id, { status: newStatus });
+        setSubtasks((prev) =>
+            prev.map((t) => (t.id === subtask.id ? { ...t, status: newStatus } : t))
+        );
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -318,6 +367,91 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                             sx={{ ml: 0, whiteSpace: 'nowrap' }}
                         />
                     </Stack>
+
+                    {/* Subtasks — only when editing */}
+                    {isEditing && (
+                        <>
+                            <Divider />
+                            <Box>
+                                <Typography variant="body2" fontWeight={600} sx={{ mb: 1.5 }}>
+                                    <FormatListBulletedIcon sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5 }} />
+                                    Subtasks
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+                                    Bite-sized steps. They stay inside this task and keep the matrix clean.
+                                </Typography>
+                                <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        placeholder="Add a step..."
+                                        value={subtaskTitle}
+                                        onChange={(e) => setSubtaskTitle(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleAddSubtask();
+                                            }
+                                        }}
+                                    />
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        onClick={handleAddSubtask}
+                                        disabled={!subtaskTitle.trim() || isAddingSubtask}
+                                    >
+                                        Add
+                                    </Button>
+                                </Stack>
+                                <Stack spacing={0.5} sx={{ maxHeight: 180, overflowY: 'auto' }}>
+                                    {isLoadingSubtasks ? (
+                                        <Typography variant="caption" color="text.secondary">Loading...</Typography>
+                                    ) : subtasks.length === 0 ? (
+                                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                            No subtasks yet.
+                                        </Typography>
+                                    ) : (
+                                        subtasks.map((st) => (
+                                            <Stack
+                                                key={st.id}
+                                                direction="row"
+                                                alignItems="center"
+                                                spacing={1}
+                                                sx={{
+                                                    py: 0.5,
+                                                    px: 1,
+                                                    borderRadius: 1,
+                                                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                                                }}
+                                            >
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => handleSubtaskToggleDone(st)}
+                                                    sx={{ p: 0.25 }}
+                                                >
+                                                    {st.status === 'DONE' ? (
+                                                        <CheckBoxIcon sx={{ fontSize: '1.2rem', color: 'success.main' }} />
+                                                    ) : (
+                                                        <CheckBoxOutlineBlankIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
+                                                    )}
+                                                </IconButton>
+                                                <Typography
+                                                    variant="body2"
+                                                    sx={{
+                                                        flex: 1,
+                                                        textDecoration: st.status === 'DONE' ? 'line-through' : 'none',
+                                                        color: st.status === 'DONE' ? 'text.secondary' : 'text.primary',
+                                                    }}
+                                                >
+                                                    {st.title}
+                                                </Typography>
+                                            </Stack>
+                                        ))
+                                    )}
+                                </Stack>
+                            </Box>
+                        </>
+                    )}
 
                     {/* Update Log — only when editing */}
                     {isEditing && (

@@ -13,6 +13,7 @@ export async function GET(request: Request) {
     const quadrant = searchParams.get('quadrant');
     const horizon = searchParams.get('horizon');
     const status = searchParams.get('status');
+    const parentIdParam = searchParams.get('parentId');
 
     // --- Auto-Archive and Cleanup Logic ---
     try {
@@ -55,6 +56,16 @@ export async function GET(request: Request) {
     if (quadrant) where.quadrant = quadrant;
     if (horizon) where.horizon = horizon;
     if (status) where.status = status;
+    // Matrix view: only root tasks. For subtasks in dialog: parentId=xxx
+    if (parentIdParam !== null && parentIdParam !== undefined) {
+        if (parentIdParam === '') {
+            where.parentId = null;
+        } else {
+            where.parentId = parentIdParam;
+        }
+    } else {
+        where.parentId = null;
+    }
 
     const tasks = await prisma.task.findMany({
         where,
@@ -73,7 +84,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, description, quadrant, horizon, estimatedMinutes, dueDate, isChase } = body;
+    const { title, description, quadrant, horizon, estimatedMinutes, dueDate, isChase, parentId } = body;
 
     if (!title || !quadrant) {
         return NextResponse.json(
@@ -85,6 +96,7 @@ export async function POST(request: Request) {
     const task = await prisma.task.create({
         data: {
             userId: session.user.id,
+            parentId: parentId || null,
             title,
             description: description || null,
             quadrant,

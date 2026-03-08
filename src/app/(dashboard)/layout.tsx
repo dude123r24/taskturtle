@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -48,7 +48,7 @@ const NAV_ITEMS = [
     { label: 'Focus', icon: <CenterFocusStrongIcon />, href: '/focus' },
     { label: 'AI Assistant', icon: <SmartToyIcon />, href: '/chat' },
     { label: 'Analytics', icon: <DashboardIcon />, href: '/dashboard' },
-    { label: 'Features', icon: <LightbulbOutlinedIcon />, href: '/ideas' },
+    { label: 'Features', icon: <LightbulbOutlinedIcon />, href: '/features' },
 ];
 
 export default function DashboardLayout({
@@ -66,6 +66,17 @@ export default function DashboardLayout({
     const [mobileOpen, setMobileOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const { quickAddOpen, setQuickAddOpen } = useTaskStore();
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+                e.preventDefault();
+                setQuickAddOpen(true);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [setQuickAddOpen]);
     const { resolvedMode } = useThemeMode();
     const isGoogle = resolvedMode === 'google';
 

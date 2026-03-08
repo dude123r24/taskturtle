@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -21,16 +20,34 @@ import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import EventIcon from '@mui/icons-material/Event';
 import { type Task, useTaskStore } from '@/store/taskStore';
 import { formatMinutes, HORIZON_LABELS, QUADRANT_LABELS } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo, useCallback } from 'react';
+
+let settingsCache: { flashOnDue: boolean; fetchedAt: number } | null = null;
+const SETTINGS_CACHE_TTL = 60_000;
+
+async function getFlashSetting(): Promise<boolean> {
+    if (settingsCache && Date.now() - settingsCache.fetchedAt < SETTINGS_CACHE_TTL) {
+        return settingsCache.flashOnDue;
+    }
+    try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+            const settings = await res.json();
+            settingsCache = { flashOnDue: settings.flashOnDue, fetchedAt: Date.now() };
+            return settings.flashOnDue;
+        }
+    } catch { /* ignore */ }
+    return false;
+}
 
 interface TaskCardProps {
     task: Task;
     compact?: boolean;
 }
 
-export default function TaskCard({ task, compact = false }: TaskCardProps) {
+function TaskCardInner({ task, compact = false }: TaskCardProps) {
     const router = useRouter();
-    const { patchTask, deleteTask, setEditingTask } = useTaskStore();
+    const { patchTask, setEditingTask } = useTaskStore();
 
     const quadrantInfo = QUADRANT_LABELS[task.quadrant];
     const isDone = task.status === 'DONE';
@@ -40,68 +57,71 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
 
     useEffect(() => {
         if (!task.dueDate || isDone) return;
-
-        // Ensure this only runs on the client to check sessionStorage
         if (typeof window === 'undefined') return;
 
+        let cancelled = false;
         const checkFlash = async () => {
             const todayStr = new Date().toDateString();
             const flashedState = sessionStorage.getItem(`flashed_${task.id}`);
-
-            // Already flashed today in this session
             if (flashedState === todayStr) return;
 
-            try {
-                const res = await fetch('/api/settings');
-                if (res.ok) {
-                    const settings = await res.json();
-                    if (settings.flashOnDue) {
-                        const now = new Date();
-                        const due = new Date(task.dueDate!);
-                        const hoursUntilDue = (due.getTime() - now.getTime()) / (1000 * 60 * 60);
+            const shouldFlash = await getFlashSetting();
+            if (cancelled || !shouldFlash) return;
 
-                        let colorToUse: string | null = null;
-                        if (hoursUntilDue < 0) {
-                            colorToUse = 'rgba(239, 68, 68, 0.25)'; // Red for overdue
-                        } else if (hoursUntilDue <= 24) {
-                            colorToUse = 'rgba(34, 197, 94, 0.25)'; // Green for nearing < 24 hrs
-                        }
+            const now = new Date();
+            const due = new Date(task.dueDate!);
+            const hoursUntilDue = (due.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-                        if (colorToUse) {
-                            sessionStorage.setItem(`flashed_${task.id}`, todayStr);
+            let colorToUse: string | null = null;
+            if (hoursUntilDue < 0) {
+                colorToUse = 'rgba(239, 68, 68, 0.25)';
+            } else if (hoursUntilDue <= 24) {
+                colorToUse = 'rgba(34, 197, 94, 0.25)';
+            }
 
-                            // Flash sequence: 3 times, 30ms gap in between
-                            const flashSequence = async () => {
-                                for (let i = 0; i < 3; i++) {
-                                    setFlashColor(colorToUse);
-                                    await new Promise(r => setTimeout(r, 600)); // Subtle flash duration
-                                    setFlashColor(null);
-                                    if (i < 2) await new Promise(r => setTimeout(r, 30)); // Exact 30ms gap
-                                }
-                            };
-
-                            flashSequence();
-                        }
-                    }
+            if (colorToUse && !cancelled) {
+                sessionStorage.setItem(`flashed_${task.id}`, todayStr);
+                for (let i = 0; i < 3; i++) {
+                    if (cancelled) break;
+                    setFlashColor(colorToUse);
+                    await new Promise(r => setTimeout(r, 600));
+                    setFlashColor(null);
+                    if (i < 2) await new Promise(r => setTimeout(r, 30));
                 }
-            } catch (error) {
-                console.error('Failed to check flash setting:', error);
             }
         };
 
         checkFlash();
+        return () => { cancelled = true; };
     }, [task.dueDate, task.id, isDone]);
 
-    const toggleDone = (e: React.MouseEvent) => {
+    const toggleDone = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
-        patchTask(task.id, {
-            status: isDone ? 'TODO' : 'DONE',
-        });
-    };
+        patchTask(task.id, { status: isDone ? 'TODO' : 'DONE' });
+    }, [patchTask, task.id, isDone]);
+
+    const handleEdit = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingTask(task);
+    }, [setEditingTask, task]);
+
+    const handleArchive = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        patchTask(task.id, { status: 'ARCHIVED' });
+    }, [patchTask, task.id]);
+
+    const handleFocus = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        router.push(`/focus?taskId=${task.id}`);
+    }, [router, task.id]);
+
+    const handleCardClick = useCallback(() => {
+        setEditingTask(task);
+    }, [setEditingTask, task]);
 
     return (
         <Card
-            onClick={() => setEditingTask(task)}
+            onClick={handleCardClick}
             sx={{
                 cursor: 'pointer',
                 background: (theme) => flashColor
@@ -114,7 +134,6 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                 opacity: isDone ? 0.7 : 1,
                 '&:hover': {
                     border: `1px solid ${quadrantInfo.color}44`,
-                    transform: 'translateY(-1px)',
                     boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.1)',
                 },
             }}
@@ -241,10 +260,7 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                             <Tooltip title="Focus on this">
                                 <IconButton
                                     size="small"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        router.push(`/focus?taskId=${task.id}`);
-                                    }}
+                                    onClick={handleFocus}
                                     sx={{ color: '#6C63FF', p: 0.5, '&:hover': { color: '#5A52D5', bgcolor: 'rgba(108,99,255,0.1)' } }}
                                 >
                                     <CenterFocusStrongIcon sx={{ fontSize: '1rem' }} />
@@ -256,10 +272,7 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                                 <Tooltip title="Edit">
                                     <IconButton
                                         size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingTask(task);
-                                        }}
+                                        onClick={handleEdit}
                                         sx={{ color: 'text.secondary', p: 0.5 }}
                                     >
                                         <EditIcon sx={{ fontSize: '1rem' }} />
@@ -268,10 +281,7 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
                                 <Tooltip title="Delete">
                                     <IconButton
                                         size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            patchTask(task.id, { status: 'ARCHIVED' });
-                                        }}
+                                        onClick={handleArchive}
                                         sx={{ color: 'text.secondary', p: 0.5, '&:hover': { color: 'error.main' } }}
                                     >
                                         <DeleteOutlineIcon sx={{ fontSize: '1rem' }} />
@@ -285,3 +295,6 @@ export default function TaskCard({ task, compact = false }: TaskCardProps) {
         </Card>
     );
 }
+
+const TaskCard = memo(TaskCardInner);
+export default TaskCard;

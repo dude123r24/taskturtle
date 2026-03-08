@@ -5,7 +5,7 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import Box from '@mui/material/Box';
 import TaskCard from './TaskCard';
 import { type Task, useTaskStore } from '@/store/taskStore';
-import { useState } from 'react';
+import { useState, useRef, useCallback, memo } from 'react';
 
 interface DraggableTaskCardProps {
     task: Task;
@@ -13,11 +13,10 @@ interface DraggableTaskCardProps {
     disableSwipe?: boolean;
 }
 
-export default function DraggableTaskCard({ task, compact, disableSwipe = false }: DraggableTaskCardProps) {
+function DraggableTaskCardInner({ task, compact, disableSwipe = false }: DraggableTaskCardProps) {
     const { patchTask } = useTaskStore();
-    const [isDragging, setIsDragging] = useState(false);
+    const dragOccurred = useRef(false);
 
-    // DnD Kit
     const {
         attributes,
         listeners,
@@ -29,62 +28,117 @@ export default function DraggableTaskCard({ task, compact, disableSwipe = false 
     const style: React.CSSProperties = {
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
         opacity: isDnDDragging ? 0.3 : 1,
-        touchAction: 'none' as const,
+        touchAction: 'none',
         zIndex: isDnDDragging ? 999 : 'auto' as any,
+        willChange: isDnDDragging ? 'transform' : undefined,
     };
 
-    // Swipe Gestures
+    const handlePointerDown = useCallback(() => {
+        dragOccurred.current = false;
+    }, []);
+
+    const wrappedListeners = {
+        ...listeners,
+        onPointerDown: (e: React.PointerEvent) => {
+            handlePointerDown();
+            listeners?.onPointerDown?.(e);
+        },
+    };
+
+    const suppressClickAfterDrag = useCallback((e: React.MouseEvent) => {
+        if (dragOccurred.current) {
+            e.stopPropagation();
+            e.preventDefault();
+            dragOccurred.current = false;
+        }
+    }, []);
+
+    if (isDnDDragging) {
+        dragOccurred.current = true;
+    }
+
+    if (disableSwipe) {
+        return (
+            <Box
+                ref={setNodeRef}
+                style={style}
+                {...attributes}
+                {...wrappedListeners}
+                onClickCapture={suppressClickAfterDrag}
+            >
+                <TaskCard task={task} compact={compact} />
+            </Box>
+        );
+    }
+
+    return <SwipeableDraggableCard
+        task={task}
+        compact={compact}
+        setNodeRef={setNodeRef}
+        style={style}
+        attributes={attributes}
+        listeners={wrappedListeners}
+        isDnDDragging={isDnDDragging}
+        patchTask={patchTask}
+        suppressClickAfterDrag={suppressClickAfterDrag}
+    />;
+}
+
+function SwipeableDraggableCard({
+    task, compact, setNodeRef, style, attributes, listeners,
+    isDnDDragging, patchTask, suppressClickAfterDrag,
+}: {
+    task: Task;
+    compact?: boolean;
+    setNodeRef: (node: HTMLElement | null) => void;
+    style: React.CSSProperties;
+    attributes: any;
+    listeners: any;
+    isDnDDragging: boolean;
+    patchTask: (id: string, data: Partial<Task>) => Promise<void>;
+    suppressClickAfterDrag: (e: React.MouseEvent) => void;
+}) {
     const x = useMotionValue(0);
     const backgroundArgs = useTransform(x, [-100, 0, 100], [
-        'linear-gradient(90deg, #ef5350 0%, #ef5350 100%)', // Red (Archive)
+        'linear-gradient(90deg, #ef5350 0%, #ef5350 100%)',
         'transparent',
-        'linear-gradient(90deg, #66bb6a 0%, #66bb6a 100%)', // Green (Done)
+        'linear-gradient(90deg, #66bb6a 0%, #66bb6a 100%)',
     ]);
     const opacity = useTransform(x, [-100, -50, 0, 50, 100], [1, 0.5, 0, 0.5, 1]);
 
-    const handleDragEnd = (_: any, info: PanInfo) => {
-        setIsDragging(false);
+    const handleSwipeEnd = (_: any, info: PanInfo) => {
         if (info.offset.x > 100) {
-            // Swipe Right -> Done
             patchTask(task.id, { status: 'DONE' });
         } else if (info.offset.x < -100) {
-            // Swipe Left -> Archive
             patchTask(task.id, { status: 'ARCHIVED' });
         }
     };
 
     return (
-        <Box ref={setNodeRef} style={style} {...attributes} {...listeners} sx={{ position: 'relative' }}>
-            {/* Swipe Background Layer */}
-            {!disableSwipe && (
-                <motion.div
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: backgroundArgs,
-                        borderRadius: 12,
-                        zIndex: 0,
-                        opacity,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '0 20px',
-                        pointerEvents: 'none',
-                    }}
-                >
-                </motion.div>
-            )}
-
-            {/* Draggable Card Layer */}
+        <Box
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            onClickCapture={suppressClickAfterDrag}
+            sx={{ position: 'relative' }}
+        >
             <motion.div
-                drag={disableSwipe || isDnDDragging ? false : "x"} // Disable swipe when sorting or explicitly disabled
+                style={{
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: backgroundArgs,
+                    borderRadius: 12,
+                    zIndex: 0,
+                    opacity,
+                    pointerEvents: 'none',
+                }}
+            />
+            <motion.div
+                drag={isDnDDragging ? false : 'x'}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.2}
-                onDragStart={() => setIsDragging(true)}
-                onDragEnd={handleDragEnd}
+                onDragEnd={handleSwipeEnd}
                 style={{ x, cursor: isDnDDragging ? 'grabbing' : 'grab', position: 'relative', zIndex: 1 }}
             >
                 <TaskCard task={task} compact={compact} />
@@ -93,3 +147,5 @@ export default function DraggableTaskCard({ task, compact, disableSwipe = false 
     );
 }
 
+const DraggableTaskCard = memo(DraggableTaskCardInner);
+export default DraggableTaskCard;
