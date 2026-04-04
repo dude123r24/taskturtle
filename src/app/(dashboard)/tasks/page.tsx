@@ -1,20 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import SearchIcon from '@mui/icons-material/Search';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestoreIcon from '@mui/icons-material/Restore';
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
-import Tooltip from '@mui/material/Tooltip';
 import Link from 'next/link';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -22,9 +14,8 @@ import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import { useTaskStore, type EisenhowerQuadrant, type TaskHorizon, type Task } from '@/store/taskStore';
-import { QUADRANT_LABELS, HORIZON_LABELS } from '@/lib/utils';
-import TaskCard from '@/components/tasks/TaskCard';
 import EisenhowerMatrix from '@/components/tasks/EisenhowerMatrix';
+import { TasksFilterBar } from '@/components/tasks/TasksFilterBar';
 
 function RecycleBinDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
     const { tasks, patchTask, deleteTask } = useTaskStore();
@@ -290,123 +281,59 @@ export default function TasksPage() {
         return true;
     });
 
+    const activeCount = useMemo(
+        () => tasks.filter((t) => t.status !== 'DONE' && t.status !== 'ARCHIVED').length,
+        [tasks]
+    );
+    const doneCount = useMemo(() => tasks.filter((t) => t.status === 'DONE').length, [tasks]);
+    const allCount = useMemo(() => tasks.filter((t) => t.status !== 'ARCHIVED').length, [tasks]);
+
     return (
         <Stack spacing={3}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="h5" fontWeight={600}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+                <Typography variant="h5" fontWeight={700} letterSpacing="-0.02em">
                     All Tasks
                 </Typography>
-                <Stack direction="row" spacing={2}>
+                <Stack direction="row" spacing={1.5}>
                     <Button
                         component={Link}
                         href="/planner"
                         variant="contained"
                         color="primary"
                         startIcon={<ViewTimelineIcon />}
-                        size="small"
-                        sx={{ borderRadius: 2 }}
+                        size="medium"
+                        sx={{ borderRadius: 100, px: 2.5, fontWeight: 600 }}
                     >
-                        Plan Timeline
+                        Plan timeline
                     </Button>
                     <Button
                         color="error"
                         variant="outlined"
                         startIcon={<DeleteIcon />}
                         onClick={() => setRecycleBinOpen(true)}
-                        size="small"
-                        sx={{ borderRadius: 2 }}
+                        size="medium"
+                        sx={{ borderRadius: 100, px: 2.5, fontWeight: 600 }}
                     >
-                        Recycle Bin
+                        Recycle bin
                     </Button>
                 </Stack>
             </Stack>
 
-            {/* Filters */}
-            <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                alignItems={{ sm: 'center' }}
-            >
-                <TextField
-                    size="small"
-                    placeholder="Search tasks..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon fontSize="small" />
-                            </InputAdornment>
-                        ),
-                    }}
-                    sx={{ minWidth: 200 }}
-                />
+            <TasksFilterBar
+                search={search}
+                onSearchChange={setSearch}
+                quadrantFilter={quadrantFilter}
+                onQuadrantChange={setQuadrantFilter}
+                horizonFilter={horizonFilter}
+                onHorizonChange={setHorizonFilter}
+                statusTab={statusTab}
+                onStatusTabChange={setStatusTab}
+                activeCount={activeCount}
+                doneCount={doneCount}
+                allCount={allCount}
+            />
 
-                <ToggleButtonGroup
-                    value={quadrantFilter}
-                    exclusive
-                    onChange={(_, val) => val && setQuadrantFilter(val)}
-                    size="small"
-                >
-                    <Tooltip title="Show All">
-                        <ToggleButton value="ALL" sx={{ fontSize: '0.7rem' }}>All</ToggleButton>
-                    </Tooltip>
-                    {Object.entries(QUADRANT_LABELS)
-                        .filter(([key]) => key !== 'UNASSIGNED')
-                        .map(([key, q]) => (
-                            <Tooltip key={key} title={q.label}>
-                                <ToggleButton
-                                    value={key}
-                                    sx={{
-                                        fontSize: '0.7rem',
-                                        '&.Mui-selected': {
-                                            bgcolor: `${q.color}22`,
-                                            color: q.color,
-                                        },
-                                    }}
-                                >
-                                    {q.icon}
-                                </ToggleButton>
-                            </Tooltip>
-                        ))}
-                </ToggleButtonGroup>
-
-                <ToggleButtonGroup
-                    value={horizonFilter}
-                    exclusive
-                    onChange={(_, val) => val && setHorizonFilter(val)}
-                    size="small"
-                >
-                    <Tooltip title="Show All Horizons">
-                        <ToggleButton value="ALL" sx={{ fontSize: '0.7rem' }}>All</ToggleButton>
-                    </Tooltip>
-                    {Object.entries(HORIZON_LABELS)
-                        .filter(([key]) => key !== 'LONG_TERM')
-                        .map(([key, label]) => (
-                            <Tooltip key={key} title={`Limit to ${label}`}>
-                                <ToggleButton value={key} sx={{ fontSize: '0.7rem' }}>
-                                    {label}
-                                </ToggleButton>
-                            </Tooltip>
-                        ))}
-                </ToggleButtonGroup>
-            </Stack>
-
-            {/* Status tabs */}
-            <Tabs
-                value={statusTab}
-                onChange={(_, v) => setStatusTab(v)}
-                sx={{
-                    '& .MuiTab-root': { textTransform: 'none', fontWeight: 500 },
-                    mb: 2
-                }}
-            >
-                <Tab label={`Active (${tasks.filter((t) => t.status !== 'DONE' && t.status !== 'ARCHIVED').length})`} value={0} />
-                <Tab label={`Done (${tasks.filter((t) => t.status === 'DONE').length})`} value={1} />
-                <Tab label={`All (${tasks.filter((t) => t.status !== 'ARCHIVED').length})`} value={2} />
-            </Tabs>
-
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 1 }}>
                 <EisenhowerMatrix tasks={filteredTasks} />
             </Box>
 

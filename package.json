@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --experimental-https",
+    "dev": "next dev -p 3000 --experimental-https --experimental-https-key \"$HOME/certificates/localhost-key.pem\" --experimental-https-cert \"$HOME/certificates/localhost.pem\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

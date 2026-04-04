@@ -79,6 +79,7 @@ export default function DashboardLayout({
     }, [setQuickAddOpen]);
     const { resolvedMode } = useThemeMode();
     const isGoogle = resolvedMode === 'google';
+    const isLuxury = resolvedMode === 'luxury';
 
     if (status === 'loading') {
         return (
@@ -103,6 +104,10 @@ export default function DashboardLayout({
                         <Box component="span" sx={{ color: '#FBBC05' }}>t</Box>
                         <Box component="span" sx={{ color: '#34A853' }}>l</Box>
                         <Box component="span" sx={{ color: '#EA4335' }}>e</Box>
+                    </Typography>
+                ) : isLuxury ? (
+                    <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '-0.03em' }}>
+                        TaskTurtle
                     </Typography>
                 ) : (
                     <Typography
@@ -130,19 +135,48 @@ export default function DashboardLayout({
                             sx={{
                                 borderRadius: 2,
                                 mb: 0.5,
-                                '&.Mui-selected': {
-                                    bgcolor: (theme) => `${theme.palette.primary.main}15`,
-                                    color: isGoogle ? GOOGLE_ICON_COLORS[index] : 'primary.main',
-                                    '& .MuiListItemIcon-root': {
-                                        color: isGoogle ? GOOGLE_ICON_COLORS[index] : 'primary.main',
-                                    },
-                                },
-                                '&:hover': {
-                                    bgcolor: (theme) => `${theme.palette.primary.main}14`,
-                                },
+                                ...(isGoogle
+                                    ? {
+                                        '&.Mui-selected': {
+                                            bgcolor: (theme) => `${theme.palette.primary.main}15`,
+                                            color: GOOGLE_ICON_COLORS[index],
+                                            '& .MuiListItemIcon-root': {
+                                                color: GOOGLE_ICON_COLORS[index],
+                                            },
+                                        },
+                                        '&:hover': {
+                                            bgcolor: (theme) => `${theme.palette.primary.main}14`,
+                                        },
+                                    }
+                                    : isLuxury
+                                        ? {
+                                            '& .MuiListItemIcon-root': {
+                                                color: pathname === item.href ? 'primary.main' : 'text.secondary',
+                                            },
+                                            '&:hover': {
+                                                bgcolor: 'rgba(117, 104, 192, 0.08)',
+                                            },
+                                        }
+                                        : {
+                                            '&.Mui-selected': {
+                                                bgcolor: (theme) => `${theme.palette.primary.main}15`,
+                                                color: 'primary.main',
+                                                '& .MuiListItemIcon-root': {
+                                                    color: 'primary.main',
+                                                },
+                                            },
+                                            '&:hover': {
+                                                bgcolor: (theme) => `${theme.palette.primary.main}14`,
+                                            },
+                                        }),
                             }}
                         >
-                            <ListItemIcon sx={{ minWidth: 40, color: isGoogle ? GOOGLE_ICON_COLORS[index] : undefined }}>
+                            <ListItemIcon
+                                sx={{
+                                    minWidth: 40,
+                                    ...(isGoogle ? { color: GOOGLE_ICON_COLORS[index] } : {}),
+                                }}
+                            >
                                 {item.icon}
                             </ListItemIcon>
                             <ListItemText
@@ -194,7 +228,7 @@ export default function DashboardLayout({
     );
 
     return (
-        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+        <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
             {/* Mobile drawer */}
             <Drawer
                 variant="temporary"
@@ -249,10 +283,17 @@ export default function DashboardLayout({
                     position="sticky"
                     elevation={0}
                     sx={{
-                        bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(15, 14, 23, 0.8)' : 'rgba(255, 255, 255, 0.85)',
-                        backdropFilter: 'blur(10px)',
+                        bgcolor: (theme) =>
+                            isLuxury
+                                ? 'rgba(253, 251, 247, 0.92)'
+                                : theme.palette.mode === 'dark'
+                                    ? 'rgba(15, 14, 23, 0.8)'
+                                    : 'rgba(255, 255, 255, 0.85)',
+                        backdropFilter: 'blur(12px)',
+                        WebkitBackdropFilter: 'blur(12px)',
                         borderBottom: '1px solid',
                         borderBottomColor: 'divider',
+                        boxShadow: 'none',
                         pt: 'env(safe-area-inset-top)',
                     }}
                 >

@@ -1,8 +1,16 @@
 import type { Metadata, Viewport } from 'next';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import Providers from '@/components/Providers';
 import { ThemeContextProvider } from '@/components/ThemeContext';
 import './globals.css';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+    subsets: ['latin'],
+    weight: ['400', '500', '600', '700', '800'],
+    variable: '--font-plus-jakarta',
+    display: 'swap',
+});
 
 export const metadata: Metadata = {
     title: 'TaskTurtle — Focus on What Matters',
@@ -31,7 +39,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
+        <html lang="en" className={plusJakartaSans.variable}>
             <head>
                 <link
                     rel="stylesheet"

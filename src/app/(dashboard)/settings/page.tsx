@@ -256,9 +256,6 @@ function SettingsContent() {
                                 <Box component="span" sx={{ color: '#EA4335' }}>e</Box>
                             </Box>
                         </ToggleButton>
-                        <ToggleButton value="apple" sx={{ gap: 0.5, color: 'text.primary' }}>
-                            Apple
-                        </ToggleButton>
                         <ToggleButton value="raspberry" sx={{ gap: 1, color: 'text.primary' }}>
                             Raspberry
                         </ToggleButton>
@@ -267,6 +264,9 @@ function SettingsContent() {
                         </ToggleButton>
                         <ToggleButton value="dubai" sx={{ gap: 1, color: 'text.primary' }}>
                             Dubai Gold
+                        </ToggleButton>
+                        <ToggleButton value="luxury" sx={{ gap: 1, color: 'text.primary' }}>
+                            Luxury minimal
                         </ToggleButton>
                         <ToggleButton value="system" sx={{ gap: 1, color: 'text.primary' }}>
                             <SettingsBrightnessIcon fontSize="small" /> System
