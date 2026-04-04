@@ -85,6 +85,7 @@ export default function CommandPalette() {
             onClose={handleClose}
             fullWidth
             maxWidth="sm"
+            aria-label="Command palette"
             PaperProps={{
                 sx: {
                     bgcolor: 'background.paper',
@@ -99,6 +100,7 @@ export default function CommandPalette() {
                 <SearchIcon sx={{ color: 'text.secondary', mr: 2 }} />
                 <InputBase
                     placeholder="Search or type a command..."
+                    aria-label="Search or type a command"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     autoFocus
@@ -109,9 +111,9 @@ export default function CommandPalette() {
                 </Typography>
             </Box>
 
-            <List sx={{ p: 1, maxHeight: 400, overflow: 'auto' }}>
+            <List sx={{ p: 1, maxHeight: 400, overflow: 'auto' }} role="listbox" aria-label="Command results">
                 {query.length > 0 && (
-                    <ListItemButton onClick={handleCreateTask} sx={{ borderRadius: 1 }}>
+                    <ListItemButton onClick={handleCreateTask} sx={{ borderRadius: 1, minHeight: 44 }} aria-label={`Create task: ${query}`}>
                         <ListItemIcon><AddTaskIcon color="primary" /></ListItemIcon>
                         <ListItemText
                             primary={`Create task: "${query}"`}

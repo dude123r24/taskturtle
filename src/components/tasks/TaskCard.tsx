@@ -66,7 +66,8 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
             if (flashedState === todayStr) return;
 
             const shouldFlash = await getFlashSetting();
-            if (cancelled || !shouldFlash) return;
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (cancelled || !shouldFlash || prefersReducedMotion) return;
 
             const now = new Date();
             const due = new Date(task.dueDate!);
@@ -119,9 +120,20 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
         setEditingTask(task);
     }, [setEditingTask, task]);
 
+    const handleCardKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick();
+        }
+    }, [handleCardClick]);
+
     return (
         <Card
             onClick={handleCardClick}
+            onKeyDown={handleCardKeyDown}
+            tabIndex={0}
+            role="button"
+            aria-label={`Task: ${task.title}`}
             sx={{
                 cursor: 'pointer',
                 background: (theme) => flashColor
@@ -144,7 +156,8 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                         <IconButton
                             size="small"
                             onClick={toggleDone}
-                            sx={{ p: compact ? 0.25 : 0.5, mt: compact ? 0 : -0.25, color: isDone ? 'success.main' : 'text.secondary' }}
+                            aria-label={isDone ? 'Mark as to do' : 'Mark as done'}
+                            sx={{ p: compact ? 0.5 : 0.75, mt: compact ? 0 : -0.25, minWidth: 44, minHeight: 44, color: isDone ? 'success.main' : 'text.secondary' }}
                         >
                             {isDone ? (
                                 <CheckCircleIcon sx={{ fontSize: compact ? '1.1rem' : '1.25rem' }} />
@@ -194,12 +207,12 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                 sx={{
                                     mt: 0.25,
                                     display: 'block',
-                                    fontSize: '0.65rem',
+                                    fontSize: '0.75rem',
                                     color: 'text.secondary',
                                     opacity: 0.8,
                                 }}
                             >
-                                📝 {task.updates[0].content}
+                                {task.updates[0].content}
                             </Typography>
                         )}
 
@@ -211,7 +224,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             flexWrap="nowrap"
                         >
                             {!compact && (
-                                <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', fontWeight: 600 }}>
+                                <Typography variant="caption" sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 600 }}>
                                     {HORIZON_LABELS[task.horizon]}
                                 </Typography>
                             )}
@@ -219,7 +232,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             {task.estimatedMinutes && (
                                 <Stack direction="row" alignItems="center" spacing={0.25} sx={{ color: 'text.secondary' }}>
                                     <AccessTimeIcon sx={{ fontSize: '0.75rem' }} />
-                                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 500 }}>
+                                    <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 500 }}>
                                         {formatMinutes(task.estimatedMinutes)}
                                     </Typography>
                                 </Stack>
@@ -228,7 +241,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             {task.dueDate && (
                                 <Stack direction="row" alignItems="center" spacing={0.25} sx={{ color: 'text.secondary' }}>
                                     <EventIcon sx={{ fontSize: '0.75rem' }} />
-                                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 500 }}>
+                                    <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 500 }}>
                                         {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                     </Typography>
                                 </Stack>
@@ -247,7 +260,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                         ? <TrendingUpIcon sx={{ fontSize: '0.75rem' }} />
                                         : <TrendingDownIcon sx={{ fontSize: '0.75rem' }} />
                                     }
-                                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600 }}>
+                                    <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>
                                         {formatMinutes(task.actualMinutes)}
                                     </Typography>
                                 </Stack>
@@ -255,13 +268,14 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                         </Stack>
                     </Box>
 
-                    <Stack direction="row" spacing={0} sx={{ ml: 1 }}>
+                    <Stack direction="row" spacing={0.5} sx={{ ml: 1 }}>
                         {isDoFirst && !isDone && (
                             <Tooltip title="Focus on this">
                                 <IconButton
                                     size="small"
                                     onClick={handleFocus}
-                                    sx={{ color: '#6C63FF', p: 0.5, '&:hover': { color: '#5A52D5', bgcolor: 'rgba(108,99,255,0.1)' } }}
+                                    aria-label="Focus on this task"
+                                    sx={{ color: '#6C63FF', p: 0.75, minWidth: 44, minHeight: 44, '&:hover': { color: '#5A52D5', bgcolor: 'rgba(108,99,255,0.1)' } }}
                                 >
                                     <CenterFocusStrongIcon sx={{ fontSize: '1rem' }} />
                                 </IconButton>
@@ -273,7 +287,8 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                     <IconButton
                                         size="small"
                                         onClick={handleEdit}
-                                        sx={{ color: 'text.secondary', p: 0.5 }}
+                                        aria-label="Edit task"
+                                        sx={{ color: 'text.secondary', p: 0.75, minWidth: 44, minHeight: 44 }}
                                     >
                                         <EditIcon sx={{ fontSize: '1rem' }} />
                                     </IconButton>
@@ -282,7 +297,8 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                     <IconButton
                                         size="small"
                                         onClick={handleArchive}
-                                        sx={{ color: 'text.secondary', p: 0.5, '&:hover': { color: 'error.main' } }}
+                                        aria-label="Delete task"
+                                        sx={{ color: 'text.secondary', p: 0.75, minWidth: 44, minHeight: 44, '&:hover': { color: 'error.main' } }}
                                     >
                                         <DeleteOutlineIcon sx={{ fontSize: '1rem' }} />
                                     </IconButton>

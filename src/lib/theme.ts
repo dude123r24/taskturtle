@@ -23,6 +23,7 @@ const sharedComponents = {
             root: {
                 borderRadius: 8,
                 padding: '8px 20px',
+                minHeight: 44,
             },
             contained: {
                 boxShadow: '0 4px 14px 0 rgba(108, 99, 255, 0.39)',
@@ -61,7 +62,7 @@ export const darkTheme = createTheme({
         success: { main: '#43A047' },
         text: {
             primary: '#FFFFFE',
-            secondary: '#A7A9BE',
+            secondary: '#B5B7CC',
         },
     },
     typography: sharedTypography,
@@ -245,6 +246,7 @@ export const googleTheme = createTheme({
                 root: {
                     borderRadius: 20,
                     textTransform: 'none' as const,
+                    minHeight: 44,
                     '&.Mui-selected': {
                         backgroundColor: '#E8F0FE',
                         color: '#1A73E8',
@@ -520,6 +522,7 @@ export const luxuryMinimalTheme = createTheme({
                 root: {
                     borderRadius: 10,
                     padding: '10px 22px',
+                    minHeight: 44,
                 },
                 contained: {
                     boxShadow: '0 4px 14px 0 rgba(117, 104, 192, 0.26)',
@@ -574,6 +577,7 @@ export const luxuryMinimalTheme = createTheme({
                 root: {
                     borderRadius: 10,
                     textTransform: 'none' as const,
+                    minHeight: 44,
                     '&.Mui-selected': {
                         backgroundColor: 'rgba(117, 104, 192, 0.14)',
                         color: '#5A4D9E',

@@ -290,7 +290,7 @@ export default function TasksPage() {
 
     return (
         <Stack spacing={3}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
                 <Typography variant="h5" fontWeight={700} letterSpacing="-0.02em">
                     All Tasks
                 </Typography>

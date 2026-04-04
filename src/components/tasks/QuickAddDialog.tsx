@@ -18,6 +18,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import SendIcon from '@mui/icons-material/Send';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -214,6 +215,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
             onClose={handleClose}
             maxWidth="sm"
             fullWidth
+            aria-labelledby="quick-add-dialog-title"
             PaperProps={{
                 sx: {
                     bgcolor: 'background.paper',
@@ -222,7 +224,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                 },
             }}
         >
-            <DialogTitle sx={{ fontWeight: 600 }}>
+            <DialogTitle id="quick-add-dialog-title" sx={{ fontWeight: 600 }}>
                 {isEditing ? 'Edit Task' : 'Quick Add Task'}
             </DialogTitle>
             <DialogContent>
@@ -427,7 +429,8 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                                                 <IconButton
                                                     size="small"
                                                     onClick={() => handleSubtaskToggleDone(st)}
-                                                    sx={{ p: 0.25 }}
+                                                    aria-label={st.status === 'DONE' ? 'Mark subtask as incomplete' : 'Mark subtask as complete'}
+                                                    sx={{ p: 0.5, minWidth: 44, minHeight: 44 }}
                                                 >
                                                     {st.status === 'DONE' ? (
                                                         <CheckBoxIcon sx={{ fontSize: '1.2rem', color: 'success.main' }} />
@@ -459,7 +462,8 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                             <Divider />
                             <Box>
                                 <Typography variant="body2" fontWeight={600} sx={{ mb: 1.5 }}>
-                                    📝 Updates
+                                    <EditNoteIcon sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5 }} />
+                                    Updates
                                 </Typography>
 
                                 {/* Add new update */}
@@ -485,7 +489,8 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                                         size="small"
                                         onClick={handleAddUpdate}
                                         disabled={!newUpdate.trim()}
-                                        sx={{ minWidth: 40, px: 1 }}
+                                        aria-label="Send update"
+                                        sx={{ minWidth: 44, minHeight: 44, px: 1 }}
                                     >
                                         <SendIcon sx={{ fontSize: '1rem' }} />
                                     </Button>

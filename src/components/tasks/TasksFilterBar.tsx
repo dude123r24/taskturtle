@@ -65,6 +65,7 @@ export function TasksFilterBar({
     const horizonToggleSx = {
         px: 2,
         py: 1,
+        minHeight: 44,
         textTransform: 'none' as const,
         fontWeight: 600,
         fontSize: '0.8125rem',
@@ -84,6 +85,7 @@ export function TasksFilterBar({
             >
                 <TextField
                     placeholder="Search tasks..."
+                    aria-label="Search tasks"
                     value={search}
                     onChange={(e) => onSearchChange(e.target.value)}
                     variant="outlined"
@@ -121,6 +123,7 @@ export function TasksFilterBar({
                         <ToggleButtonGroup
                             value={quadrantFilter}
                             exclusive
+                            aria-label="Filter by quadrant"
                             onChange={(_, val: EisenhowerQuadrant | 'ALL' | null) => val != null && onQuadrantChange(val)}
                             sx={{
                                 '& .MuiToggleButtonGroup-grouped': {
@@ -129,6 +132,7 @@ export function TasksFilterBar({
                                     px: 1.5,
                                     py: 1,
                                     minWidth: 44,
+                                    minHeight: 44,
                                     ...toggleSelected,
                                 },
                                 '& .MuiToggleButtonGroup-grouped:not(:first-of-type)': {
@@ -138,27 +142,27 @@ export function TasksFilterBar({
                             }}
                         >
                             <Tooltip title="All quadrants">
-                                <ToggleButton value="ALL">
+                                <ToggleButton value="ALL" aria-label="All quadrants">
                                     All
                                 </ToggleButton>
                             </Tooltip>
                             <Tooltip title="Do First">
-                                <ToggleButton value="DO_FIRST">
+                                <ToggleButton value="DO_FIRST" aria-label="Do First quadrant">
                                     <FiberManualRecordIcon sx={{ color: '#E53935', fontSize: 22 }} />
                                 </ToggleButton>
                             </Tooltip>
                             <Tooltip title="Schedule">
-                                <ToggleButton value="SCHEDULE">
+                                <ToggleButton value="SCHEDULE" aria-label="Schedule quadrant">
                                     <CalendarMonthIcon sx={{ fontSize: 22, color: 'text.secondary' }} />
                                 </ToggleButton>
                             </Tooltip>
                             <Tooltip title="Delegate">
-                                <ToggleButton value="DELEGATE">
+                                <ToggleButton value="DELEGATE" aria-label="Delegate quadrant">
                                     <GroupsIcon sx={{ fontSize: 22, color: 'text.secondary' }} />
                                 </ToggleButton>
                             </Tooltip>
                             <Tooltip title="Eliminate">
-                                <ToggleButton value="ELIMINATE">
+                                <ToggleButton value="ELIMINATE" aria-label="Eliminate quadrant">
                                     <DeleteOutlineIcon sx={{ fontSize: 22, color: 'text.secondary' }} />
                                 </ToggleButton>
                             </Tooltip>
@@ -169,6 +173,7 @@ export function TasksFilterBar({
                         <ToggleButtonGroup
                             value={horizonFilter}
                             exclusive
+                            aria-label="Filter by time horizon"
                             onChange={(_, val: TaskHorizon | 'ALL' | null) => val != null && onHorizonChange(val)}
                             sx={{
                                 '& .MuiToggleButtonGroup-grouped': {
@@ -200,14 +205,15 @@ export function TasksFilterBar({
                 onChange={(_, v) => onStatusTabChange(v)}
                 textColor="primary"
                 indicatorColor="primary"
+                aria-label="Filter tasks by status"
                 sx={{
-                    minHeight: 42,
+                    minHeight: 44,
                     '& .MuiTabs-indicator': { height: 3 },
                     '& .MuiTab-root': {
                         textTransform: 'none',
                         fontWeight: 600,
                         fontSize: '0.9375rem',
-                        minHeight: 42,
+                        minHeight: 44,
                         color: 'text.secondary',
                         '&.Mui-selected': {
                             color: 'primary.main',

@@ -8,6 +8,7 @@ import type { DailyPlanTask } from '@/store/taskStore';
 import type { Task } from '@/store/taskStore';
 import { frostedLuxury } from '@/components/dashboard/dashboardTokens';
 import { useLuxuryDashboard } from '@/components/dashboard/useLuxuryDashboard';
+import { QUADRANT_LABELS } from '@/lib/utils';
 
 function formatSlot(start?: string | null, end?: string | null) {
     if (!start && !end) return null;
@@ -93,7 +94,7 @@ function StackedPlan({
     isLuxury: boolean;
 }) {
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {planTasks.map((pt) => {
                 const slot = formatSlot(pt.timeSlotStart, pt.timeSlotEnd);
                 const t = pt.task;
@@ -101,35 +102,58 @@ function StackedPlan({
                     <Box
                         key={pt.id}
                         onClick={() => onSelectTask(t)}
+                        onKeyDown={(e: React.KeyboardEvent) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                onSelectTask(t);
+                            }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Task: ${t.title}`}
                         sx={{
                             p: 2,
                             borderRadius: 2,
+                            borderLeft: `6px solid ${QUADRANT_LABELS[t.quadrant]?.color || '#9E9E9E'}`,
                             cursor: 'pointer',
                             transition: 'background 0.18s',
                             ...(isLuxury
                                 ? {
                                     ...frostedLuxury.panelDense,
-                                    backgroundColor: 'rgba(255, 252, 247, 0.52)',
+                                    backgroundColor: `${QUADRANT_LABELS[t.quadrant]?.color || '#9E9E9E'}0A`,
                                     '&:hover': {
-                                        backgroundColor: 'rgba(255, 252, 247, 0.72)',
+                                        backgroundColor: `${QUADRANT_LABELS[t.quadrant]?.color || '#9E9E9E'}14`,
                                         boxShadow: '0 6px 18px rgba(48, 32, 90, 0.07)',
                                     },
                                 }
                                 : {
-                                    bgcolor: 'rgba(255, 252, 247, 0.95)',
+                                    bgcolor: `${QUADRANT_LABELS[t.quadrant]?.color || '#9E9E9E'}0A`,
                                     border: '1px solid rgba(26, 26, 26, 0.06)',
-                                    '&:hover': { bgcolor: 'rgba(107, 70, 193, 0.06)' },
+                                    borderLeft: `6px solid ${QUADRANT_LABELS[t.quadrant]?.color || '#9E9E9E'}`,
+                                    '&:hover': { bgcolor: `${QUADRANT_LABELS[t.quadrant]?.color || '#9E9E9E'}14` },
                                 }),
                         }}
                     >
-                        {slot && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {slot && (
+                                <Typography
+                                    variant="caption"
+                                    sx={{ fontWeight: 700, color: 'primary.main', letterSpacing: '0.02em' }}
+                                >
+                                    {slot}
+                                </Typography>
+                            )}
                             <Typography
                                 variant="caption"
-                                sx={{ fontWeight: 700, color: 'primary.main', letterSpacing: '0.02em' }}
+                                sx={{
+                                    fontWeight: 600,
+                                    fontSize: '0.7rem',
+                                    color: QUADRANT_LABELS[t.quadrant]?.color || '#9E9E9E',
+                                }}
                             >
-                                {slot}
+                                {QUADRANT_LABELS[t.quadrant]?.label || 'Backlog'}
                             </Typography>
-                        )}
+                        </Box>
                         <Typography
                             variant="subtitle2"
                             fontWeight={800}

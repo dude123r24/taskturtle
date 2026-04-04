@@ -134,7 +134,7 @@ export default function DashboardLayout({
                             selected={pathname === item.href}
                             sx={{
                                 borderRadius: 2,
-                                mb: 0.5,
+                                mb: 1,
                                 ...(isGoogle
                                     ? {
                                         '&.Mui-selected': {
@@ -197,7 +197,7 @@ export default function DashboardLayout({
                             selected={pathname === '/admin'}
                             sx={{
                                 borderRadius: 2,
-                                mb: 0.5,
+                                mb: 1,
                                 '&.Mui-selected': {
                                     bgcolor: 'rgba(251, 140, 0, 0.15)',
                                     color: '#FB8C00',
@@ -234,6 +234,7 @@ export default function DashboardLayout({
                 variant="temporary"
                 open={mobileOpen}
                 onClose={() => setMobileOpen(false)}
+                aria-label="Navigation menu"
                 ModalProps={{ keepMounted: true }}
                 sx={{
                     display: { xs: 'block', md: 'none' },
@@ -310,6 +311,7 @@ export default function DashboardLayout({
                         <IconButton
                             edge="start"
                             onClick={() => setMobileOpen(true)}
+                            aria-label="Open navigation menu"
                             sx={{ mr: 2, display: { md: 'none' } }}
                         >
                             <MenuIcon />
@@ -319,7 +321,7 @@ export default function DashboardLayout({
                                 {NAV_ITEMS.find((n) => n.href === pathname)?.label || 'Tasks'}
                             </Typography>
                         </Box>
-                        <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+                        <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} aria-label="User profile menu">
                             <Avatar
                                 src={session?.user?.image || undefined}
                                 alt={session?.user?.name || 'User'}
@@ -365,8 +367,8 @@ export default function DashboardLayout({
                 onClick={() => setQuickAddOpen(true)}
                 sx={{
                     position: 'fixed',
-                    bottom: 24,
-                    right: 24,
+                    bottom: 'calc(24px + env(safe-area-inset-bottom))',
+                    right: 'calc(24px + env(safe-area-inset-right))',
                     zIndex: 1200,
                 }}
             >

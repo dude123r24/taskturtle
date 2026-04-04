@@ -9,6 +9,7 @@ import FlagIcon from '@mui/icons-material/Flag';
 import type { Task, EisenhowerQuadrant } from '@/store/taskStore';
 import { frostedLuxury } from '@/components/dashboard/dashboardTokens';
 import { useLuxuryDashboard } from '@/components/dashboard/useLuxuryDashboard';
+import { QUADRANT_LABELS as QUADRANT_META } from '@/lib/utils';
 
 const QUADRANT_LABELS: Record<EisenhowerQuadrant, string> = {
     DO_FIRST: 'Do first',
@@ -157,26 +158,37 @@ export function PriorityTaskPath({ tasks, onComplete, onSelect }: PriorityTaskPa
                             </Box>
                             <Box
                                 onClick={() => onSelect(task)}
+                                onKeyDown={(e: React.KeyboardEvent) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        onSelect(task);
+                                    }
+                                }}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`Task: ${task.title}`}
                                 sx={{
                                     flex: 1,
                                     minWidth: 0,
                                     p: 2,
                                     borderRadius: 2,
+                                    borderLeft: `6px solid ${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}`,
                                     cursor: 'pointer',
                                     transition: 'background 0.18s, box-shadow 0.18s',
                                     ...(isLuxury
                                         ? {
                                             ...frostedLuxury.panelDense,
-                                            backgroundColor: 'rgba(255, 252, 247, 0.52)',
+                                            backgroundColor: `${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}0A`,
                                             '&:hover': {
-                                                backgroundColor: 'rgba(255, 252, 247, 0.68)',
+                                                backgroundColor: `${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}14`,
                                                 boxShadow: '0 6px 20px rgba(48, 32, 90, 0.08)',
                                             },
                                         }
                                         : {
-                                            bgcolor: 'rgba(249, 245, 235, 0.6)',
+                                            bgcolor: `${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}0A`,
                                             border: '1px solid rgba(26, 26, 26, 0.06)',
-                                            '&:hover': { bgcolor: 'rgba(107, 70, 193, 0.06)' },
+                                            borderLeft: `6px solid ${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}`,
+                                            '&:hover': { bgcolor: `${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}14` },
                                         }),
                                 }}
                             >
@@ -194,6 +206,17 @@ export function PriorityTaskPath({ tasks, onComplete, onSelect }: PriorityTaskPa
                                     >
                                         {task.title}
                                     </Typography>
+                                    <Chip
+                                        label={QUADRANT_META[task.quadrant]?.label || 'Backlog'}
+                                        size="small"
+                                        sx={{
+                                            height: 22,
+                                            fontWeight: 700,
+                                            fontSize: '0.7rem',
+                                            bgcolor: `${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}18`,
+                                            color: QUADRANT_META[task.quadrant]?.color || '#9E9E9E',
+                                        }}
+                                    />
                                     {task.isChase && (
                                         <Chip
                                             label="Chase"
@@ -226,8 +249,7 @@ export function PriorityTaskPath({ tasks, onComplete, onSelect }: PriorityTaskPa
                                 )}
                             </Box>
                             <IconButton
-                                size="small"
-                                aria-label="Mark done"
+                                aria-label={`Mark ${task.title} as done`}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onComplete(task.id);

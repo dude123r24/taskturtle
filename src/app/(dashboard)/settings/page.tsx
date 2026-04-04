@@ -194,16 +194,13 @@ function SettingsContent() {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
-                    alert(data.message);
                     setShowSuccess(true);
                 } else {
                     const data = await response.json();
-                    alert(`Import failed: ${data.error}`);
+                    console.error('Import failed:', data.error);
                 }
             } catch (error) {
                 console.error('Import failed', error);
-                alert('Import failed. Check file format.');
             }
         };
         reader.readAsText(file);
@@ -348,12 +345,15 @@ function SettingsContent() {
                                                 size="small"
                                             />
                                         }
-                                        label=""
+                                        label={account.enabled ? 'Enabled' : 'Disabled'}
+                                        labelPlacement="start"
+                                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.75rem', color: 'text.secondary' } }}
                                     />
                                     <IconButton
                                         size="small"
                                         onClick={() => removeCalendar(account.id)}
-                                        sx={{ color: 'text.secondary' }}
+                                        aria-label={`Remove ${account.calendarName} calendar`}
+                                        sx={{ color: 'text.secondary', minWidth: 44, minHeight: 44 }}
                                     >
                                         <DeleteOutlineIcon fontSize="small" />
                                     </IconButton>
@@ -556,10 +556,14 @@ function SettingsContent() {
                                 {CALENDAR_COLORS.map((c) => (
                                     <Box
                                         key={c}
+                                        component="button"
+                                        type="button"
                                         onClick={() => setNewCalColor(c)}
+                                        aria-label={`Select color ${c}`}
+                                        aria-pressed={newCalColor === c}
                                         sx={{
-                                            width: 32,
-                                            height: 32,
+                                            width: 44,
+                                            height: 44,
                                             borderRadius: '50%',
                                             bgcolor: c,
                                             cursor: 'pointer',
@@ -567,6 +571,13 @@ function SettingsContent() {
                                                 ? '3px solid white'
                                                 : '3px solid transparent',
                                             transition: 'border 0.2s',
+                                            p: 0,
+                                            outline: 'none',
+                                            '&:focus-visible': {
+                                                outline: '2px solid',
+                                                outlineColor: 'primary.main',
+                                                outlineOffset: 2,
+                                            },
                                         }}
                                     />
                                 ))}

@@ -74,19 +74,20 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
             sx={{
                 p: 2,
                 borderRadius: 3,
-                border: isOver ? '2px dashed rgba(255, 255, 255, 0.4)' : '1px solid rgba(158, 158, 158, 0.2)',
+                border: isOver ? '2px dashed rgba(255, 255, 255, 0.4)' : '1px solid rgba(158, 158, 158, 0.25)',
+                borderTop: isOver ? '2px dashed rgba(255, 255, 255, 0.4)' : '4px solid rgba(158, 158, 158, 0.5)',
                 background: isOver
-                    ? 'rgba(158, 158, 158, 0.1)'
-                    : 'linear-gradient(135deg, rgba(158, 158, 158, 0.05), transparent)',
-                height: { xs: 300, md: 'calc(40vh - 100px)' },
-                minHeight: 250,
+                    ? 'rgba(158, 158, 158, 0.12)'
+                    : 'linear-gradient(180deg, rgba(158, 158, 158, 0.08) 0%, rgba(158, 158, 158, 0.03) 40%, transparent 100%)',
+                height: { xs: 200, md: 'calc(40vh - 100px)' },
+                minHeight: 180,
                 maxHeight: 500,
                 overflowY: 'auto',
                 transition: 'all 0.2s',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                '&:hover': { borderColor: 'rgba(158, 158, 158, 0.4)' },
+                '&:hover': { borderColor: 'rgba(158, 158, 158, 0.5)' },
             }}
         >
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -104,16 +105,18 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                 <Stack direction="row" spacing={0.5} alignItems="center">
                     <Tooltip title="Bulk add tasks">
                         <IconButton
-                            size="small"
                             className="bulk-add-area"
                             onClick={(e) => { e.stopPropagation(); setBulkMode(!bulkMode); }}
+                            aria-label="Bulk add tasks"
                             sx={{
                                 color: bulkMode ? 'primary.main' : 'text.secondary',
                                 bgcolor: bulkMode ? 'rgba(108,99,255,0.1)' : 'transparent',
+                                minWidth: 44,
+                                minHeight: 44,
                                 '&:hover': { bgcolor: 'rgba(108,99,255,0.15)' },
                             }}
                         >
-                            <PlaylistAddIcon fontSize="small" />
+                            <PlaylistAddIcon />
                         </IconButton>
                     </Tooltip>
                     <Chip
@@ -177,15 +180,19 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
             sx={{
                 p: 2,
                 borderRadius: 3,
-                border: isOver ? `2px dashed ${q.color}` : `1px solid ${q.color}22`,
-                background: isOver ? `${q.color}11` : `linear-gradient(135deg, ${q.color}08, transparent)`,
-                height: { xs: 300, md: 'calc(45vh - 100px)' },
-                minHeight: 250,
+                borderTop: `4px solid ${q.color}`,
+                border: isOver ? `2px dashed ${q.color}` : `1px solid ${q.color}30`,
+                borderTop: isOver ? `2px dashed ${q.color}` : `4px solid ${q.color}`,
+                background: isOver
+                    ? `${q.color}18`
+                    : `linear-gradient(180deg, ${q.color}14 0%, ${q.color}08 40%, transparent 100%)`,
+                height: { xs: 200, md: 'calc(45vh - 100px)' },
+                minHeight: 180,
                 maxHeight: 500,
                 overflowY: 'auto',
                 transition: 'all 0.2s',
                 cursor: 'pointer',
-                '&:hover': { borderColor: `${q.color}44` },
+                '&:hover': { borderColor: `${q.color}55`, background: `linear-gradient(180deg, ${q.color}1A 0%, ${q.color}0C 40%, transparent 100%)` },
             }}
         >
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -204,7 +211,7 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
                 </Box>
                 <Chip
                     label={tasks.length} size="small"
-                    sx={{ bgcolor: `${q.color}22`, color: q.color, fontWeight: 600, fontSize: '0.75rem' }}
+                    sx={{ bgcolor: `${q.color}28`, color: q.color, fontWeight: 700, fontSize: '0.8rem', minWidth: 32 }}
                 />
             </Stack>
 
@@ -246,7 +253,7 @@ function DroppableAction({ id, icon: Icon, label, color }: { id: string; icon: a
             <Icon sx={{ fontSize: 32, color: isOver ? color : 'text.secondary' }} />
             <Typography
                 variant="caption"
-                sx={{ fontWeight: 700, color: isOver ? color : 'text.secondary', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                sx={{ fontWeight: 700, color: isOver ? color : 'text.secondary', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}
             >
                 {label}
             </Typography>
