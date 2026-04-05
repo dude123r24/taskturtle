@@ -25,7 +25,7 @@ import {
     type DragStartEvent,
 } from '@dnd-kit/core';
 import { motion, AnimatePresence } from 'framer-motion';
-import { type Task, useTaskStore } from '@/store/taskStore';
+import { type Task, type EisenhowerQuadrant, useTaskStore } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
 import TaskCard from './TaskCard';
 import DraggableTaskCard from './DraggableTaskCard';
@@ -164,7 +164,7 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
     );
 });
 
-const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadrant: string; tasks: Task[] }) {
+const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadrant: EisenhowerQuadrant; tasks: Task[] }) {
     const { setNodeRef, isOver } = useDroppable({ id: quadrant });
     const q = QUADRANT_LABELS[quadrant];
     const { setQuickAddOpen } = useTaskStore();
@@ -174,13 +174,12 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
             ref={setNodeRef}
             onClick={(e) => {
                 if (!(e.target as HTMLElement).closest('.MuiCard-root')) {
-                    setQuickAddOpen(true, quadrant as any);
+                    setQuickAddOpen(true, quadrant);
                 }
             }}
             sx={{
                 p: 2,
                 borderRadius: 3,
-                borderTop: `4px solid ${q.color}`,
                 border: isOver ? `2px dashed ${q.color}` : `1px solid ${q.color}30`,
                 borderTop: isOver ? `2px dashed ${q.color}` : `4px solid ${q.color}`,
                 background: isOver
