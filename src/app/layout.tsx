@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Geist } from 'next/font/google';
+import { Plus_Jakarta_Sans, Geist, Figtree } from 'next/font/google';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import Providers from '@/components/Providers';
 import { ThemeContextProvider } from '@/components/ThemeContext';
 import './globals.css';
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
 const plusJakartaSans = Plus_Jakarta_Sans({
     subsets: ['latin'],
@@ -42,7 +42,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" className={cn("font-sans", geist.variable)}>
+        <html lang="en" className={cn("font-sans", figtree.variable)}>
             <head>
                 <link
                     rel="stylesheet"
