@@ -40,16 +40,17 @@ import CommandPalette from '@/components/layout/CommandPalette';
 import { useThemeMode } from '@/components/ThemeContext';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import { getPageTitle, getBottomNavValue } from '@/lib/navConfig';
+import { isPlatformAdmin } from '@/lib/taskDeepLinks';
 
 const DRAWER_WIDTH = 260;
 
 const GOOGLE_ICON_COLORS = ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#4285F4', '#EA4335', '#34A853'];
 
 const PRIMARY_NAV = [
+    { label: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
     { label: 'Tasks', icon: <ChecklistIcon />, href: '/tasks' },
     { label: 'Planner', icon: <ViewTimelineIcon />, href: '/planner' },
     { label: 'Focus', icon: <CenterFocusStrongIcon />, href: '/focus' },
-    { label: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
 ] as const;
 
 const MORE_NAV = [
@@ -248,7 +249,7 @@ export default function DashboardLayout({
                         </ListItem>
                     );
                 })}
-                {session?.user?.email === 'sanghviamit@gmail.com' && (
+                {isPlatformAdmin(session?.user?.email) && (
                     <ListItem disablePadding>
                         <ListItemButton
                             component={Link}
@@ -319,15 +320,15 @@ export default function DashboardLayout({
                 <ListItem disablePadding>
                     <ListItemButton
                         component={Link}
-                        href="/dashboard"
+                        href="/focus"
                         onClick={closeMore}
-                        selected={routeSelected(pathname, '/dashboard')}
+                        selected={routeSelected(pathname, '/focus')}
                         sx={{ borderRadius: 2, py: 1.25 }}
                     >
                         <ListItemIcon sx={{ minWidth: 44 }}>
-                            <DashboardIcon />
+                            <CenterFocusStrongIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Dashboard" primaryTypographyProps={{ fontWeight: 600 }} />
+                        <ListItemText primary="Focus" primaryTypographyProps={{ fontWeight: 600 }} />
                     </ListItemButton>
                 </ListItem>
                 {MORE_NAV.map((item) => (
@@ -344,7 +345,7 @@ export default function DashboardLayout({
                         </ListItemButton>
                     </ListItem>
                 ))}
-                {session?.user?.email === 'sanghviamit@gmail.com' && (
+                {isPlatformAdmin(session?.user?.email) && (
                     <ListItem disablePadding>
                         <ListItemButton component={Link} href="/admin" onClick={closeMore} sx={{ borderRadius: 2, py: 1.25 }}>
                             <ListItemIcon sx={{ minWidth: 44 }}>
@@ -554,9 +555,9 @@ export default function DashboardLayout({
                         },
                     }}
                 >
+                    <BottomNavigationAction label="Dashboard" value="/dashboard" icon={<DashboardIcon />} />
                     <BottomNavigationAction label="Tasks" value="/tasks" icon={<ChecklistIcon />} />
                     <BottomNavigationAction label="Planner" value="/planner" icon={<ViewTimelineIcon />} />
-                    <BottomNavigationAction label="Focus" value="/focus" icon={<CenterFocusStrongIcon />} />
                     <BottomNavigationAction label="More" value="__more" icon={<MoreHorizIcon />} />
                 </BottomNavigation>
             </Paper>

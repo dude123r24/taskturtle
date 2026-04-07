@@ -17,11 +17,11 @@ export function getPageTitle(pathname: string): string {
 }
 
 /**
- * Bottom nav: Tasks · Planner · Focus · More — dashboard & others map to __more.
+ * Bottom nav: Dashboard · Tasks · Planner · More — other routes map to __more.
  */
 export function getBottomNavValue(pathname: string): string {
+    if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) return '/dashboard'
     if (pathname === '/tasks' || pathname.startsWith('/tasks/')) return '/tasks'
     if (pathname === '/planner' || pathname.startsWith('/planner/')) return '/planner'
-    if (pathname === '/focus' || pathname.startsWith('/focus/')) return '/focus'
     return '__more'
 }

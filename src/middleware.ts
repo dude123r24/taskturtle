@@ -9,10 +9,9 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Allow root (Landing Page), public pages, auth endpoints, static files, and PWA assets through
+    // Public marketing/legal pages and auth endpoints (no session required)
     if (
         pathname === '/' ||
-        pathname === '/login' ||
         pathname === '/privacy' ||
         pathname === '/terms' ||
         pathname.startsWith('/api/auth') ||
@@ -25,25 +24,24 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Check for Auth.js session cookie (database strategy uses this name)
     const sessionCookie =
         request.cookies.get('authjs.session-token') ||
         request.cookies.get('__Secure-authjs.session-token');
 
+    // Login: allow only when logged out; signed-in users go to dashboard
+    if (pathname === '/login') {
+        if (sessionCookie) {
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+        return NextResponse.next();
+    }
+
     if (!sessionCookie) {
-        // No session cookie → redirect to login for page requests
-        // For API requests → let the route handler return 401
         if (pathname.startsWith('/api/')) {
             return NextResponse.next();
         }
         const loginUrl = new URL('/login', request.url);
         return NextResponse.redirect(loginUrl);
-    }
-
-    // If user is already authenticated and trying to access login page, redirect to dashboard
-    if (pathname === '/login') {
-        const tasksUrl = new URL('/tasks', request.url);
-        return NextResponse.redirect(tasksUrl);
     }
 
     return NextResponse.next();

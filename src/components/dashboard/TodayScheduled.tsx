@@ -3,7 +3,9 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import MuiLink from '@mui/material/Link';
 import Link from 'next/link';
+import { useTheme } from '@mui/material/styles';
 import type { DailyPlanTask } from '@/store/taskStore';
 import type { Task } from '@/store/taskStore';
 import { frostedLuxury } from '@/components/dashboard/dashboardTokens';
@@ -29,7 +31,9 @@ interface TodayScheduledProps {
 }
 
 export function TodayScheduled({ planTasks, onSelectTask }: TodayScheduledProps) {
+    const theme = useTheme();
     const isLuxury = useLuxuryDashboard();
+    const isDark = theme.palette.mode === 'dark';
 
     return (
         <Box
@@ -64,17 +68,22 @@ export function TodayScheduled({ planTasks, onSelectTask }: TodayScheduledProps)
                             ? {
                                 ...frostedLuxury.panelDense,
                                 borderStyle: 'dashed',
-                                borderColor: 'rgba(26, 26, 26, 0.14)',
-                                backgroundColor: 'rgba(255, 252, 247, 0.4)',
+                                borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(26, 26, 26, 0.14)',
+                                backgroundColor: isDark ? 'rgba(30, 30, 40, 0.5)' : 'rgba(255, 252, 247, 0.4)',
                             }
                             : {
-                                bgcolor: 'rgba(249, 245, 235, 0.8)',
-                                border: '1px dashed rgba(26, 26, 26, 0.12)',
+                                bgcolor: isDark ? 'action.hover' : 'rgba(249, 245, 235, 0.9)',
+                                border: '1px dashed',
+                                borderColor: 'divider',
                             }),
                     }}
                 >
-                    <Typography variant="body2" color="text.secondary" fontWeight={500} textAlign="center">
-                        Nothing on today&apos;s plan. Open the planner to assign tasks.
+                    <Typography variant="body2" color="text.primary" fontWeight={500} textAlign="center" sx={{ opacity: 0.92 }}>
+                        Nothing on today&apos;s plan.{' '}
+                        <MuiLink component={Link} href="/planner" fontWeight={700} underline="hover">
+                            Open the planner
+                        </MuiLink>{' '}
+                        to assign tasks.
                     </Typography>
                 </Box>
             ) : (

@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { Suspense, useEffect, useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RestoreIcon from '@mui/icons-material/Restore';
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
@@ -16,6 +18,15 @@ import IconButton from '@mui/material/IconButton';
 import { useTaskStore, type EisenhowerQuadrant, type TaskHorizon, type Task } from '@/store/taskStore';
 import EisenhowerMatrix from '@/components/tasks/EisenhowerMatrix';
 import { TasksFilterBar } from '@/components/tasks/TasksFilterBar';
+
+const QUADRANT_PARAM_VALUES: EisenhowerQuadrant[] = ['DO_FIRST', 'SCHEDULE', 'DELEGATE', 'ELIMINATE', 'UNASSIGNED'];
+
+function parseQuadrantParam(value: string | null): EisenhowerQuadrant | 'ALL' {
+    if (value && (QUADRANT_PARAM_VALUES as readonly string[]).includes(value)) {
+        return value as EisenhowerQuadrant;
+    }
+    return 'ALL';
+}
 
 function RecycleBinDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
     const { tasks, patchTask, deleteTask } = useTaskStore();
@@ -199,15 +210,34 @@ function OnboardingWalkthroughDialog({
     );
 }
 
-export default function TasksPage() {
+function TasksPageContent() {
+    const searchParams = useSearchParams();
     const { tasks, isLoading, fetchTasks, createTask } = useTaskStore();
     const [search, setSearch] = useState('');
     const [statusTab, setStatusTab] = useState(0); // 0=Active, 1=Done, 2=All
     const [quadrantFilter, setQuadrantFilter] = useState<EisenhowerQuadrant | 'ALL'>('ALL');
     const [horizonFilter, setHorizonFilter] = useState<TaskHorizon | 'ALL'>('ALL');
+    const [dueScope, setDueScope] = useState<'ALL' | 'overdue' | 'today'>('ALL');
+    const [chaseOnly, setChaseOnly] = useState(false);
     const [recycleBinOpen, setRecycleBinOpen] = useState(false);
     const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
     const [onboardingChecked, setOnboardingChecked] = useState(false);
+
+    useEffect(() => {
+        const status = searchParams.get('status');
+        if (status === 'done') setStatusTab(1);
+        else if (status === 'all') setStatusTab(2);
+        else setStatusTab(0);
+
+        const due = searchParams.get('due');
+        if (due === 'overdue' || due === 'today') setDueScope(due);
+        else setDueScope('ALL');
+
+        const chase = searchParams.get('chase');
+        setChaseOnly(chase === '1' || chase === 'true');
+
+        setQuadrantFilter(parseQuadrantParam(searchParams.get('quadrant')));
+    }, [searchParams]);
 
     useEffect(() => {
         fetchTasks();
@@ -254,9 +284,19 @@ export default function TasksPage() {
         } catch { /* ignore */ }
     };
 
+    const todayStr = new Date().toISOString().split('T')[0];
+
     const filteredTasks = tasks.filter((t) => {
         // Exclude archived tasks from all normal views
         if (t.status === 'ARCHIVED') return false;
+
+        if (dueScope === 'overdue') {
+            if (!t.dueDate || t.dueDate.split('T')[0] >= todayStr) return false;
+        }
+        if (dueScope === 'today') {
+            if (!t.dueDate || !t.dueDate.startsWith(todayStr)) return false;
+        }
+        if (chaseOnly && !t.isChase) return false;
 
         // Status filter
         // 0=Active, 1=Done, 2=All
@@ -343,5 +383,23 @@ export default function TasksPage() {
                 onComplete={handleOnboardingComplete}
             />
         </Stack>
+    );
+}
+
+function TasksPageFallback() {
+    return (
+        <Stack spacing={3}>
+            <Skeleton variant="text" width={220} height={44} sx={{ borderRadius: 1 }} />
+            <Skeleton variant="rounded" height={100} sx={{ borderRadius: 2 }} />
+            <Skeleton variant="rounded" height={420} sx={{ borderRadius: 2 }} />
+        </Stack>
+    );
+}
+
+export default function TasksPage() {
+    return (
+        <Suspense fallback={<TasksPageFallback />}>
+            <TasksPageContent />
+        </Suspense>
     );
 }

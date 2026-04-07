@@ -2,7 +2,7 @@
     "name": "TaskTurtle",
     "short_name": "TaskTurtle",
     "description": "Eisenhower Matrix task manager — Focus on what matters",
-    "start_url": "/tasks",
+    "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#0A0A14",
     "theme_color": "#6C63FF",

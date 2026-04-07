@@ -21,15 +21,17 @@ import {
     ResponsiveContainer,
     AreaChart,
     Area,
+    BarChart,
+    Bar,
     ScatterChart,
     Scatter,
     ZAxis,
 } from 'recharts';
 import { useTaskStore, type Task, type DailyPlan } from '@/store/taskStore';
-import { GlassKpiStrip } from '@/components/dashboard/GlassKpiStrip';
-import { DashboardHero } from '@/components/dashboard/DashboardHero';
+import { GlassKpiStrip, type GlassKpiItem } from '@/components/dashboard/GlassKpiStrip';
 import { DashboardQuickStats } from '@/components/dashboard/DashboardQuickStats';
-import { PriorityTaskPath, buildPriorityPathTasks } from '@/components/dashboard/PriorityTaskPath';
+import { PriorityTaskPath } from '@/components/dashboard/PriorityTaskPath';
+import { isPlatformAdmin, tasksDeepLinks } from '@/lib/taskDeepLinks';
 import { TodayScheduled } from '@/components/dashboard/TodayScheduled';
 import { DashboardBanners } from '@/components/dashboard/DashboardBanners';
 import { DashboardLuxuryCanvas } from '@/components/dashboard/DashboardLuxuryCanvas';
@@ -44,15 +46,31 @@ const QUADRANT_COLORS = {
     ELIMINATE: '#9CA3AF',
 };
 
-function tasksCompletedThisWeek(tasks: Task[]): number {
-    const now = new Date();
-    const start = new Date(now);
-    start.setDate(now.getDate() - 7);
-    return tasks.filter((t) => {
-        if (t.status !== 'DONE' || !t.updatedAt) return false;
-        const u = new Date(t.updatedAt);
-        return u >= start && u <= now;
-    }).length;
+const COMPLETED_CHART_DAYS = 28;
+
+function localYmd(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function buildCompletedOverTimeSeries(tasks: Task[]) {
+    const keys: string[] = [];
+    for (let i = COMPLETED_CHART_DAYS - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setHours(12, 0, 0, 0);
+        d.setDate(d.getDate() - i);
+        keys.push(localYmd(d));
+    }
+    const counts = new Map<string, number>(keys.map((k) => [k, 0]));
+    for (const t of tasks) {
+        if (t.status !== 'DONE' || !t.updatedAt) continue;
+        const k = localYmd(new Date(t.updatedAt));
+        if (counts.has(k)) counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    return keys.map((k) => {
+        const [y, m, day] = k.split('-').map(Number);
+        const label = new Date(y, m - 1, day).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        return { date: label, completed: counts.get(k) ?? 0 };
+    });
 }
 
 export default function DashboardPage() {
@@ -77,7 +95,7 @@ export default function DashboardPage() {
         }
         fetchTasks();
         fetchTodayPlan();
-        fetchFeatureRequests();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only bootstrap
     }, []);
 
     const fetchFeatureRequests = async () => {
@@ -86,6 +104,14 @@ export default function DashboardPage() {
             if (res.ok) setFeatureRequests(await res.json());
         } catch { /* graceful */ }
     };
+
+    useEffect(() => {
+        if (!isPlatformAdmin(session?.user?.email)) {
+            setFeatureRequests([]);
+            return;
+        }
+        void fetchFeatureRequests();
+    }, [session?.user?.email]);
 
     const fetchTodayPlan = async () => {
         try {
@@ -110,20 +136,28 @@ export default function DashboardPage() {
         tasks.length > 0 ? Math.round((tasks.filter((t) => t.isChase).length / tasks.length) * 100) : 0;
     const pendingFeatures = featureRequests.filter((fr) => fr.status === 'NEW' || fr.status === 'PLANNED').length;
 
-    const kpiItems = useMemo(
-        () => [
-            { label: 'Active tasks', value: activeCount },
-            { label: 'Completed', value: doneCount, accent: '#6EE7B7' },
-            { label: 'Chase rate', value: `${chasePct}%`, accent: '#FCD34D' },
-            { label: 'Ideas pending', value: pendingFeatures, accent: '#C4B5FD' },
-        ],
-        [activeCount, doneCount, chasePct, pendingFeatures]
-    );
+    const showAdminInsights = isPlatformAdmin(session?.user?.email);
 
-    const priorityTasks = useMemo(() => buildPriorityPathTasks(tasks), [tasks]);
+    const kpiItems = useMemo((): GlassKpiItem[] => {
+        const base: GlassKpiItem[] = [
+            { label: 'Active tasks', value: activeCount, href: tasksDeepLinks.active },
+            { label: 'Completed', value: doneCount, accent: '#6EE7B7', href: tasksDeepLinks.done },
+            { label: 'Chase rate', value: `${chasePct}%`, accent: '#FCD34D', href: tasksDeepLinks.chase },
+        ];
+        if (showAdminInsights) {
+            base.push({
+                label: 'Features pending',
+                value: pendingFeatures,
+                accent: '#C4B5FD',
+                href: tasksDeepLinks.ideas,
+            });
+        }
+        return base;
+    }, [activeCount, chasePct, doneCount, pendingFeatures, showAdminInsights]);
+
     const planTasks = dailyPlan?.tasks ?? [];
-    const completedThisWeek = useMemo(() => tasksCompletedThisWeek(tasks), [tasks]);
-    const greetingName = session?.user?.name?.split(' ')[0] || 'there';
+
+    const completedOverTime = useMemo(() => buildCompletedOverTimeSeries(tasks), [tasks]);
 
     const insightCardSx = isLuxury
         ? {
@@ -147,37 +181,28 @@ export default function DashboardPage() {
     }
 
     const body = (
-        <Stack spacing={3}>
+        <Stack spacing={2.5}>
             <DashboardBanners showWelcome={showAlert} onDismissWelcome={dismissWelcome} overload={overload} />
 
             <GlassKpiStrip items={kpiItems} />
 
             <Box
                 sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', md: 'row' },
-                    gap: 3,
-                    alignItems: 'stretch',
-                }}
-            >
-                <DashboardHero greetingName={greetingName} completedThisWeek={completedThisWeek} />
-                <DashboardQuickStats tasks={tasks} plannedTodayCount={planTasks.length} />
-            </Box>
-
-            <Box
-                sx={{
                     display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1.2fr) minmax(280px, 0.8fr)' },
+                    gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) minmax(280px, 1fr)' },
                     gap: 3,
                     alignItems: 'start',
                 }}
             >
                 <PriorityTaskPath
-                    tasks={priorityTasks}
+                    tasks={tasks}
                     onComplete={(id) => patchTask(id, { status: 'DONE' })}
                     onSelect={setEditingTask}
                 />
-                <TodayScheduled planTasks={planTasks} onSelectTask={setEditingTask} />
+                <Stack spacing={2.5} sx={{ minWidth: 0 }}>
+                    <DashboardQuickStats tasks={tasks} plannedTodayCount={planTasks.length} />
+                    <TodayScheduled planTasks={planTasks} onSelectTask={setEditingTask} />
+                </Stack>
             </Box>
 
             <Box>
@@ -243,58 +268,41 @@ export default function DashboardPage() {
 
                     <Card sx={insightCardSx}>
                         <CardContent>
-                            <Typography variant="h6" fontWeight={700} mb={3}>
-                                Feature pipeline
+                            <Typography variant="h6" fontWeight={700} mb={1}>
+                                Tasks completed over time
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                Last {COMPLETED_CHART_DAYS} days, by completion date (local time).
                             </Typography>
                             <Box sx={{ height: 300, width: '100%', minHeight: 200 }}>
-                                {featureRequests.length === 0 ? (
-                                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Typography color="text.secondary" fontStyle="italic">
-                                            No feature requests yet.
-                                        </Typography>
-                                    </Box>
-                                ) : (
-                                    <ResponsiveContainer>
-                                        <PieChart>
-                                            <Pie
-                                                data={[
-                                                    { name: 'New', value: featureRequests.filter((fr) => fr.status === 'NEW').length, color: '#3B82F6' },
-                                                    { name: 'Planned', value: featureRequests.filter((fr) => fr.status === 'PLANNED').length, color: '#F59E0B' },
-                                                    { name: 'In Progress', value: featureRequests.filter((fr) => fr.status === 'IN_PROGRESS').length, color: '#8B5CF6' },
-                                                    { name: 'Completed', value: featureRequests.filter((fr) => fr.status === 'COMPLETED').length, color: '#10B981' },
-                                                    { name: 'Rejected', value: featureRequests.filter((fr) => fr.status === 'REJECTED').length, color: '#EF4444' },
-                                                ].filter((d) => d.value > 0)}
-                                                cx="50%"
-                                                cy="50%"
-                                                innerRadius={70}
-                                                outerRadius={100}
-                                                paddingAngle={5}
-                                                dataKey="value"
-                                            >
-                                                {(
-                                                    [
-                                                        { name: 'New', value: featureRequests.filter((fr) => fr.status === 'NEW').length, color: '#3B82F6' },
-                                                        { name: 'Planned', value: featureRequests.filter((fr) => fr.status === 'PLANNED').length, color: '#F59E0B' },
-                                                        { name: 'In Progress', value: featureRequests.filter((fr) => fr.status === 'IN_PROGRESS').length, color: '#8B5CF6' },
-                                                        { name: 'Completed', value: featureRequests.filter((fr) => fr.status === 'COMPLETED').length, color: '#10B981' },
-                                                        { name: 'Rejected', value: featureRequests.filter((fr) => fr.status === 'REJECTED').length, color: '#EF4444' },
-                                                    ].filter((d) => d.value > 0)
-                                                ).map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip
-                                                contentStyle={{
-                                                    backgroundColor: tooltipBg,
-                                                    border: `1px solid ${tooltipBorder}`,
-                                                    borderRadius: 8,
-                                                }}
-                                                itemStyle={{ color: theme.palette.text.primary }}
-                                            />
-                                            <Legend wrapperStyle={{ color: chartMuted }} />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                )}
+                                <ResponsiveContainer>
+                                    <BarChart data={completedOverTime} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                                        <defs>
+                                            <linearGradient id="dashCompletedBars" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor={theme.palette.primary.main} stopOpacity={0.9} />
+                                                <stop offset="100%" stopColor={theme.palette.primary.main} stopOpacity={0.35} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" stroke={chartGrid} vertical={false} />
+                                        <XAxis
+                                            dataKey="date"
+                                            stroke={chartMuted}
+                                            tick={{ fill: chartMuted, fontSize: 10 }}
+                                            interval="preserveStartEnd"
+                                            tickMargin={6}
+                                        />
+                                        <YAxis stroke={chartMuted} tick={{ fill: chartMuted }} allowDecimals={false} width={36} />
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: tooltipBg,
+                                                border: `1px solid ${tooltipBorder}`,
+                                                borderRadius: 8,
+                                            }}
+                                            labelStyle={{ color: theme.palette.text.primary }}
+                                        />
+                                        <Bar dataKey="completed" name="Completed" fill="url(#dashCompletedBars)" radius={[4, 4, 0, 0]} maxBarSize={14} />
+                                    </BarChart>
+                                </ResponsiveContainer>
                             </Box>
                         </CardContent>
                     </Card>

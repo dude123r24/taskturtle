@@ -23,7 +23,7 @@ export default function LoginPage() {
         setLoading(true);
         try {
             const result = await signIn('google', {
-                callbackUrl: '/tasks',
+                callbackUrl: '/dashboard',
                 redirect: false,
             });
 
