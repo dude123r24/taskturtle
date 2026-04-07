@@ -28,7 +28,7 @@ import {
 import { useTaskStore, type Task, type DailyPlan } from '@/store/taskStore';
 import { GlassKpiStrip } from '@/components/dashboard/GlassKpiStrip';
 import { DashboardHero } from '@/components/dashboard/DashboardHero';
-import { ShortcutTiles } from '@/components/dashboard/ShortcutTiles';
+import { DashboardQuickStats } from '@/components/dashboard/DashboardQuickStats';
 import { PriorityTaskPath, buildPriorityPathTasks } from '@/components/dashboard/PriorityTaskPath';
 import { TodayScheduled } from '@/components/dashboard/TodayScheduled';
 import { DashboardBanners } from '@/components/dashboard/DashboardBanners';
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                 }}
             >
                 <DashboardHero greetingName={greetingName} completedThisWeek={completedThisWeek} />
-                <ShortcutTiles />
+                <DashboardQuickStats tasks={tasks} plannedTodayCount={planTasks.length} />
             </Box>
 
             <Box

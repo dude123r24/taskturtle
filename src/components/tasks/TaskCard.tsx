@@ -8,6 +8,9 @@ import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
+import Chip from '@mui/material/Chip';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme, alpha } from '@mui/material/styles';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
@@ -46,12 +49,16 @@ interface TaskCardProps {
 }
 
 function TaskCardInner({ task, compact = false }: TaskCardProps) {
+    const theme = useTheme();
     const router = useRouter();
+    const isMobileComfort = useMediaQuery(theme.breakpoints.down('md'));
+    const comfortable = isMobileComfort || !compact;
     const { patchTask, setEditingTask } = useTaskStore();
 
     const quadrantInfo = QUADRANT_LABELS[task.quadrant];
     const isDone = task.status === 'DONE';
     const isDoFirst = task.quadrant === 'DO_FIRST';
+    const accentColor = isDone ? theme.palette.text.disabled : quadrantInfo.color;
 
     const [flashColor, setFlashColor] = useState<string | null>(null);
 
@@ -85,47 +92,95 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                 for (let i = 0; i < 3; i++) {
                     if (cancelled) break;
                     setFlashColor(colorToUse);
-                    await new Promise(r => setTimeout(r, 600));
+                    await new Promise((r) => setTimeout(r, 600));
                     setFlashColor(null);
-                    if (i < 2) await new Promise(r => setTimeout(r, 30));
+                    if (i < 2) await new Promise((r) => setTimeout(r, 30));
                 }
             }
         };
 
         checkFlash();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [task.dueDate, task.id, isDone]);
 
-    const toggleDone = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        patchTask(task.id, { status: isDone ? 'TODO' : 'DONE' });
-    }, [patchTask, task.id, isDone]);
+    const toggleDone = useCallback(
+        (e: React.MouseEvent) => {
+            e.stopPropagation();
+            patchTask(task.id, { status: isDone ? 'TODO' : 'DONE' });
+        },
+        [patchTask, task.id, isDone]
+    );
 
-    const handleEdit = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        setEditingTask(task);
-    }, [setEditingTask, task]);
+    const handleEdit = useCallback(
+        (e: React.MouseEvent) => {
+            e.stopPropagation();
+            setEditingTask(task);
+        },
+        [setEditingTask, task]
+    );
 
-    const handleArchive = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        patchTask(task.id, { status: 'ARCHIVED' });
-    }, [patchTask, task.id]);
+    const handleArchive = useCallback(
+        (e: React.MouseEvent) => {
+            e.stopPropagation();
+            patchTask(task.id, { status: 'ARCHIVED' });
+        },
+        [patchTask, task.id]
+    );
 
-    const handleFocus = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        router.push(`/focus?taskId=${task.id}`);
-    }, [router, task.id]);
+    const handleFocus = useCallback(
+        (e: React.MouseEvent) => {
+            e.stopPropagation();
+            router.push(`/focus?taskId=${task.id}`);
+        },
+        [router, task.id]
+    );
 
     const handleCardClick = useCallback(() => {
         setEditingTask(task);
     }, [setEditingTask, task]);
 
-    const handleCardKeyDown = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleCardClick();
-        }
-    }, [handleCardClick]);
+    const handleCardKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCardClick();
+            }
+        },
+        [handleCardClick]
+    );
+
+    const metaIconSx = comfortable
+        ? { fontSize: '1.05rem' }
+        : { fontSize: '0.75rem' };
+    const metaTextSx = comfortable
+        ? { fontSize: '0.875rem', fontWeight: 500 }
+        : { fontSize: '0.75rem', fontWeight: 500 };
+
+    const cardBg = flashColor
+        ? flashColor
+        : isDone
+            ? alpha(theme.palette.success.main, theme.palette.mode === 'dark' ? 0.08 : 0.06)
+            : alpha(accentColor, theme.palette.mode === 'dark' ? 0.12 : 0.08);
+
+    const idleShadows: string[] = [];
+    if (task.isChase && !isDone) {
+        idleShadows.push(`inset 0 3px 0 0 ${alpha('#ff9800', 0.95)}`);
+    }
+    if (isDoFirst && !isDone) {
+        idleShadows.push(`0 0 0 1px ${alpha(accentColor, 0.35)}`);
+        idleShadows.push(`0 6px 20px ${alpha(accentColor, 0.12)}`);
+    }
+
+    const hoverShadows: string[] = [];
+    if (task.isChase && !isDone) {
+        hoverShadows.push(`inset 0 3px 0 0 ${alpha('#ff9800', 0.95)}`);
+    }
+    if (isDoFirst && !isDone) {
+        hoverShadows.push(`0 0 0 1px ${alpha(accentColor, 0.45)}`);
+        hoverShadows.push(`0 8px 24px ${alpha(accentColor, 0.16)}`);
+    }
 
     return (
         <Card
@@ -136,65 +191,146 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
             aria-label={`Task: ${task.title}`}
             sx={{
                 cursor: 'pointer',
-                background: (theme) => flashColor
-                    ? flashColor
-                    : (isDone
-                        ? 'rgba(67, 160, 71, 0.06)'
-                        : theme.palette.mode === 'dark' ? 'rgba(26, 25, 41, 0.6)' : 'rgba(255,255,255,0.8)'),
-                border: (theme) => `1px solid ${isDone ? 'rgba(67,160,71,0.2)' : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)')}`,
-                transition: flashColor ? 'none' : 'all 0.2s ease',
-                opacity: isDone ? 0.7 : 1,
+                position: 'relative',
+                backgroundColor: cardBg,
+                border: `1px solid ${theme.palette.divider}`,
+                borderLeft: `6px solid ${accentColor}`,
+                boxShadow: idleShadows.length ? idleShadows.join(', ') : undefined,
+                transition: flashColor ? 'none' : 'background-color 0.2s ease, box-shadow 0.2s ease',
+                opacity: isDone ? 0.72 : 1,
                 '&:hover': {
-                    border: `1px solid ${quadrantInfo.color}44`,
-                    boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.1)',
+                    backgroundColor: flashColor || alpha(accentColor, theme.palette.mode === 'dark' ? 0.18 : 0.14),
+                    boxShadow:
+                        hoverShadows.length > 0
+                            ? hoverShadows.join(', ')
+                            : theme.palette.mode === 'dark'
+                                ? '0 4px 14px rgba(0,0,0,0.35)'
+                                : '0 4px 14px rgba(0,0,0,0.08)',
                 },
             }}
         >
-            <CardContent sx={{ p: compact ? 0.75 : 1.5, '&:last-child': { pb: compact ? 0.75 : 1.5 }, display: 'flex', alignItems: compact ? 'center' : 'flex-start' }}>
-                <Stack direction="row" spacing={0.5} alignItems={compact ? "center" : "flex-start"} sx={{ flex: 1, minWidth: 0 }}>
+            <CardContent
+                sx={{
+                    p: comfortable ? 2 : compact ? 1 : 1.5,
+                    py: comfortable ? 2 : undefined,
+                    '&:last-child': { pb: comfortable ? 2 : compact ? 1 : 1.5 },
+                    display: 'flex',
+                    alignItems: comfortable ? 'flex-start' : compact ? 'center' : 'flex-start',
+                }}
+            >
+                <Stack
+                    direction="row"
+                    spacing={comfortable ? 1.25 : 0.5}
+                    alignItems={comfortable ? 'flex-start' : compact ? 'center' : 'flex-start'}
+                    sx={{ flex: 1, minWidth: 0 }}
+                >
                     <Tooltip title={isDone ? 'Mark as to do' : 'Mark as done'}>
                         <IconButton
-                            size="small"
+                            size={comfortable ? 'medium' : 'small'}
                             onClick={toggleDone}
                             aria-label={isDone ? 'Mark as to do' : 'Mark as done'}
-                            sx={{ p: compact ? 0.5 : 0.75, mt: compact ? 0 : -0.25, minWidth: 44, minHeight: 44, color: isDone ? 'success.main' : 'text.secondary' }}
+                            sx={{
+                                p: comfortable ? 1 : compact ? 0.5 : 0.75,
+                                mt: comfortable ? 0.25 : compact ? 0 : -0.25,
+                                minWidth: 48,
+                                minHeight: 48,
+                                color: isDone ? 'success.main' : 'text.secondary',
+                            }}
                         >
                             {isDone ? (
-                                <CheckCircleIcon sx={{ fontSize: compact ? '1.1rem' : '1.25rem' }} />
+                                <CheckCircleIcon sx={{ fontSize: comfortable ? '1.35rem' : compact ? '1.1rem' : '1.25rem' }} />
                             ) : (
-                                <CheckCircleOutlineIcon sx={{ fontSize: compact ? '1.1rem' : '1.25rem' }} />
+                                <CheckCircleOutlineIcon sx={{ fontSize: comfortable ? '1.35rem' : compact ? '1.1rem' : '1.25rem' }} />
                             )}
                         </IconButton>
                     </Tooltip>
 
-                    <Box sx={{ flex: 1, minWidth: 0, display: compact ? 'flex' : 'block', alignItems: 'center', gap: 1 }}>
-                        <Typography
-                            variant={compact ? 'body2' : 'body1'}
-                            noWrap
-                            sx={{
-                                fontWeight: compact ? 500 : 600,
-                                fontSize: compact ? '0.8rem' : '0.9rem',
-                                textDecoration: isDone ? 'line-through' : 'none',
-                                color: isDone ? 'text.secondary' : 'text.primary',
-                                flex: compact ? 1 : 'unset',
-                                lineHeight: compact ? 1.2 : 1.5,
-                            }}
-                        >
-                            {task.title}
-                        </Typography>
-
-                        {task.isChase && (
-                            <Tooltip title="Chasing">
-                                <DirectionsRunIcon sx={{ fontSize: compact ? '0.85rem' : '1rem', color: '#FF6D00', ml: 0.5, flexShrink: 0 }} />
-                            </Tooltip>
-                        )}
+                    <Box
+                        sx={{
+                            flex: 1,
+                            minWidth: 0,
+                            display: comfortable ? 'block' : compact ? 'flex' : 'block',
+                            alignItems: comfortable ? undefined : compact ? 'center' : undefined,
+                            gap: comfortable ? undefined : compact ? 1 : undefined,
+                        }}
+                    >
+                        <Stack direction="row" alignItems="flex-start" spacing={1} flexWrap="wrap" sx={{ gap: 0.75 }}>
+                            <Typography
+                                variant={comfortable ? 'body1' : compact ? 'body2' : 'body1'}
+                                {...(comfortable ? {} : { noWrap: true })}
+                                sx={{
+                                    fontWeight: comfortable ? 600 : compact ? 500 : 600,
+                                    fontSize: comfortable ? '1rem' : compact ? '0.8rem' : '0.9rem',
+                                    textDecoration: isDone ? 'line-through' : 'none',
+                                    color: isDone ? 'text.secondary' : 'text.primary',
+                                    flex: comfortable ? '1 1 100%' : compact ? 1 : 'unset',
+                                    lineHeight: comfortable ? 1.45 : compact ? 1.2 : 1.5,
+                                    ...(comfortable && {
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden',
+                                    }),
+                                }}
+                            >
+                                {task.title}
+                            </Typography>
+                            {comfortable && (
+                                <Chip
+                                    label={`${quadrantInfo.icon} ${quadrantInfo.label}`}
+                                    size="small"
+                                    sx={{
+                                        height: 26,
+                                        fontWeight: 700,
+                                        fontSize: '0.72rem',
+                                        bgcolor: alpha(accentColor, 0.2),
+                                        color: accentColor,
+                                        border: `1px solid ${alpha(accentColor, 0.35)}`,
+                                    }}
+                                />
+                            )}
+                            {task.isChase && (
+                                <Tooltip title="Chasing">
+                                    <Chip
+                                        label="🏃 Chase"
+                                        size="small"
+                                        sx={{
+                                            height: 26,
+                                            fontWeight: 700,
+                                            fontSize: '0.72rem',
+                                            bgcolor: alpha('#ff9800', 0.2),
+                                            color: 'warning.dark',
+                                            border: `1px solid ${alpha('#ff9800', 0.35)}`,
+                                        }}
+                                    />
+                                </Tooltip>
+                            )}
+                            {!comfortable && task.isChase && (
+                                <Tooltip title="Chasing">
+                                    <DirectionsRunIcon
+                                        sx={{ fontSize: compact ? '0.85rem' : '1rem', color: '#FF6D00', ml: 0.5, flexShrink: 0 }}
+                                    />
+                                </Tooltip>
+                            )}
+                        </Stack>
 
                         {!compact && task.description && (
                             <Typography
                                 variant="caption"
                                 color="text.secondary"
-                                noWrap
-                                sx={{ mt: 0.25, display: 'block', fontSize: '0.7rem' }}
+                                noWrap={!comfortable}
+                                sx={{
+                                    mt: comfortable ? 0.75 : 0.25,
+                                    display: 'block',
+                                    fontSize: comfortable ? '0.8rem' : '0.7rem',
+                                    lineHeight: 1.45,
+                                    ...(comfortable && {
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden',
+                                    }),
+                                }}
                             >
                                 {task.description}
                             </Typography>
@@ -203,13 +339,20 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                         {!compact && task.updates && task.updates.length > 0 && (
                             <Typography
                                 variant="caption"
-                                noWrap
+                                noWrap={!comfortable}
                                 sx={{
                                     mt: 0.25,
                                     display: 'block',
-                                    fontSize: '0.75rem',
+                                    fontSize: comfortable ? '0.8rem' : '0.75rem',
                                     color: 'text.secondary',
-                                    opacity: 0.8,
+                                    opacity: 0.85,
+                                    ...(comfortable && {
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden',
+                                        mt: 0.5,
+                                    }),
                                 }}
                             >
                                 {task.updates[0].content}
@@ -218,66 +361,86 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
 
                         <Stack
                             direction="row"
-                            spacing={1}
-                            sx={{ mt: compact ? 0 : 0.75 }}
+                            spacing={comfortable ? 1.5 : 1}
+                            sx={{ mt: comfortable ? 1.25 : compact ? 0 : 0.75 }}
                             alignItems="center"
-                            flexWrap="nowrap"
+                            flexWrap={comfortable ? 'wrap' : 'nowrap'}
+                            useFlexGap
                         >
                             {!compact && (
-                                <Typography variant="caption" sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 600 }}>
+                                <Typography
+                                    variant="caption"
+                                    sx={{
+                                        ...metaTextSx,
+                                        color: 'text.secondary',
+                                        fontWeight: 600,
+                                    }}
+                                >
                                     {HORIZON_LABELS[task.horizon]}
                                 </Typography>
                             )}
 
-                            {task.estimatedMinutes && (
-                                <Stack direction="row" alignItems="center" spacing={0.25} sx={{ color: 'text.secondary' }}>
-                                    <AccessTimeIcon sx={{ fontSize: '0.75rem' }} />
-                                    <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 500 }}>
+                            {task.estimatedMinutes ? (
+                                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: 'text.secondary' }}>
+                                    <AccessTimeIcon sx={metaIconSx} />
+                                    <Typography variant="caption" sx={{ ...metaTextSx, color: 'text.secondary' }}>
                                         {formatMinutes(task.estimatedMinutes)}
                                     </Typography>
                                 </Stack>
-                            )}
+                            ) : null}
 
-                            {task.dueDate && (
-                                <Stack direction="row" alignItems="center" spacing={0.25} sx={{ color: 'text.secondary' }}>
-                                    <EventIcon sx={{ fontSize: '0.75rem' }} />
-                                    <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 500 }}>
-                                        {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            {task.dueDate ? (
+                                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: 'text.secondary' }}>
+                                    <EventIcon sx={metaIconSx} />
+                                    <Typography variant="caption" sx={{ ...metaTextSx, color: 'text.secondary' }}>
+                                        {new Date(task.dueDate).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                        })}
                                     </Typography>
                                 </Stack>
-                            )}
+                            ) : null}
 
-                            {task.actualMinutes !== null && task.actualMinutes !== undefined && task.estimatedMinutes && (
+                            {task.actualMinutes != null && task.estimatedMinutes ? (
                                 <Stack
                                     direction="row"
                                     alignItems="center"
-                                    spacing={0.25}
+                                    spacing={0.5}
                                     sx={{
-                                        color: task.actualMinutes > task.estimatedMinutes ? 'error.main' : 'success.main'
+                                        color: task.actualMinutes > task.estimatedMinutes ? 'error.main' : 'success.main',
                                     }}
                                 >
-                                    {task.actualMinutes > task.estimatedMinutes
-                                        ? <TrendingUpIcon sx={{ fontSize: '0.75rem' }} />
-                                        : <TrendingDownIcon sx={{ fontSize: '0.75rem' }} />
-                                    }
-                                    <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                                    {task.actualMinutes > task.estimatedMinutes ? (
+                                        <TrendingUpIcon sx={metaIconSx} />
+                                    ) : (
+                                        <TrendingDownIcon sx={metaIconSx} />
+                                    )}
+                                    <Typography variant="caption" sx={{ ...metaTextSx, fontWeight: 600 }}>
                                         {formatMinutes(task.actualMinutes)}
                                     </Typography>
                                 </Stack>
-                            )}
+                            ) : null}
                         </Stack>
                     </Box>
 
-                    <Stack direction="row" spacing={0.5} sx={{ ml: 1 }}>
+                    <Stack direction="row" spacing={0.5} sx={{ ml: comfortable ? 0.5 : 1, flexShrink: 0 }}>
                         {isDoFirst && !isDone && (
                             <Tooltip title="Focus on this">
                                 <IconButton
-                                    size="small"
+                                    size={comfortable ? 'medium' : 'small'}
                                     onClick={handleFocus}
                                     aria-label="Focus on this task"
-                                    sx={{ color: '#6C63FF', p: 0.75, minWidth: 44, minHeight: 44, '&:hover': { color: '#5A52D5', bgcolor: 'rgba(108,99,255,0.1)' } }}
+                                    sx={{
+                                        color: accentColor,
+                                        p: comfortable ? 1 : 0.75,
+                                        minWidth: 48,
+                                        minHeight: 48,
+                                        '&:hover': { bgcolor: alpha(accentColor, 0.12) },
+                                    }}
                                 >
-                                    <CenterFocusStrongIcon sx={{ fontSize: '1rem' }} />
+                                    <CenterFocusStrongIcon sx={{ fontSize: comfortable ? '1.25rem' : '1rem' }} />
                                 </IconButton>
                             </Tooltip>
                         )}
@@ -285,22 +448,33 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             <>
                                 <Tooltip title="Edit">
                                     <IconButton
-                                        size="small"
+                                        size={comfortable ? 'medium' : 'small'}
                                         onClick={handleEdit}
                                         aria-label="Edit task"
-                                        sx={{ color: 'text.secondary', p: 0.75, minWidth: 44, minHeight: 44 }}
+                                        sx={{
+                                            color: 'text.secondary',
+                                            p: comfortable ? 1 : 0.75,
+                                            minWidth: 48,
+                                            minHeight: 48,
+                                        }}
                                     >
-                                        <EditIcon sx={{ fontSize: '1rem' }} />
+                                        <EditIcon sx={{ fontSize: comfortable ? '1.2rem' : '1rem' }} />
                                     </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Delete">
                                     <IconButton
-                                        size="small"
+                                        size={comfortable ? 'medium' : 'small'}
                                         onClick={handleArchive}
                                         aria-label="Delete task"
-                                        sx={{ color: 'text.secondary', p: 0.75, minWidth: 44, minHeight: 44, '&:hover': { color: 'error.main' } }}
+                                        sx={{
+                                            color: 'text.secondary',
+                                            p: comfortable ? 1 : 0.75,
+                                            minWidth: 48,
+                                            minHeight: 48,
+                                            '&:hover': { color: 'error.main' },
+                                        }}
                                     >
-                                        <DeleteOutlineIcon sx={{ fontSize: '1rem' }} />
+                                        <DeleteOutlineIcon sx={{ fontSize: comfortable ? '1.2rem' : '1rem' }} />
                                     </IconButton>
                                 </Tooltip>
                             </>

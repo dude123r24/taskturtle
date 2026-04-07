@@ -103,10 +103,10 @@ export function PriorityTaskPath({ tasks, onComplete, onSelect }: PriorityTaskPa
                     }),
             }}
         >
-            <Typography variant="h6" fontWeight={800} letterSpacing="-0.02em" sx={{ mb: 3 }}>
+            <Typography variant="h6" fontWeight={800} letterSpacing="-0.02em" sx={{ mb: { xs: 2, md: 3 }, fontSize: { xs: '1.1rem', md: '1.25rem' } }}>
                 Priority path
             </Typography>
-            <Box sx={{ position: 'relative', pl: { xs: 3, sm: 4 } }}>
+            <Box sx={{ position: 'relative', pl: { xs: 3.5, sm: 4 } }}>
                 <Box
                     sx={{
                         position: 'absolute',
@@ -118,7 +118,7 @@ export function PriorityTaskPath({ tasks, onComplete, onSelect }: PriorityTaskPa
                         bgcolor: 'rgba(107, 70, 193, 0.2)',
                     }}
                 />
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2.5, md: 2 } }}>
                     {tasks.map((task) => (
                         <Box
                             key={task.id}
@@ -170,7 +170,7 @@ export function PriorityTaskPath({ tasks, onComplete, onSelect }: PriorityTaskPa
                                 sx={{
                                     flex: 1,
                                     minWidth: 0,
-                                    p: 2,
+                                    p: { xs: 2.25, md: 2 },
                                     borderRadius: 2,
                                     borderLeft: `6px solid ${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}`,
                                     cursor: 'pointer',
@@ -202,6 +202,7 @@ export function PriorityTaskPath({ tasks, onComplete, onSelect }: PriorityTaskPa
                                             flex: '1 1 auto',
                                             minWidth: 0,
                                             lineHeight: 1.35,
+                                            fontSize: { xs: '1.02rem', md: '1rem' },
                                         }}
                                     >
                                         {task.title}
@@ -254,9 +255,15 @@ export function PriorityTaskPath({ tasks, onComplete, onSelect }: PriorityTaskPa
                                     e.stopPropagation();
                                     onComplete(task.id);
                                 }}
-                                sx={{ mt: 1, color: 'text.secondary', '&:hover': { color: 'success.main' } }}
+                                sx={{
+                                    mt: { xs: 0.5, md: 1 },
+                                    minWidth: 48,
+                                    minHeight: 48,
+                                    color: 'text.secondary',
+                                    '&:hover': { color: 'success.main' },
+                                }}
                             >
-                                <CheckCircleOutlineIcon />
+                                <CheckCircleOutlineIcon sx={{ fontSize: { xs: '1.35rem', md: '1.25rem' } }} />
                             </IconButton>
                         </Box>
                     ))}

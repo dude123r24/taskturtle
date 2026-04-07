@@ -4,13 +4,15 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Link from 'next/link';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import Grid from '@mui/material/Grid';
+import { marketingPalette as m } from '@/lib/marketingPalette';
+
+const fontStack = 'var(--font-sans), ui-sans-serif, system-ui, sans-serif';
 
 export default function LoginPage() {
     const [loading, setLoading] = useState(false);
@@ -59,144 +61,260 @@ export default function LoginPage() {
 
     return (
         <Box
+            component="main"
             sx={{
                 minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background:
-                    'radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.15) 0%, transparent 60%), #0F0E17',
+                fontFamily: fontStack,
+                bgcolor: m.bg,
+                color: m.surface,
+                position: 'relative',
+                overflow: 'hidden',
             }}
         >
-            <Card
+            <Box
+                aria-hidden
                 sx={{
-                    maxWidth: 440,
-                    width: '100%',
-                    mx: 2,
-                    p: 2,
-                    background: 'rgba(26, 25, 41, 0.8)',
-                    border: '1px solid rgba(108,99,255,0.2)',
-                    backdropFilter: 'blur(20px)',
+                    position: 'absolute',
+                    inset: 0,
+                    background: `
+            radial-gradient(ellipse 80% 50% at 0% -20%, ${m.sageMuted}, transparent 55%),
+            radial-gradient(ellipse 60% 40% at 100% 100%, ${m.accentMuted}, transparent 50%),
+            linear-gradient(165deg, ${m.bg} 0%, ${m.bgLift} 45%, ${m.bg} 100%)
+          `,
+                    pointerEvents: 'none',
                 }}
-            >
-                <CardContent>
-                    <Stack spacing={4} alignItems="center">
-                        {/* Logo / Brand */}
-                        <Box sx={{ textAlign: 'center' }}>
-                            <Typography
-                                variant="h3"
+            />
+            <Box
+                aria-hidden
+                sx={{
+                    position: 'absolute',
+                    inset: 0,
+                    opacity: 0.04,
+                    backgroundImage: `linear-gradient(${m.surface} 1px, transparent 1px), linear-gradient(90deg, ${m.surface} 1px, transparent 1px)`,
+                    backgroundSize: '48px 48px',
+                    pointerEvents: 'none',
+                }}
+            />
+
+            <Grid container sx={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+                <Grid
+                    item
+                    md={5}
+                    sx={{
+                        display: { xs: 'none', md: 'flex' },
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        px: { md: 5, lg: 8 },
+                        py: 6,
+                        borderRight: `1px solid ${m.line}`,
+                    }}
+                >
+                    <Typography
+                        component={Link}
+                        href="/"
+                        sx={{
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            letterSpacing: '0.2em',
+                            textTransform: 'uppercase',
+                            color: m.accent,
+                            textDecoration: 'none',
+                            mb: 4,
+                            '&:hover': { color: m.accentHover },
+                        }}
+                    >
+                        ← Back home
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontSize: { md: '2.75rem', lg: '3.25rem' },
+                            fontWeight: 800,
+                            lineHeight: 1.05,
+                            letterSpacing: '-0.03em',
+                            color: m.surface,
+                            mb: 2,
+                        }}
+                    >
+                        Slow is smooth.
+                        <Box component="span" sx={{ display: 'block', color: m.sage, mt: 0.5 }}>
+                            Smooth is fast.
+                        </Box>
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontSize: '1.05rem',
+                            lineHeight: 1.65,
+                            color: m.inkSubtle,
+                            maxWidth: 360,
+                            mb: 5,
+                        }}
+                    >
+                        Sign in to your workspace. Priorities, planner, and calendar stay in one calm system.
+                    </Typography>
+                    <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+                        {[
+                            { label: 'Do first', c: m.coral },
+                            { label: 'Schedule', c: m.accent },
+                            { label: 'Delegate', c: m.sage },
+                            { label: 'Eliminate', c: m.inkSubtle },
+                        ].map((q) => (
+                            <Box
+                                key={q.label}
                                 sx={{
-                                    fontWeight: 700,
-                                    background: 'linear-gradient(135deg, #6C63FF, #FF6584)',
-                                    backgroundClip: 'text',
-                                    WebkitBackgroundClip: 'text',
-                                    color: 'transparent',
-                                    mb: 1,
+                                    px: 1.5,
+                                    py: 0.75,
+                                    borderRadius: 999,
+                                    fontSize: '0.7rem',
+                                    fontWeight: 600,
+                                    letterSpacing: '0.04em',
+                                    textTransform: 'uppercase',
+                                    border: `1px solid ${q.c}55`,
+                                    color: q.c,
+                                    bgcolor: `${q.c}14`,
                                 }}
                             >
-                                TaskTurtle
-                            </Typography>
-                            <Typography variant="body1" color="text.secondary">
-                                Focus on what matters. Get things done.
-                            </Typography>
-                        </Box>
+                                {q.label}
+                            </Box>
+                        ))}
+                    </Stack>
+                </Grid>
 
-                        {/* Eisenhower Matrix Preview */}
-                        <Box
-                            sx={{
-                                display: 'grid',
-                                gridTemplateColumns: '1fr 1fr',
-                                gap: 1,
-                                width: '100%',
-                                maxWidth: 280,
-                            }}
-                        >
-                            {[
-                                { label: 'Do First', color: '#E53935', emoji: '🔴' },
-                                { label: 'Schedule', color: '#1E88E5', emoji: '📅' },
-                                { label: 'Delegate', color: '#FB8C00', emoji: '👥' },
-                                { label: 'Eliminate', color: '#757575', emoji: '🗑️' },
-                            ].map((q) => (
-                                <Box
-                                    key={q.label}
+                <Grid
+                    item
+                    xs={12}
+                    md={7}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        px: { xs: 2, sm: 4 },
+                        py: { xs: 4, md: 6 },
+                    }}
+                >
+                    <Box
+                        sx={{
+                            width: '100%',
+                            maxWidth: 420,
+                            borderRadius: 3,
+                            bgcolor: m.surface,
+                            color: m.ink,
+                            p: { xs: 3, sm: 4 },
+                            boxShadow: '0 24px 64px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset',
+                        }}
+                    >
+                        <Stack spacing={3}>
+                            <Box>
+                                <Typography
+                                    component={Link}
+                                    href="/"
                                     sx={{
-                                        p: 1.5,
-                                        borderRadius: 1.5,
-                                        border: `1px solid ${q.color}33`,
-                                        background: `${q.color}0D`,
-                                        textAlign: 'center',
-                                        fontSize: '0.75rem',
-                                        color: q.color,
-                                        fontWeight: 500,
+                                        display: { xs: 'inline-block', md: 'none' },
+                                        fontSize: '0.7rem',
+                                        fontWeight: 600,
+                                        letterSpacing: '0.18em',
+                                        textTransform: 'uppercase',
+                                        color: m.sage,
+                                        textDecoration: 'none',
+                                        mb: 2,
+                                        '&:hover': { textDecoration: 'underline' },
                                     }}
                                 >
-                                    {q.emoji} {q.label}
-                                </Box>
-                            ))}
-                        </Box>
+                                    ← Home
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        fontSize: '1.75rem',
+                                        fontWeight: 800,
+                                        letterSpacing: '-0.03em',
+                                        lineHeight: 1.2,
+                                        color: m.ink,
+                                    }}
+                                >
+                                    TaskTurtle
+                                </Typography>
+                                <Typography sx={{ mt: 1, color: m.inkMuted, fontSize: '0.95rem', lineHeight: 1.5 }}>
+                                    Continue with Google to open your tasks and planner.
+                                </Typography>
+                            </Box>
 
-                        {error && (
-                            <Alert severity="error" sx={{ width: '100%' }} onClose={() => setError(null)}>
-                                {error}
-                            </Alert>
-                        )}
-
-                        {/* Sign In */}
-                        <Button
-                            type="button"
-                            variant="contained"
-                            size="large"
-                            fullWidth
-                            disabled={loading}
-                            onClick={() => void handleGoogleSignIn()}
-                            sx={{
-                                py: 1.5,
-                                fontSize: '1rem',
-                                background: 'linear-gradient(135deg, #6C63FF, #5A52E0)',
-                                '&:hover': {
-                                    background: 'linear-gradient(135deg, #7B73FF, #6C63FF)',
-                                },
-                            }}
-                        >
-                            {loading ? (
-                                <CircularProgress size={22} color="inherit" />
-                            ) : (
-                                <>
-                                    <Box
-                                        component="img"
-                                        src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                                        alt=""
-                                        sx={{ width: 20, height: 20, mr: 1.5 }}
-                                    />
-                                    Sign in with Google
-                                </>
+                            {error && (
+                                <Alert severity="error" sx={{ width: '100%' }} onClose={() => setError(null)}>
+                                    {error}
+                                </Alert>
                             )}
-                        </Button>
 
+                            <Button
+                                type="button"
+                                variant="contained"
+                                size="large"
+                                fullWidth
+                                disableElevation
+                                disabled={loading}
+                                onClick={() => void handleGoogleSignIn()}
+                                sx={{
+                                    py: 1.35,
+                                    fontSize: '0.95rem',
+                                    fontWeight: 700,
+                                    textTransform: 'none',
+                                    borderRadius: 2,
+                                    bgcolor: m.ink,
+                                    color: m.surface,
+                                    '&:hover': { bgcolor: '#1a2420' },
+                                    '&:disabled': { bgcolor: m.inkSubtle, color: m.surface2 },
+                                }}
+                            >
+                                {loading ? (
+                                    <CircularProgress size={22} sx={{ color: m.surface }} />
+                                ) : (
+                                    <>
+                                        <Box
+                                            component="img"
+                                            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                                            alt=""
+                                            sx={{ width: 20, height: 20, mr: 1.5 }}
+                                        />
+                                        Sign in with Google
+                                    </>
+                                )}
+                            </Button>
 
+                            <Typography variant="caption" sx={{ color: m.inkSubtle, textAlign: 'center', display: 'block' }}>
+                                By continuing you agree to our policies below.
+                            </Typography>
 
-                        <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 2 }}>
-                            <Link href="/privacy" style={{ textDecoration: 'none' }}>
-                                <Typography
-                                    variant="caption"
-                                    sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary', textDecoration: 'underline' } }}
-                                >
-                                    Privacy Policy
+                            <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap" useFlexGap>
+                                <Link href="/privacy" style={{ textDecoration: 'none' }}>
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            color: m.inkMuted,
+                                            fontWeight: 600,
+                                            '&:hover': { color: m.ink, textDecoration: 'underline' },
+                                        }}
+                                    >
+                                        Privacy
+                                    </Typography>
+                                </Link>
+                                <Typography variant="caption" sx={{ color: m.lineOnPaper }}>
+                                    ·
                                 </Typography>
-                            </Link>
-                            <Typography variant="caption" color="text.secondary">•</Typography>
-                            <Link href="/terms" style={{ textDecoration: 'none' }}>
-                                <Typography
-                                    variant="caption"
-                                    sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary', textDecoration: 'underline' } }}
-                                >
-                                    Terms of Service
-                                </Typography>
-                            </Link>
+                                <Link href="/terms" style={{ textDecoration: 'none' }}>
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            color: m.inkMuted,
+                                            fontWeight: 600,
+                                            '&:hover': { color: m.ink, textDecoration: 'underline' },
+                                        }}
+                                    >
+                                        Terms
+                                    </Typography>
+                                </Link>
+                            </Stack>
                         </Stack>
-                    </Stack>
-                </CardContent>
-            </Card>
+                    </Box>
+                </Grid>
+            </Grid>
         </Box>
     );
 }

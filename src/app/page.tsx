@@ -1,40 +1,37 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
 import {
     Timeline as TimelineIcon,
     Schedule as ScheduleIcon,
     AutoAwesome as SparklesIcon,
     ArrowForward as ArrowIcon,
-    CheckCircle as CheckCircleIcon
+    CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
-import {
-    Box,
-    Container,
-    Typography,
-    Button,
-    Stack,
-    Grid,
-    alpha
-} from '@mui/material';
+import { Box, Container, Typography, Button, Stack, Grid } from '@mui/material';
+import { marketingPalette as m } from '@/lib/marketingPalette';
+
+const fontStack = 'var(--font-sans), ui-sans-serif, system-ui, sans-serif';
 
 const LandingPage = () => {
     const features = [
         {
-            title: "The Eisenhower Matrix",
-            description: "Stop reacting, start prioritizing. Filter tasks by urgency and importance to discover what actually moves the needle.",
-            icon: <TimelineIcon sx={{ fontSize: 40, color: '#6C63FF' }} />,
+            title: 'Eisenhower Matrix',
+            description:
+                'Decide what is urgent versus important before your day decides for you. Drag tasks between quadrants as priorities shift.',
+            icon: <TimelineIcon sx={{ fontSize: 36, color: m.coral }} />,
         },
         {
-            title: "Unified Planning",
-            description: "Drag and drop your top priorities directly into your daily schedule. Bridge the gap between 'to-do' and 'done'.",
-            icon: <ScheduleIcon sx={{ fontSize: 40, color: '#4CAF50' }} />,
+            title: 'Unified planning',
+            description:
+                'Move from matrix to day plan without retyping. Keep a single source of truth from capture to calendar.',
+            icon: <ScheduleIcon sx={{ fontSize: 36, color: m.accent }} />,
         },
         {
-            title: "AI-Powered Assistance",
-            description: "Let Gemini analyze your workload and calendar. Automatically find focus blocks and keep your progress on track.",
-            icon: <SparklesIcon sx={{ fontSize: 40, color: '#FFD700' }} />,
+            title: 'AI-assisted rhythm',
+            description:
+                'Use Gemini to reflect on workload and calendar so focus blocks stay realistic, not optimistic fiction.',
+            icon: <SparklesIcon sx={{ fontSize: 36, color: m.sage }} />,
         },
     ];
 
@@ -43,163 +40,233 @@ const LandingPage = () => {
             component="main"
             sx={{
                 minHeight: '100vh',
-                bgcolor: '#09090E',
-                color: 'white',
+                fontFamily: fontStack,
+                bgcolor: m.bg,
+                color: m.surface,
                 position: 'relative',
                 overflowX: 'hidden',
-                fontFamily: '"Inter", sans-serif'
             }}
         >
-            {/* Subtle Gradient Background */}
             <Box
+                aria-hidden
                 sx={{
                     position: 'absolute',
-                    top: '-20%',
-                    left: '10%',
-                    width: '600px',
-                    height: '600px',
-                    background: 'radial-gradient(circle, rgba(108, 99, 255, 0.15) 0%, rgba(108, 99, 255, 0) 70%)',
-                    filter: 'blur(100px)',
-                    zIndex: 0,
-                    pointerEvents: 'none'
+                    inset: 0,
+                    background: `
+            radial-gradient(ellipse 70% 45% at 15% 0%, ${m.sageMuted}, transparent 50%),
+            radial-gradient(ellipse 55% 40% at 85% 15%, ${m.accentMuted}, transparent 45%),
+            linear-gradient(180deg, ${m.bg} 0%, ${m.bgLift} 40%, ${m.bg} 100%)
+          `,
+                    pointerEvents: 'none',
+                }}
+            />
+            <Box
+                aria-hidden
+                sx={{
+                    position: 'absolute',
+                    inset: 0,
+                    opacity: 0.035,
+                    backgroundImage: `linear-gradient(${m.surface} 1px, transparent 1px), linear-gradient(90deg, ${m.surface} 1px, transparent 1px)`,
+                    backgroundSize: '56px 56px',
+                    pointerEvents: 'none',
                 }}
             />
 
-            {/* Navigation Header */}
-            <Box component="header" sx={{ position: 'relative', zIndex: 10, py: 3, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <Box
+                component="header"
+                sx={{
+                    position: 'relative',
+                    zIndex: 2,
+                    py: 2.5,
+                    borderBottom: `1px solid ${m.line}`,
+                }}
+            >
                 <Container maxWidth="lg">
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography
-                            variant="h5"
-                            component="div"
-                            fontWeight={900}
+                            component={Link}
+                            href="/"
                             sx={{
-                                background: 'linear-gradient(45deg, #6C63FF, #FF6B6B)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                letterSpacing: '-1px'
+                                fontSize: '1.15rem',
+                                fontWeight: 800,
+                                letterSpacing: '-0.02em',
+                                color: m.surface,
+                                textDecoration: 'none',
                             }}
                         >
-                            TaskTurtle
+                            Task<span style={{ color: m.accent }}>Turtle</span>
                         </Typography>
-                        <Link href="/login" passHref legacyBehavior>
-                            <Button
-                                variant="contained"
-                                sx={{
-                                    bgcolor: 'rgba(255,255,255,0.1)',
-                                    color: 'white',
-                                    fontWeight: 600,
-                                    borderRadius: '8px',
-                                    textTransform: 'none',
-                                    px: 3,
-                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.15)' },
-                                    boxShadow: 'none'
-                                }}
-                            >
-                                Sign In
-                            </Button>
-                        </Link>
+                        <Button
+                            component={Link}
+                            href="/login"
+                            variant="outlined"
+                            sx={{
+                                color: m.surface,
+                                borderColor: m.line,
+                                fontWeight: 600,
+                                textTransform: 'none',
+                                borderRadius: 2,
+                                px: 2.5,
+                                '&:hover': {
+                                    borderColor: m.accent,
+                                    bgcolor: m.accentMuted,
+                                },
+                            }}
+                        >
+                            Sign in
+                        </Button>
                     </Stack>
                 </Container>
             </Box>
 
-            {/* Hero Section */}
-            <Box component="section" sx={{ position: 'relative', zIndex: 1, pt: { xs: 8, md: 16 }, pb: { xs: 10, md: 16 } }}>
+            <Box component="section" sx={{ position: 'relative', zIndex: 1, pt: { xs: 8, md: 14 }, pb: { xs: 10, md: 14 } }}>
                 <Container maxWidth="md">
                     <Box sx={{ textAlign: 'center' }}>
                         <Typography
-                            component="h1"
-                            variant="h1"
+                            component="p"
                             sx={{
-                                fontSize: { xs: '3rem', md: '5rem' },
-                                fontWeight: 900,
-                                lineHeight: 1.1,
-                                mb: 3,
-                                letterSpacing: '-2px'
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                letterSpacing: '0.22em',
+                                textTransform: 'uppercase',
+                                color: m.sage,
+                                mb: 2,
                             }}
                         >
-                            Master your Focus. <br />
-                            Conquer the <Box component="span" sx={{ color: '#6C63FF' }}>Chaos.</Box>
+                            Eisenhower · Planner · Focus
                         </Typography>
-
+                        <Typography
+                            component="h1"
+                            sx={{
+                                fontSize: { xs: '2.65rem', sm: '3.5rem', md: '4.25rem' },
+                                fontWeight: 800,
+                                lineHeight: 1.05,
+                                letterSpacing: '-0.035em',
+                                mb: 3,
+                            }}
+                        >
+                            Clarity before{' '}
+                            <Box component="span" sx={{ color: m.accent }}>
+                                velocity.
+                            </Box>
+                        </Typography>
                         <Typography
                             component="p"
-                            variant="h6"
                             sx={{
-                                color: 'rgba(255,255,255,0.6)',
-                                mb: 6,
-                                maxWidth: '600px',
+                                color: m.inkSubtle,
+                                mb: 5,
+                                maxWidth: 520,
                                 mx: 'auto',
-                                fontWeight: 400,
-                                lineHeight: 1.6,
-                                fontSize: { xs: '1.1rem', md: '1.25rem' }
+                                fontSize: { xs: '1.05rem', md: '1.15rem' },
+                                lineHeight: 1.65,
+                                fontWeight: 450,
                             }}
                         >
-                            TaskTurtle isn't just a list. It's a strategic system that combines the Eisenhower Matrix with intelligent scheduling to elevate your productivity.
+                            TaskTurtle is a quiet system for deciding what matters, scheduling it, and reviewing what actually
+                            shipped—not another infinite scroll of unchecked boxes.
                         </Typography>
-
-                        <Link href="/login" passHref legacyBehavior>
+                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" alignItems="center">
                             <Button
+                                component={Link}
+                                href="/login"
                                 variant="contained"
                                 size="large"
                                 endIcon={<ArrowIcon />}
+                                disableElevation
                                 sx={{
-                                    bgcolor: '#6C63FF',
-                                    px: 5,
-                                    py: 2,
-                                    borderRadius: '12px',
-                                    fontSize: '1.1rem',
-                                    fontWeight: 700,
+                                    bgcolor: m.accent,
+                                    color: m.ink,
+                                    px: 4,
+                                    py: 1.5,
+                                    borderRadius: 2,
+                                    fontSize: '1rem',
+                                    fontWeight: 800,
                                     textTransform: 'none',
-                                    boxShadow: '0 8px 30px rgba(108, 99, 255, 0.4)',
-                                    transition: 'transform 0.2s, box-shadow 0.2s',
-                                    '&:hover': {
-                                        bgcolor: '#5A52D5',
-                                        transform: 'translateY(-2px)',
-                                        boxShadow: '0 12px 40px rgba(108, 99, 255, 0.5)',
-                                    }
+                                    '&:hover': { bgcolor: m.accentHover },
                                 }}
                             >
-                                Start Organizing Free
+                                Open your workspace
                             </Button>
-                        </Link>
+                            <Button
+                                component={Link}
+                                href="/login"
+                                variant="text"
+                                sx={{
+                                    color: m.surface,
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    '&:hover': { bgcolor: 'rgba(244,240,232,0.06)' },
+                                }}
+                            >
+                                Google sign-in →
+                            </Button>
+                        </Stack>
                     </Box>
                 </Container>
             </Box>
 
-            {/* Features Section */}
-            <Box component="section" sx={{ py: 12, bgcolor: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <Box
+                component="section"
+                sx={{
+                    py: { xs: 10, md: 12 },
+                    borderTop: `1px solid ${m.line}`,
+                    bgcolor: 'rgba(0,0,0,0.2)',
+                    position: 'relative',
+                    zIndex: 1,
+                }}
+            >
                 <Container maxWidth="lg">
-                    <Typography component="h2" variant="overline" sx={{ color: '#6C63FF', fontWeight: 800, letterSpacing: '3px', display: 'block', textAlign: 'center', mb: 2 }}>
-                        CORE PILLARS
+                    <Typography
+                        component="p"
+                        sx={{
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.2em',
+                            textTransform: 'uppercase',
+                            color: m.accent,
+                            textAlign: 'center',
+                            mb: 1.5,
+                        }}
+                    >
+                        How it works
                     </Typography>
-                    <Typography component="h3" variant="h3" align="center" fontWeight={800} sx={{ mb: 8, fontSize: { xs: '2rem', md: '2.5rem' } }}>
-                        A system designed for builders.
+                    <Typography
+                        component="h2"
+                        sx={{
+                            textAlign: 'center',
+                            fontWeight: 800,
+                            fontSize: { xs: '1.85rem', md: '2.35rem' },
+                            letterSpacing: '-0.02em',
+                            mb: 6,
+                            maxWidth: 520,
+                            mx: 'auto',
+                        }}
+                    >
+                        One loop: decide, schedule, do, review.
                     </Typography>
 
-                    <Grid container spacing={4}>
+                    <Grid container spacing={3}>
                         {features.map((feature, index) => (
                             <Grid item xs={12} md={4} key={index}>
                                 <Box
                                     sx={{
-                                        p: 4,
+                                        p: 3.5,
                                         height: '100%',
-                                        borderRadius: '24px',
-                                        bgcolor: 'rgba(255,255,255,0.03)',
-                                        border: '1px solid rgba(255,255,255,0.05)',
-                                        transition: 'background-color 0.3s',
+                                        borderRadius: 3,
+                                        bgcolor: 'rgba(244,240,232,0.04)',
+                                        border: `1px solid ${m.line}`,
+                                        transition: 'border-color 0.2s, background-color 0.2s',
                                         '&:hover': {
-                                            bgcolor: 'rgba(255,255,255,0.05)'
-                                        }
+                                            bgcolor: 'rgba(244,240,232,0.07)',
+                                            borderColor: 'rgba(201, 162, 39, 0.25)',
+                                        },
                                     }}
                                 >
-                                    <Box sx={{ mb: 3 }}>
-                                        {feature.icon}
-                                    </Box>
-                                    <Typography component="h4" variant="h5" fontWeight={700} sx={{ mb: 2 }}>
+                                    <Box sx={{ mb: 2.5 }}>{feature.icon}</Box>
+                                    <Typography component="h3" sx={{ fontWeight: 800, fontSize: '1.2rem', mb: 1.5, letterSpacing: '-0.02em' }}>
                                         {feature.title}
                                     </Typography>
-                                    <Typography component="p" variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
+                                    <Typography component="p" sx={{ color: m.inkSubtle, lineHeight: 1.65, fontSize: '0.95rem' }}>
                                         {feature.description}
                                     </Typography>
                                 </Box>
@@ -209,116 +276,152 @@ const LandingPage = () => {
                 </Container>
             </Box>
 
-            {/* Workflow Section */}
-            <Box component="section" sx={{ py: { xs: 12, md: 16 } }}>
+            <Box component="section" sx={{ py: { xs: 10, md: 14 }, position: 'relative', zIndex: 1 }}>
                 <Container maxWidth="lg">
-                    <Grid container spacing={8} alignItems="center">
+                    <Grid container spacing={6} alignItems="center">
                         <Grid item xs={12} md={6}>
-                            <Box sx={{ position: 'relative' }}>
-                                {/* Decorative elements */}
-                                <Box sx={{ position: 'absolute', top: -20, left: -20, width: 100, height: 100, bgcolor: 'rgba(108, 99, 255, 0.1)', borderRadius: '50%', filter: 'blur(30px)' }} />
-
-                                <Typography component="h2" variant="h3" fontWeight={800} sx={{ mb: 4, position: 'relative', zIndex: 1 }}>
-                                    Stop writing infinite lists.
-                                </Typography>
-                                <Typography component="p" variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', mb: 4, fontSize: '1.1rem', lineHeight: 1.8 }}>
-                                    Most task managers fail because they treat all tasks equally. TaskTurtle forces you to make decisions early, so execution becomes effortless.
-                                </Typography>
-
-                                <Stack spacing={2}>
-                                    {['Identify immediate priorities', 'Visual timeline planning', 'Track focused deep work', 'Review progress insights'].map((item, i) => (
-                                        <Stack key={i} direction="row" spacing={2} alignItems="center">
-                                            <CheckCircleIcon sx={{ color: '#4CAF50', fontSize: 20 }} />
-                                            <Typography variant="body1" fontWeight={500}>{item}</Typography>
-                                        </Stack>
-                                    ))}
-                                </Stack>
-                            </Box>
+                            <Typography component="h2" sx={{ fontWeight: 800, fontSize: { xs: '1.85rem', md: '2.25rem' }, mb: 3, letterSpacing: '-0.02em' }}>
+                                Lists don’t fail—priorities do.
+                            </Typography>
+                            <Typography component="p" sx={{ color: m.inkSubtle, mb: 4, fontSize: '1.05rem', lineHeight: 1.75 }}>
+                                When every task looks equal, everything feels urgent. TaskTurtle makes the tradeoffs visible so you
+                                can protect deep work and still handle what’s on fire.
+                            </Typography>
+                            <Stack spacing={1.75}>
+                                {[
+                                    'Sort the matrix before you open email',
+                                    'Drag today’s plan from real priorities',
+                                    'Log time to sharpen estimates over weeks',
+                                    'Glance at analytics without leaving flow',
+                                ].map((item, i) => (
+                                    <Stack key={i} direction="row" spacing={1.5} alignItems="flex-start">
+                                        <CheckCircleIcon sx={{ color: m.sage, fontSize: 22, mt: 0.15, flexShrink: 0 }} />
+                                        <Typography sx={{ fontWeight: 500, fontSize: '0.95rem', lineHeight: 1.5 }}>{item}</Typography>
+                                    </Stack>
+                                ))}
+                            </Stack>
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Box
                                 sx={{
+                                    position: 'relative',
+                                    borderRadius: 3,
                                     p: 2,
-                                    borderRadius: '24px',
-                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+                                    border: `1px solid ${m.line}`,
+                                    background: `linear-gradient(145deg, rgba(95,143,114,0.12) 0%, rgba(201,162,39,0.08) 50%, rgba(196,92,74,0.06) 100%)`,
                                 }}
                             >
                                 <Box
-                                    component="img"
-                                    src="https://images.unsplash.com/photo-1507925922888-508782a9d80d?auto=format&fit=crop&q=80&w=1200"
-                                    alt="Productivity Workspace"
                                     sx={{
-                                        width: '100%',
-                                        borderRadius: '16px',
-                                        display: 'block',
-                                        objectFit: 'cover',
-                                        aspectRatio: '4/3',
-                                        opacity: 0.9
+                                        borderRadius: 2,
+                                        minHeight: 280,
+                                        bgcolor: 'rgba(244,240,232,0.06)',
+                                        border: `1px dashed ${m.line}`,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'column',
+                                        gap: 1,
+                                        py: 6,
+                                        px: 3,
                                     }}
-                                />
+                                >
+                                    <Box
+                                        sx={{
+                                            display: 'grid',
+                                            gridTemplateColumns: '1fr 1fr',
+                                            gap: 1,
+                                            maxWidth: 200,
+                                            width: '100%',
+                                        }}
+                                    >
+                                        {[m.coral, m.accent, m.sage, m.inkSubtle].map((c, i) => (
+                                            <Box
+                                                key={i}
+                                                sx={{
+                                                    aspectRatio: '1',
+                                                    borderRadius: 1.5,
+                                                    bgcolor: `${c}22`,
+                                                    border: `1px solid ${c}44`,
+                                                }}
+                                            />
+                                        ))}
+                                    </Box>
+                                    <Typography sx={{ color: m.inkSubtle, fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.06em', mt: 1 }}>
+                                        MATRIX PREVIEW
+                                    </Typography>
+                                </Box>
                             </Box>
                         </Grid>
                     </Grid>
                 </Container>
             </Box>
 
-            {/* CTA Section */}
-            <Box component="section" sx={{ pb: 16 }}>
+            <Box component="section" sx={{ pb: { xs: 10, md: 14 }, position: 'relative', zIndex: 1 }}>
                 <Container maxWidth="md">
                     <Box
                         sx={{
                             textAlign: 'center',
-                            p: { xs: 6, md: 8 },
-                            borderRadius: '32px',
-                            background: 'linear-gradient(180deg, rgba(108, 99, 255, 0.1) 0%, rgba(108, 99, 255, 0.05) 100%)',
-                            border: '1px solid rgba(108, 99, 255, 0.2)'
+                            p: { xs: 5, md: 7 },
+                            borderRadius: 3,
+                            border: `1px solid ${m.line}`,
+                            background: `linear-gradient(180deg, rgba(201,162,39,0.08) 0%, transparent 100%)`,
                         }}
                     >
-                        <Typography component="h2" variant="h3" fontWeight={800} sx={{ mb: 3 }}>
-                            Reclaim your time.
+                        <Typography component="h2" sx={{ fontWeight: 800, fontSize: { xs: '1.75rem', md: '2.1rem' }, mb: 2, letterSpacing: '-0.02em' }}>
+                            Ready when you are.
                         </Typography>
-                        <Typography component="p" variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', mb: 5, fontSize: '1.1rem' }}>
-                            Join the productivity system built for intentional execution.
+                        <Typography component="p" sx={{ color: m.inkSubtle, mb: 4, fontSize: '1.05rem', lineHeight: 1.65 }}>
+                            Sign in with Google and land straight on your tasks.
                         </Typography>
-                        <Link href="/login" passHref legacyBehavior>
-                            <Button
-                                variant="contained"
-                                size="large"
-                                sx={{
-                                    bgcolor: 'white',
-                                    color: 'black',
-                                    px: 6,
-                                    py: 2,
-                                    borderRadius: '12px',
-                                    fontWeight: 800,
-                                    fontSize: '1.1rem',
-                                    textTransform: 'none',
-                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
-                                }}
-                            >
-                                Enter Workspace
-                            </Button>
-                        </Link>
+                        <Button
+                            component={Link}
+                            href="/login"
+                            variant="contained"
+                            size="large"
+                            disableElevation
+                            sx={{
+                                bgcolor: m.surface,
+                                color: m.ink,
+                                px: 5,
+                                py: 1.5,
+                                borderRadius: 2,
+                                fontWeight: 800,
+                                textTransform: 'none',
+                                fontSize: '1rem',
+                                '&:hover': { bgcolor: m.surface2 },
+                            }}
+                        >
+                            Sign in to start
+                        </Button>
                     </Box>
                 </Container>
             </Box>
 
-            {/* Footer */}
-            <Box component="footer" sx={{ py: 6, borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+            <Box
+                component="footer"
+                sx={{
+                    py: 5,
+                    borderTop: `1px solid ${m.line}`,
+                    textAlign: 'center',
+                    position: 'relative',
+                    zIndex: 1,
+                }}
+            >
                 <Container>
-                    <Stack direction="row" spacing={3} justifyContent="center" sx={{ mb: 3 }}>
+                    <Stack direction="row" spacing={3} justifyContent="center" sx={{ mb: 2 }}>
                         <Link href="/privacy" style={{ textDecoration: 'none' }}>
-                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', '&:hover': { color: 'white' } }}>Privacy</Typography>
+                            <Typography sx={{ color: m.inkSubtle, fontSize: '0.875rem', '&:hover': { color: m.surface } }}>
+                                Privacy
+                            </Typography>
                         </Link>
                         <Link href="/terms" style={{ textDecoration: 'none' }}>
-                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', '&:hover': { color: 'white' } }}>Terms</Typography>
+                            <Typography sx={{ color: m.inkSubtle, fontSize: '0.875rem', '&:hover': { color: m.surface } }}>
+                                Terms
+                            </Typography>
                         </Link>
                     </Stack>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.2)' }}>
-                        © 2026 TaskTurtle. Engineered for focus.
-                    </Typography>
+                    <Typography sx={{ color: m.inkMuted, fontSize: '0.8rem' }}>© {new Date().getFullYear()} TaskTurtle</Typography>
                 </Container>
             </Box>
         </Box>

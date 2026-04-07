@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Box from '@mui/material/Box';
@@ -21,35 +21,45 @@ import MenuItem from '@mui/material/MenuItem';
 import Fab from '@mui/material/Fab';
 import Divider from '@mui/material/Divider';
 import CircularProgress from '@mui/material/CircularProgress';
+import Paper from '@mui/material/Paper';
+import BottomNavigation from '@mui/material/BottomNavigation';
+import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ChecklistIcon from '@mui/icons-material/Checklist';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
-import SettingsIcon from '@mui/icons-material/Settings';
 import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useTaskStore } from '@/store/taskStore';
 import QuickAddDialog from '@/components/tasks/QuickAddDialog';
 import CommandPalette from '@/components/layout/CommandPalette';
 import { useThemeMode } from '@/components/ThemeContext';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
+import { getPageTitle, getBottomNavValue } from '@/lib/navConfig';
 
-const DRAWER_WIDTH = 240;
+const DRAWER_WIDTH = 260;
 
-// Google RGBY colors for sidebar icons
 const GOOGLE_ICON_COLORS = ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#4285F4', '#EA4335', '#34A853'];
 
-const NAV_ITEMS = [
+const PRIMARY_NAV = [
     { label: 'Tasks', icon: <ChecklistIcon />, href: '/tasks' },
     { label: 'Planner', icon: <ViewTimelineIcon />, href: '/planner' },
     { label: 'Focus', icon: <CenterFocusStrongIcon />, href: '/focus' },
+    { label: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
+] as const;
+
+const MORE_NAV = [
     { label: 'AI Assistant', icon: <SmartToyIcon />, href: '/chat' },
-    { label: 'Analytics', icon: <DashboardIcon />, href: '/dashboard' },
     { label: 'Features', icon: <LightbulbOutlinedIcon />, href: '/features' },
-];
+] as const;
+
+function routeSelected(pathname: string, href: string) {
+    return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export default function DashboardLayout({
     children,
@@ -57,6 +67,7 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const router = useRouter();
     const { data: session, status } = useSession({
         required: true,
         onUnauthenticated() {
@@ -64,6 +75,7 @@ export default function DashboardLayout({
         },
     });
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [moreSheetOpen, setMoreSheetOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const { quickAddOpen, setQuickAddOpen } = useTaskStore();
 
@@ -81,16 +93,56 @@ export default function DashboardLayout({
     const isGoogle = resolvedMode === 'google';
     const isLuxury = resolvedMode === 'luxury';
 
-    if (status === 'loading') {
-        return (
-            <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-                <CircularProgress />
-            </Box>
-        );
-    }
+    const closeMobile = useCallback(() => setMobileOpen(false), []);
+    const closeMore = useCallback(() => setMoreSheetOpen(false), []);
 
-    const drawer = (
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    const navButtonSx = useCallback(
+        (href: string, googleColorIndex: number) => ({
+            borderRadius: 2,
+            mb: 0.5,
+            ...(isGoogle
+                ? {
+                    '&.Mui-selected': {
+                        bgcolor: (theme: { palette: { primary: { main: string } } }) => `${theme.palette.primary.main}15`,
+                        color: GOOGLE_ICON_COLORS[googleColorIndex],
+                        '& .MuiListItemIcon-root': {
+                            color: GOOGLE_ICON_COLORS[googleColorIndex],
+                        },
+                    },
+                    '&:hover': {
+                        bgcolor: (theme: { palette: { primary: { main: string } } }) => `${theme.palette.primary.main}14`,
+                    },
+                }
+                : isLuxury
+                    ? {
+                        '&.Mui-selected': {
+                            bgcolor: 'rgba(117, 104, 192, 0.12)',
+                        },
+                        '& .MuiListItemIcon-root': {
+                            color: routeSelected(pathname, href) ? 'primary.main' : 'text.secondary',
+                        },
+                        '&:hover': {
+                            bgcolor: 'rgba(117, 104, 192, 0.08)',
+                        },
+                    }
+                    : {
+                        '&.Mui-selected': {
+                            bgcolor: (theme: { palette: { primary: { main: string } } }) => `${theme.palette.primary.main}15`,
+                            color: 'primary.main',
+                            '& .MuiListItemIcon-root': {
+                                color: 'primary.main',
+                            },
+                        },
+                        '&:hover': {
+                            bgcolor: (theme: { palette: { primary: { main: string } } }) => `${theme.palette.primary.main}14`,
+                        },
+                    }),
+        }),
+        [isGoogle, isLuxury, pathname]
+    );
+
+    const brandBlock = useMemo(
+        () => (
             <Box sx={{ px: 2, display: 'flex', alignItems: 'center', gap: 1, minHeight: 56 }}>
                 {isGoogle ? (
                     <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -124,56 +176,25 @@ export default function DashboardLayout({
                     </Typography>
                 )}
             </Box>
-            <Divider sx={{ borderColor: 'divider' }} />
+        ),
+        [isGoogle, isLuxury]
+    );
+
+    const renderNavList = (onNavigate?: () => void) => (
+        <>
             <List sx={{ flex: 1, px: 1, pt: 1 }}>
-                {NAV_ITEMS.map((item, index) => (
+                {PRIMARY_NAV.map((item, index) => (
                     <ListItem key={item.href} disablePadding>
                         <ListItemButton
                             component={Link}
                             href={item.href}
-                            selected={pathname === item.href}
-                            sx={{
-                                borderRadius: 2,
-                                mb: 1,
-                                ...(isGoogle
-                                    ? {
-                                        '&.Mui-selected': {
-                                            bgcolor: (theme) => `${theme.palette.primary.main}15`,
-                                            color: GOOGLE_ICON_COLORS[index],
-                                            '& .MuiListItemIcon-root': {
-                                                color: GOOGLE_ICON_COLORS[index],
-                                            },
-                                        },
-                                        '&:hover': {
-                                            bgcolor: (theme) => `${theme.palette.primary.main}14`,
-                                        },
-                                    }
-                                    : isLuxury
-                                        ? {
-                                            '& .MuiListItemIcon-root': {
-                                                color: pathname === item.href ? 'primary.main' : 'text.secondary',
-                                            },
-                                            '&:hover': {
-                                                bgcolor: 'rgba(117, 104, 192, 0.08)',
-                                            },
-                                        }
-                                        : {
-                                            '&.Mui-selected': {
-                                                bgcolor: (theme) => `${theme.palette.primary.main}15`,
-                                                color: 'primary.main',
-                                                '& .MuiListItemIcon-root': {
-                                                    color: 'primary.main',
-                                                },
-                                            },
-                                            '&:hover': {
-                                                bgcolor: (theme) => `${theme.palette.primary.main}14`,
-                                            },
-                                        }),
-                            }}
+                            selected={routeSelected(pathname, item.href)}
+                            onClick={onNavigate}
+                            sx={navButtonSx(item.href, index)}
                         >
                             <ListItemIcon
                                 sx={{
-                                    minWidth: 40,
+                                    minWidth: 44,
                                     ...(isGoogle ? { color: GOOGLE_ICON_COLORS[index] } : {}),
                                 }}
                             >
@@ -182,22 +203,61 @@ export default function DashboardLayout({
                             <ListItemText
                                 primary={item.label}
                                 primaryTypographyProps={{
-                                    fontSize: '0.875rem',
-                                    fontWeight: pathname === item.href ? 600 : 400
+                                    fontSize: '0.9rem',
+                                    fontWeight: routeSelected(pathname, item.href) ? 600 : 500,
                                 }}
                             />
                         </ListItemButton>
                     </ListItem>
                 ))}
+            </List>
+            <Typography
+                variant="overline"
+                sx={{ px: 2.5, pt: 1.5, pb: 0.5, display: 'block', color: 'text.secondary', letterSpacing: '0.14em', fontWeight: 700 }}
+            >
+                More
+            </Typography>
+            <List sx={{ px: 1, pb: 1 }}>
+                {MORE_NAV.map((item, index) => {
+                    const gIdx = PRIMARY_NAV.length + index;
+                    return (
+                        <ListItem key={item.href} disablePadding>
+                            <ListItemButton
+                                component={Link}
+                                href={item.href}
+                                selected={routeSelected(pathname, item.href)}
+                                onClick={onNavigate}
+                                sx={navButtonSx(item.href, gIdx)}
+                            >
+                                <ListItemIcon
+                                    sx={{
+                                        minWidth: 44,
+                                        ...(isGoogle ? { color: GOOGLE_ICON_COLORS[gIdx % GOOGLE_ICON_COLORS.length] } : {}),
+                                    }}
+                                >
+                                    {item.icon}
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary={item.label}
+                                    primaryTypographyProps={{
+                                        fontSize: '0.9rem',
+                                        fontWeight: routeSelected(pathname, item.href) ? 600 : 500,
+                                    }}
+                                />
+                            </ListItemButton>
+                        </ListItem>
+                    );
+                })}
                 {session?.user?.email === 'sanghviamit@gmail.com' && (
                     <ListItem disablePadding>
                         <ListItemButton
                             component={Link}
                             href="/admin"
-                            selected={pathname === '/admin'}
+                            selected={routeSelected(pathname, '/admin')}
+                            onClick={onNavigate}
                             sx={{
                                 borderRadius: 2,
-                                mb: 1,
+                                mb: 0.5,
                                 '&.Mui-selected': {
                                     bgcolor: 'rgba(251, 140, 0, 0.15)',
                                     color: '#FB8C00',
@@ -210,30 +270,124 @@ export default function DashboardLayout({
                                 },
                             }}
                         >
-                            <ListItemIcon sx={{ minWidth: 40 }}>
+                            <ListItemIcon sx={{ minWidth: 44 }}>
                                 <AdminPanelSettingsIcon />
                             </ListItemIcon>
                             <ListItemText
                                 primary="Admin"
                                 primaryTypographyProps={{
-                                    fontSize: '0.875rem',
-                                    fontWeight: pathname === '/admin' ? 600 : 400
+                                    fontSize: '0.9rem',
+                                    fontWeight: routeSelected(pathname, '/admin') ? 600 : 500,
                                 }}
                             />
                         </ListItemButton>
                     </ListItem>
                 )}
             </List>
+        </>
+    );
+
+    const drawer = (
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            {brandBlock}
+            <Divider sx={{ borderColor: 'divider' }} />
+            {renderNavList(closeMobile)}
+            <Divider sx={{ borderColor: 'divider', mt: 'auto' }} />
+            <List sx={{ px: 1, py: 1 }}>
+                <ListItem disablePadding>
+                    <ListItemButton component={Link} href="/settings" onClick={closeMobile} sx={{ borderRadius: 2 }}>
+                        <ListItemIcon sx={{ minWidth: 44 }}>
+                            <SettingsIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Settings" primaryTypographyProps={{ fontSize: '0.9rem' }} />
+                    </ListItemButton>
+                </ListItem>
+            </List>
+            <Typography variant="caption" sx={{ px: 2, pb: 1.5, color: 'text.secondary', display: { xs: 'block', md: 'none' } }}>
+                Tip: ⌘K / Ctrl+K for command palette
+            </Typography>
         </Box>
     );
 
+    const moreSheetContent = (
+        <Box sx={{ px: 2, pt: 1, pb: 'calc(16px + env(safe-area-inset-bottom))' }} role="dialog" aria-label="More destinations">
+            <Box sx={{ width: 40, height: 4, borderRadius: 2, bgcolor: 'divider', mx: 'auto', mb: 2 }} />
+            <Typography variant="subtitle2" color="text.secondary" sx={{ px: 1, mb: 1, fontWeight: 700 }}>
+                More
+            </Typography>
+            <List disablePadding>
+                <ListItem disablePadding>
+                    <ListItemButton
+                        component={Link}
+                        href="/dashboard"
+                        onClick={closeMore}
+                        selected={routeSelected(pathname, '/dashboard')}
+                        sx={{ borderRadius: 2, py: 1.25 }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 44 }}>
+                            <DashboardIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Dashboard" primaryTypographyProps={{ fontWeight: 600 }} />
+                    </ListItemButton>
+                </ListItem>
+                {MORE_NAV.map((item) => (
+                    <ListItem key={item.href} disablePadding>
+                        <ListItemButton
+                            component={Link}
+                            href={item.href}
+                            onClick={closeMore}
+                            selected={routeSelected(pathname, item.href)}
+                            sx={{ borderRadius: 2, py: 1.25 }}
+                        >
+                            <ListItemIcon sx={{ minWidth: 44 }}>{item.icon}</ListItemIcon>
+                            <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 600 }} />
+                        </ListItemButton>
+                    </ListItem>
+                ))}
+                {session?.user?.email === 'sanghviamit@gmail.com' && (
+                    <ListItem disablePadding>
+                        <ListItemButton component={Link} href="/admin" onClick={closeMore} sx={{ borderRadius: 2, py: 1.25 }}>
+                            <ListItemIcon sx={{ minWidth: 44 }}>
+                                <AdminPanelSettingsIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Admin" primaryTypographyProps={{ fontWeight: 600 }} />
+                        </ListItemButton>
+                    </ListItem>
+                )}
+                <ListItem disablePadding>
+                    <ListItemButton component={Link} href="/settings" onClick={closeMore} sx={{ borderRadius: 2, py: 1.25 }}>
+                        <ListItemIcon sx={{ minWidth: 44 }}>
+                            <SettingsIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Settings" primaryTypographyProps={{ fontWeight: 600 }} />
+                    </ListItemButton>
+                </ListItem>
+            </List>
+        </Box>
+    );
+
+    const handleBottomNav = (_: React.SyntheticEvent, value: string) => {
+        if (value === '__more') {
+            setMoreSheetOpen(true);
+            return;
+        }
+        router.push(value);
+    };
+
+    if (status === 'loading') {
+        return (
+            <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-            {/* Mobile drawer */}
             <Drawer
                 variant="temporary"
                 open={mobileOpen}
-                onClose={() => setMobileOpen(false)}
+                onClose={closeMobile}
                 aria-label="Navigation menu"
                 ModalProps={{ keepMounted: true }}
                 sx={{
@@ -251,7 +405,6 @@ export default function DashboardLayout({
                 {drawer}
             </Drawer>
 
-            {/* Desktop drawer */}
             <Drawer
                 variant="permanent"
                 sx={{
@@ -269,7 +422,22 @@ export default function DashboardLayout({
                 {drawer}
             </Drawer>
 
-            {/* Main content */}
+            <Drawer
+                anchor="bottom"
+                open={moreSheetOpen}
+                onClose={closeMore}
+                sx={{ display: { xs: 'block', md: 'none' }, zIndex: 1300 }}
+                PaperProps={{
+                    sx: {
+                        borderTopLeftRadius: 16,
+                        borderTopRightRadius: 16,
+                        maxHeight: '70vh',
+                    },
+                }}
+            >
+                {moreSheetContent}
+            </Drawer>
+
             <Box
                 sx={{
                     flex: 1,
@@ -298,7 +466,6 @@ export default function DashboardLayout({
                         pt: 'env(safe-area-inset-top)',
                     }}
                 >
-                    {/* Google 4-color strip */}
                     {isGoogle && (
                         <Box sx={{ display: 'flex', height: 4 }}>
                             <Box sx={{ flex: 1, bgcolor: '#4285F4' }} />
@@ -316,9 +483,9 @@ export default function DashboardLayout({
                         >
                             <MenuIcon />
                         </IconButton>
-                        <Box sx={{ flexGrow: 1 }}>
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                             <Typography variant="h6" noWrap component="div">
-                                {NAV_ITEMS.find((n) => n.href === pathname)?.label || 'Tasks'}
+                                {getPageTitle(pathname)}
                             </Typography>
                         </Box>
                         <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} aria-label="User profile menu">
@@ -328,18 +495,16 @@ export default function DashboardLayout({
                                 sx={{ width: 32, height: 32 }}
                             />
                         </IconButton>
-                        <Menu
-                            anchorEl={anchorEl}
-                            open={Boolean(anchorEl)}
-                            onClose={() => setAnchorEl(null)}
-                        >
+                        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
                             <MenuItem disabled>
                                 <Typography variant="body2" color="text.secondary">
                                     {session?.user?.email}
                                 </Typography>
                             </MenuItem>
                             <Divider />
-                            <MenuItem component={Link} href="/settings" onClick={() => setAnchorEl(null)}>Settings</MenuItem>
+                            <MenuItem component={Link} href="/settings" onClick={() => setAnchorEl(null)}>
+                                Settings
+                            </MenuItem>
                             <MenuItem onClick={() => signOut()}>Sign out</MenuItem>
                         </Menu>
                     </Toolbar>
@@ -349,8 +514,10 @@ export default function DashboardLayout({
                     component="main"
                     sx={{
                         flex: 1,
-                        p: { xs: 2, md: 3 },
-                        maxWidth: 1400,
+                        px: { xs: 2, md: 3 },
+                        pt: { xs: 2, md: 3 },
+                        pb: { xs: 'calc(88px + env(safe-area-inset-bottom))', md: 3 },
+                        maxWidth: 1200,
                         width: '100%',
                         mx: 'auto',
                     }}
@@ -360,14 +527,50 @@ export default function DashboardLayout({
                 </Box>
             </Box>
 
-            {/* Floating Action Button */}
+            <Paper
+                square
+                elevation={8}
+                sx={{
+                    display: { xs: 'block', md: 'none' },
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1100,
+                    pb: 'env(safe-area-inset-bottom)',
+                    borderTop: 1,
+                    borderColor: 'divider',
+                }}
+            >
+                <BottomNavigation
+                    value={getBottomNavValue(pathname)}
+                    onChange={handleBottomNav}
+                    showLabels
+                    sx={{
+                        bgcolor: 'background.paper',
+                        '& .MuiBottomNavigationAction-label': {
+                            fontSize: '0.65rem',
+                            '&.Mui-selected': { fontSize: '0.7rem' },
+                        },
+                    }}
+                >
+                    <BottomNavigationAction label="Tasks" value="/tasks" icon={<ChecklistIcon />} />
+                    <BottomNavigationAction label="Planner" value="/planner" icon={<ViewTimelineIcon />} />
+                    <BottomNavigationAction label="Focus" value="/focus" icon={<CenterFocusStrongIcon />} />
+                    <BottomNavigationAction label="More" value="__more" icon={<MoreHorizIcon />} />
+                </BottomNavigation>
+            </Paper>
+
             <Fab
                 color="primary"
                 aria-label="Quick add task"
                 onClick={() => setQuickAddOpen(true)}
                 sx={{
                     position: 'fixed',
-                    bottom: 'calc(24px + env(safe-area-inset-bottom))',
+                    bottom: {
+                        xs: 'calc(72px + env(safe-area-inset-bottom))',
+                        md: 'calc(24px + env(safe-area-inset-bottom))',
+                    },
                     right: 'calc(24px + env(safe-area-inset-right))',
                     zIndex: 1200,
                 }}
@@ -375,13 +578,8 @@ export default function DashboardLayout({
                 <AddIcon />
             </Fab>
 
-            {/* Quick Add Dialog */}
-            <QuickAddDialog
-                open={quickAddOpen}
-                onClose={() => setQuickAddOpen(false)}
-            />
+            <QuickAddDialog open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
 
-            {/* Command Palette */}
             <CommandPalette />
         </Box>
     );

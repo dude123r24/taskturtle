@@ -1,17 +1,15 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Geist, Figtree } from 'next/font/google';
+import { Figtree } from 'next/font/google';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import Providers from '@/components/Providers';
 import { ThemeContextProvider } from '@/components/ThemeContext';
 import './globals.css';
 import { cn } from "@/lib/utils";
 
-const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
+const figtree = Figtree({
     subsets: ['latin'],
     weight: ['400', '500', '600', '700', '800'],
-    variable: '--font-plus-jakarta',
+    variable: '--font-sans',
     display: 'swap',
 });
 
@@ -28,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-    themeColor: '#6C63FF',
+    themeColor: '#0a0f0c',
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
@@ -42,12 +40,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" className={cn("font-sans", figtree.variable)}>
+        <html lang="en" className={cn('antialiased', figtree.variable)}>
             <head>
-                <link
-                    rel="stylesheet"
-                    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-                />
                 <link rel="icon" href="/icons/icon-192.png" type="image/png" />
                 <link rel="apple-touch-icon" href="/icons/icon-192.png" />
             </head>

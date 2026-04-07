@@ -14,17 +14,20 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ChecklistIcon from '@mui/icons-material/Checklist';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import { useTaskStore } from '@/store/taskStore';
 
 const STATIC_ACTIONS = [
-    { label: 'Go to Analytics', path: '/dashboard', icon: <DashboardIcon /> },
+    { label: 'Go to Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
     { label: 'Go to Tasks', path: '/tasks', icon: <ChecklistIcon /> },
     { label: 'Go to Planner', path: '/planner', icon: <ViewTimelineIcon /> },
-    { label: 'Go to Focus Mode', path: '/focus', icon: <CenterFocusStrongIcon /> },
+    { label: 'Go to Focus', path: '/focus', icon: <CenterFocusStrongIcon /> },
+    { label: 'Go to AI Assistant', path: '/chat', icon: <SmartToyIcon /> },
+    { label: 'Go to Features', path: '/features', icon: <LightbulbOutlinedIcon /> },
 ];
 
 export default function CommandPalette() {

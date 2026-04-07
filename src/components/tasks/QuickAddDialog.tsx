@@ -13,7 +13,6 @@ import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
-import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
@@ -224,14 +223,24 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                 },
             }}
         >
-            <DialogTitle id="quick-add-dialog-title" sx={{ fontWeight: 600 }}>
+            <DialogTitle id="quick-add-dialog-title" sx={{ fontWeight: 600, pt: 1.5, pb: 1, px: 2.5, fontSize: '1.05rem' }}>
                 {isEditing ? 'Edit Task' : 'Quick Add Task'}
             </DialogTitle>
-            <DialogContent>
-                <Stack spacing={3} sx={{ mt: 1 }}>
+            <DialogContent
+                sx={{
+                    px: 2.5,
+                    // Outlined TextField labels need vertical room; pt:0 clips the legend against the title
+                    pt: 2,
+                    pb: 2,
+                    overflowX: 'hidden',
+                    overflowY: 'auto',
+                }}
+            >
+                <Stack spacing={2}>
                     <TextField
                         inputRef={inputRef}
                         fullWidth
+                        size="small"
                         label="What needs to be done?"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
@@ -241,18 +250,19 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
 
                     <TextField
                         fullWidth
+                        size="small"
                         label="Description (optional)"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         variant="outlined"
                         multiline
                         minRows={2}
-                        maxRows={4}
+                        maxRows={3}
                     />
 
                     {isEditing && (
                         <Box>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block', fontWeight: 600, letterSpacing: '0.02em' }}>
                                 Status
                             </Typography>
                             <ToggleButtonGroup
@@ -283,32 +293,69 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                         </Box>
                     )}
 
-                    <Stack direction="row" spacing={2}>
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        spacing={1.25}
+                        alignItems={{ xs: 'stretch', sm: 'flex-start' }}
+                    >
                         <TextField
                             label="Due Date (optional)"
                             type="datetime-local"
+                            size="small"
                             fullWidth
                             value={dueDate}
                             onChange={(e) => setDueDate(e.target.value)}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
+                            InputLabelProps={{ shrink: true }}
+                            sx={{ flex: { sm: '1 1 auto' }, minWidth: 0 }}
                         />
-                        <TextField
-                            label="Estimated Time (min)"
-                            type="number"
-                            fullWidth
-                            value={estimatedMinutes}
-                            onChange={(e) => setEstimatedMinutes(e.target.value)}
-                            inputProps={{
-                                min: 5,
-                                step: 5,
+                        <Stack
+                            direction="row"
+                            spacing={0.75}
+                            alignItems="center"
+                            sx={{
+                                flexShrink: 0,
+                                width: { xs: '100%', sm: 'auto' },
+                                pt: { sm: 0.25 },
                             }}
-                        />
+                        >
+                            <TextField
+                                label="Est. (min)"
+                                type="number"
+                                size="small"
+                                value={estimatedMinutes}
+                                onChange={(e) => setEstimatedMinutes(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                inputProps={{ min: 5, step: 5 }}
+                                sx={{
+                                    flex: { xs: 1, sm: '0 0 auto' },
+                                    width: { sm: 100 },
+                                    minWidth: { xs: 0, sm: 100 },
+                                }}
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        size="small"
+                                        checked={isChase}
+                                        onChange={(e) => setIsChase(e.target.checked)}
+                                        color="warning"
+                                    />
+                                }
+                                label={
+                                    <Stack direction="row" spacing={0.35} alignItems="center" sx={{ ml: -0.25 }}>
+                                        <DirectionsRunIcon sx={{ fontSize: '0.95rem', color: isChase ? '#FF6D00' : 'text.secondary' }} />
+                                        <Typography variant="caption" sx={{ color: isChase ? '#FF6D00' : 'text.secondary', fontWeight: isChase ? 700 : 500, lineHeight: 1.2 }}>
+                                            Chase
+                                        </Typography>
+                                    </Stack>
+                                }
+                                sx={{ m: 0, mr: 0, gap: 0.25, whiteSpace: 'nowrap' }}
+                            />
+                        </Stack>
                     </Stack>
 
                     <Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block', fontWeight: 600, letterSpacing: '0.02em' }}>
                             Eisenhower Quadrant
                         </Typography>
                         <ToggleButtonGroup
@@ -338,48 +385,16 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                         </ToggleButtonGroup>
                     </Box>
 
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <TextField
-                            fullWidth
-                            label="Estimated time (minutes)"
-                            type="number"
-                            value={estimatedMinutes}
-                            onChange={(e) => setEstimatedMinutes(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            variant="outlined"
-                            inputProps={{ min: 0, step: 15 }}
-                            size="small"
-                        />
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={isChase}
-                                    onChange={(e) => setIsChase(e.target.checked)}
-                                    color="warning"
-                                />
-                            }
-                            label={
-                                <Stack direction="row" spacing={0.5} alignItems="center">
-                                    <DirectionsRunIcon sx={{ fontSize: '1rem', color: isChase ? '#FF6D00' : 'text.secondary' }} />
-                                    <Typography variant="body2" sx={{ color: isChase ? '#FF6D00' : 'text.secondary', fontWeight: isChase ? 600 : 400 }}>
-                                        Chase
-                                    </Typography>
-                                </Stack>
-                            }
-                            sx={{ ml: 0, whiteSpace: 'nowrap' }}
-                        />
-                    </Stack>
-
                     {/* Subtasks — only when editing */}
                     {isEditing && (
                         <>
                             <Divider />
                             <Box>
-                                <Typography variant="body2" fontWeight={600} sx={{ mb: 1.5 }}>
+                                <Typography variant="body2" fontWeight={600} sx={{ mb: 1, fontSize: '0.85rem' }}>
                                     <FormatListBulletedIcon sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5 }} />
                                     Subtasks
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+                                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
                                     Bite-sized steps. They stay inside this task and keep the matrix clean.
                                 </Typography>
                                 <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
@@ -461,7 +476,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                         <>
                             <Divider />
                             <Box>
-                                <Typography variant="body2" fontWeight={600} sx={{ mb: 1.5 }}>
+                                <Typography variant="body2" fontWeight={600} sx={{ mb: 1, fontSize: '0.85rem' }}>
                                     <EditNoteIcon sx={{ fontSize: '1rem', verticalAlign: 'middle', mr: 0.5 }} />
                                     Updates
                                 </Typography>
@@ -530,7 +545,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                     )}
                 </Stack>
             </DialogContent>
-            <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'space-between' }}>
+            <DialogActions sx={{ px: 2.5, py: 1, pb: 1.5, justifyContent: 'space-between' }}>
                 <Box>
                     {isEditing && (
                         <Button
