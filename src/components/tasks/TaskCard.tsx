@@ -250,8 +250,11 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             flex: 1,
                             minWidth: 0,
                             display: comfortable ? 'block' : compact ? 'flex' : 'block',
-                            alignItems: comfortable ? undefined : compact ? 'center' : undefined,
-                            gap: comfortable ? undefined : compact ? 1 : undefined,
+                            // Compact desktop: stack title and meta vertically so due date / time
+                            // keeps horizontal space (row flex was squeezing meta into a narrow column).
+                            flexDirection: comfortable ? undefined : compact ? 'column' : undefined,
+                            alignItems: comfortable ? undefined : compact ? 'stretch' : undefined,
+                            gap: comfortable ? undefined : compact ? 0.75 : undefined,
                         }}
                     >
                         <Stack direction="row" alignItems="flex-start" spacing={1} flexWrap="wrap" sx={{ gap: 0.75 }}>
@@ -362,7 +365,10 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                         <Stack
                             direction="row"
                             spacing={comfortable ? 1.5 : 1}
-                            sx={{ mt: comfortable ? 1.25 : compact ? 0 : 0.75 }}
+                            sx={{
+                                mt: comfortable ? 1.25 : compact ? 0 : 0.75,
+                                ...(compact && !comfortable ? { width: '100%', minWidth: 0 } : {}),
+                            }}
                             alignItems="center"
                             flexWrap={comfortable ? 'wrap' : 'nowrap'}
                             useFlexGap
@@ -390,9 +396,24 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             ) : null}
 
                             {task.dueDate ? (
-                                <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: 'text.secondary' }}>
-                                    <EventIcon sx={metaIconSx} />
-                                    <Typography variant="caption" sx={{ ...metaTextSx, color: 'text.secondary' }}>
+                                <Stack
+                                    direction="row"
+                                    alignItems="center"
+                                    spacing={0.5}
+                                    sx={{
+                                        color: 'text.secondary',
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    <EventIcon sx={{ ...metaIconSx, flexShrink: 0 }} />
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            ...metaTextSx,
+                                            color: 'text.secondary',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
                                         {new Date(task.dueDate).toLocaleDateString('en-US', {
                                             month: 'short',
                                             day: 'numeric',

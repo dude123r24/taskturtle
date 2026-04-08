@@ -9,19 +9,11 @@ import Link from 'next/link';
 import { useTheme } from '@mui/material/styles';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FlagIcon from '@mui/icons-material/Flag';
-import type { Task, EisenhowerQuadrant } from '@/store/taskStore';
+import type { Task } from '@/store/taskStore';
 import { frostedLuxury } from '@/components/dashboard/dashboardTokens';
 import { useLuxuryDashboard } from '@/components/dashboard/useLuxuryDashboard';
 import { QUADRANT_LABELS as QUADRANT_META } from '@/lib/utils';
 import { tasksDeepLinks } from '@/lib/taskDeepLinks';
-
-const QUADRANT_LABELS: Record<EisenhowerQuadrant, string> = {
-    DO_FIRST: 'Do first',
-    SCHEDULE: 'Schedule',
-    DELEGATE: 'Delegate',
-    ELIMINATE: 'Eliminate',
-    UNASSIGNED: 'Unassigned',
-};
 
 function formatDue(due?: string) {
     if (!due) return '';
@@ -30,12 +22,17 @@ function formatDue(due?: string) {
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-function buildSubtitle(task: Task) {
+/** Meta line next to quadrant chip: due only (chip already shows quadrant), or description / latest update. */
+function buildPriorityMetaText(task: Task): string | null {
     if (task.description?.trim()) return task.description.trim();
     if (task.updates?.length) return task.updates[0].content;
-    const q = QUADRANT_LABELS[task.quadrant] || '';
     const due = formatDue(task.dueDate);
-    return [q, due ? `Due ${due}` : ''].filter(Boolean).join(' · ');
+    if (due) return `Due ${due}`;
+    return null;
+}
+
+function metaTextIsMultilineClamped(task: Task): boolean {
+    return !!(task.description?.trim() || task.updates?.length);
 }
 
 export type PrioritySection = {
@@ -374,21 +371,30 @@ function TaskRow({
                           }),
                 }}
             >
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, flexWrap: 'wrap' }}>
-                    <Typography
-                        variant="subtitle1"
-                        fontWeight={800}
-                        sx={{
-                            color: 'text.primary',
-                            letterSpacing: '-0.02em',
-                            flex: '1 1 auto',
-                            minWidth: 0,
-                            lineHeight: 1.35,
-                            fontSize: { xs: '1.02rem', md: '1rem' },
-                        }}
-                    >
-                        {task.title}
-                    </Typography>
+                <Typography
+                    variant="subtitle1"
+                    fontWeight={800}
+                    sx={{
+                        color: 'text.primary',
+                        letterSpacing: '-0.02em',
+                        width: '100%',
+                        lineHeight: 1.35,
+                        fontSize: { xs: '1.02rem', md: '1rem' },
+                    }}
+                >
+                    {task.title}
+                </Typography>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: 1,
+                        mt: 1,
+                        rowGap: 0.75,
+                    }}
+                >
                     <Chip
                         label={QUADRANT_META[task.quadrant]?.label || 'Backlog'}
                         size="small"
@@ -398,6 +404,7 @@ function TaskRow({
                             fontSize: '0.7rem',
                             bgcolor: `${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}18`,
                             color: QUADRANT_META[task.quadrant]?.color || '#9E9E9E',
+                            flexShrink: 0,
                         }}
                     />
                     {task.isChase && (
@@ -410,26 +417,31 @@ function TaskRow({
                                 fontSize: '0.7rem',
                                 bgcolor: 'rgba(201, 162, 39, 0.2)',
                                 color: 'secondary.dark',
+                                flexShrink: 0,
                             }}
                         />
                     )}
+                    {buildPriorityMetaText(task) && (
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                color: 'text.secondary',
+                                lineHeight: 1.55,
+                                minWidth: 0,
+                                flex: '1 1 120px',
+                                whiteSpace: metaTextIsMultilineClamped(task) ? undefined : 'nowrap',
+                                ...(metaTextIsMultilineClamped(task) && {
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                }),
+                            }}
+                        >
+                            {buildPriorityMetaText(task)}
+                        </Typography>
+                    )}
                 </Box>
-                {buildSubtitle(task) && (
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: 'text.secondary',
-                            mt: 1,
-                            lineHeight: 1.55,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        {buildSubtitle(task)}
-                    </Typography>
-                )}
             </Box>
             <IconButton
                 aria-label={`Mark ${task.title} as done`}
