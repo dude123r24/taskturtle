@@ -2,6 +2,9 @@
   "name": "task-turtle",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev -p 3000 --experimental-https --experimental-https-key \"$HOME/certificates/localhost-key.pem\" --experimental-https-cert \"$HOME/certificates/localhost.pem\"",
     "build": "next build",
