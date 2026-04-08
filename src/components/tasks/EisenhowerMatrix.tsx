@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo, useCallback, useMemo } from 'react';
+import { useState, memo, useCallback, useMemo, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -50,6 +50,8 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
     const [bulkMode, setBulkMode] = useState(false);
     const [bulkText, setBulkText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const didScrollRef = useRef(false);
+    const touchStartY = useRef(0);
 
     const handleBulkAdd = async () => {
         const lines = bulkText.split('\n').map((l) => l.trim()).filter(Boolean);
@@ -66,7 +68,17 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
     return (
         <Box
             ref={setNodeRef}
+            onTouchStart={(e) => {
+                didScrollRef.current = false;
+                touchStartY.current = e.touches[0].clientY;
+            }}
+            onTouchMove={(e) => {
+                if (Math.abs(e.touches[0].clientY - touchStartY.current) > 8) {
+                    didScrollRef.current = true;
+                }
+            }}
             onClick={(e) => {
+                if (didScrollRef.current) return;
                 if (!(e.target as HTMLElement).closest('.MuiCard-root') && !(e.target as HTMLElement).closest('.bulk-add-area')) {
                     setQuickAddOpen(true, 'UNASSIGNED');
                 }
@@ -168,11 +180,23 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
     const { setNodeRef, isOver } = useDroppable({ id: quadrant });
     const q = QUADRANT_LABELS[quadrant];
     const { setQuickAddOpen } = useTaskStore();
+    const didScrollRef = useRef(false);
+    const touchStartY = useRef(0);
 
     return (
         <Box
             ref={setNodeRef}
+            onTouchStart={(e) => {
+                didScrollRef.current = false;
+                touchStartY.current = e.touches[0].clientY;
+            }}
+            onTouchMove={(e) => {
+                if (Math.abs(e.touches[0].clientY - touchStartY.current) > 8) {
+                    didScrollRef.current = true;
+                }
+            }}
             onClick={(e) => {
+                if (didScrollRef.current) return;
                 if (!(e.target as HTMLElement).closest('.MuiCard-root')) {
                     setQuickAddOpen(true, quadrant);
                 }
@@ -266,7 +290,8 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
+        // Longer delay so a quick vertical swipe registers as a scroll, not a drag
+        useSensor(TouchSensor, { activationConstraint: { delay: 500, tolerance: 10 } }),
     );
 
     const handleDragStart = useCallback((event: DragStartEvent) => {

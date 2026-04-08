@@ -486,7 +486,8 @@ export default function DashboardLayout({
                         borderBottom: '1px solid',
                         borderBottomColor: 'divider',
                         boxShadow: 'none',
-                        pt: 'env(safe-area-inset-top)',
+                        // Use explicit paddingTop (not shorthand pt) to bypass MUI spacing transform
+                        paddingTop: 'env(safe-area-inset-top)',
                     }}
                 >
                     {isGoogle && (

@@ -28,7 +28,8 @@ function DraggableTaskCardInner({ task, compact, disableSwipe = false }: Draggab
     const style: React.CSSProperties = {
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
         opacity: isDnDDragging ? 0.3 : 1,
-        touchAction: 'none',
+        // pan-y allows native vertical scroll while dnd-kit captures horizontal for drag
+        touchAction: 'pan-y',
         zIndex: isDnDDragging ? 999 : 'auto' as any,
         willChange: isDnDDragging ? 'transform' : undefined,
     };
