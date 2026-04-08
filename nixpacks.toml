@@ -1,0 +1,5 @@
+# Tailwind CSS v4 uses @tailwindcss/oxide native optional deps. `npm ci` can omit
+# the Linux binding when the lockfile was generated on another OS (npm/cli#4828).
+# `npm install` resolves optional packages for the build container.
+[phases.install]
+cmds = ["npm install --no-audit --no-fund"]
