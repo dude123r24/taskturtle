@@ -3,9 +3,10 @@
 import { useDraggable } from '@dnd-kit/core';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import Box from '@mui/material/Box';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import TaskCard from './TaskCard';
 import { type Task, useTaskStore } from '@/store/taskStore';
-import { useState, useRef, useCallback, memo } from 'react';
+import { useRef, useCallback, memo } from 'react';
 
 interface DraggableTaskCardProps {
     task: Task;
@@ -21,6 +22,7 @@ function DraggableTaskCardInner({ task, compact, disableSwipe = false }: Draggab
         attributes,
         listeners,
         setNodeRef,
+        setActivatorNodeRef,
         transform,
         isDragging: isDnDDragging,
     } = useDraggable({ id: task.id });
@@ -28,8 +30,6 @@ function DraggableTaskCardInner({ task, compact, disableSwipe = false }: Draggab
     const style: React.CSSProperties = {
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
         opacity: isDnDDragging ? 0.3 : 1,
-        // pan-y allows native vertical scroll while dnd-kit captures horizontal for drag
-        touchAction: 'pan-y',
         zIndex: isDnDDragging ? 999 : 'auto' as any,
         willChange: isDnDDragging ? 'transform' : undefined,
     };
@@ -62,12 +62,31 @@ function DraggableTaskCardInner({ task, compact, disableSwipe = false }: Draggab
         return (
             <Box
                 ref={setNodeRef}
-                style={style}
-                {...attributes}
-                {...wrappedListeners}
+                style={{ ...style, touchAction: 'auto', display: 'flex', alignItems: 'stretch' }}
                 onClickCapture={suppressClickAfterDrag}
             >
-                <TaskCard task={task} compact={compact} />
+                {/* Drag handle — only this initiates drag, so the rest of the card can scroll naturally */}
+                <Box
+                    ref={setActivatorNodeRef}
+                    {...attributes}
+                    {...wrappedListeners}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        px: 0.5,
+                        cursor: isDnDDragging ? 'grabbing' : 'grab',
+                        touchAction: 'none',
+                        color: 'text.disabled',
+                        flexShrink: 0,
+                        '&:hover': { color: 'text.secondary' },
+                    }}
+                    aria-label="Drag to reorder"
+                >
+                    <DragIndicatorIcon fontSize="small" />
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <TaskCard task={task} compact={compact} />
+                </Box>
             </Box>
         );
     }
