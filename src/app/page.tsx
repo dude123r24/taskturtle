@@ -314,7 +314,7 @@ const LandingPage = () => {
                                 {/* Axis labels */}
                                 <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
                                     <Typography sx={{ color: m.inkSubtle, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-                                        ← Not urgent · Urgent →
+                                        ← Urgent · Not urgent →
                                     </Typography>
                                 </Box>
                                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.25 }}>
@@ -350,7 +350,7 @@ const LandingPage = () => {
                                 </Box>
                                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
                                     <Typography sx={{ color: m.inkSubtle, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-                                        ↑ Not important · Important ↑
+                                        ↓ Not important · Important ↑
                                     </Typography>
                                 </Box>
                             </Box>
