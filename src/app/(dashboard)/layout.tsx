@@ -34,6 +34,7 @@ import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import SettingsIcon from '@mui/icons-material/Settings';
+import TableChartIcon from '@mui/icons-material/TableChart';
 import { useTaskStore } from '@/store/taskStore';
 import QuickAddDialog from '@/components/tasks/QuickAddDialog';
 import CommandPalette from '@/components/layout/CommandPalette';
@@ -49,6 +50,7 @@ const GOOGLE_ICON_COLORS = ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#4285F4
 const PRIMARY_NAV = [
     { label: 'Dashboard', icon: <DashboardIcon />, href: '/dashboard' },
     { label: 'Tasks', icon: <ChecklistIcon />, href: '/tasks' },
+    { label: 'Task Grid', icon: <TableChartIcon />, href: '/tasks-grid' },
     { label: 'Planner', icon: <ViewTimelineIcon />, href: '/planner' },
     { label: 'Focus', icon: <CenterFocusStrongIcon />, href: '/focus' },
 ] as const;
@@ -317,6 +319,20 @@ export default function DashboardLayout({
                 More
             </Typography>
             <List disablePadding>
+                <ListItem disablePadding>
+                    <ListItemButton
+                        component={Link}
+                        href="/tasks-grid"
+                        onClick={closeMore}
+                        selected={routeSelected(pathname, '/tasks-grid')}
+                        sx={{ borderRadius: 2, py: 1.25 }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 44 }}>
+                            <TableChartIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Task Grid" primaryTypographyProps={{ fontWeight: 600 }} />
+                    </ListItemButton>
+                </ListItem>
                 <ListItem disablePadding>
                     <ListItemButton
                         component={Link}

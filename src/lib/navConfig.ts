@@ -8,6 +8,7 @@ const ROUTE_TITLES: { prefix: string; title: string }[] = [
     { prefix: '/focus', title: 'Focus' },
     { prefix: '/chat', title: 'AI Assistant' },
     { prefix: '/calendar', title: 'Calendar' },
+    { prefix: '/tasks-grid', title: 'Task Grid' },
     { prefix: '/tasks', title: 'Tasks' },
 ]
 
