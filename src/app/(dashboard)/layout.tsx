@@ -311,7 +311,7 @@ export default function DashboardLayout({
     );
 
     const moreSheetContent = (
-        <Box sx={{ px: 2, pt: 1, pb: 'calc(16px + env(safe-area-inset-bottom))' }} role="dialog" aria-label="More destinations">
+        <Box sx={{ px: 2, pt: 1, pb: 'calc(16px + env(safe-area-inset-bottom))' }} role="dialog" aria-modal="true" aria-label="More destinations">
             <Box sx={{ width: 40, height: 4, borderRadius: 2, bgcolor: 'divider', mx: 'auto', mb: 2 }} />
             <Typography variant="subtitle2" color="text.secondary" sx={{ px: 1, mb: 1, fontWeight: 700 }}>
                 More
@@ -385,6 +385,28 @@ export default function DashboardLayout({
 
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+            {/* Skip to main content — visually hidden until focused */}
+            <Box
+                component="a"
+                href="#main-content"
+                sx={{
+                    position: 'absolute',
+                    top: -60,
+                    left: 8,
+                    zIndex: 9999,
+                    px: 2,
+                    py: 1,
+                    borderRadius: 1,
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    textDecoration: 'none',
+                    '&:focus': { top: 8 },
+                }}
+            >
+                Skip to main content
+            </Box>
             <Drawer
                 variant="temporary"
                 open={mobileOpen}
@@ -512,6 +534,7 @@ export default function DashboardLayout({
                 </AppBar>
 
                 <Box
+                    id="main-content"
                     component="main"
                     sx={{
                         flex: 1,
@@ -550,8 +573,8 @@ export default function DashboardLayout({
                     sx={{
                         bgcolor: 'background.paper',
                         '& .MuiBottomNavigationAction-label': {
-                            fontSize: '0.65rem',
-                            '&.Mui-selected': { fontSize: '0.7rem' },
+                            fontSize: '0.75rem',
+                            '&.Mui-selected': { fontSize: '0.75rem' },
                         },
                     }}
                 >

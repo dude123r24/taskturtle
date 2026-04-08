@@ -3,7 +3,7 @@
 import { createTheme } from '@mui/material/styles';
 
 const sharedTypography = {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: 'var(--font-sans), "Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: { fontWeight: 700, fontSize: '2.5rem' },
     h2: { fontWeight: 700, fontSize: '2rem' },
     h3: { fontWeight: 600, fontSize: '1.5rem' },
@@ -476,7 +476,7 @@ export const dubaiGoldTheme = createTheme({
 
 /** Filko-inspired cream canvas, purple primary, gold secondary; does not alter other themes */
 const luxuryTypography = {
-    fontFamily: 'var(--font-plus-jakarta, "Plus Jakarta Sans"), "Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: 'var(--font-sans), "Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: { fontWeight: 800, fontSize: '2.5rem', letterSpacing: '-0.03em' },
     h2: { fontWeight: 800, fontSize: '2rem', letterSpacing: '-0.03em' },
     h3: { fontWeight: 700, fontSize: '1.5rem', letterSpacing: '-0.02em' },

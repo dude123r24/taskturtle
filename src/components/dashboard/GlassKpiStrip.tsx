@@ -48,8 +48,8 @@ export function GlassKpiStrip({ items }: { items: GlassKpiItem[] }) {
                       : undefined,
           };
 
-    const labelColor = isLuxury ? 'text.secondary' : 'text.secondary';
-    const valueColorDefault = isLuxury ? 'text.primary' : 'text.primary';
+    const labelColor = 'text.secondary';
+    const valueColorDefault = 'text.primary';
 
     return (
         <Box sx={embedded}>

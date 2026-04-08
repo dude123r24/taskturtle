@@ -146,7 +146,7 @@ const LandingPage = () => {
                             }}
                         >
                             Clarity before{' '}
-                            <Box component="span" sx={{ color: m.accent }}>
+                            <Box component="span" sx={{ color: m.accent, fontFamily: 'var(--font-display), serif', fontStyle: 'italic', fontWeight: 400 }}>
                                 velocity.
                             </Box>
                         </Typography>
@@ -308,47 +308,49 @@ const LandingPage = () => {
                                     borderRadius: 3,
                                     p: 2,
                                     border: `1px solid ${m.line}`,
-                                    background: `linear-gradient(145deg, rgba(95,143,114,0.12) 0%, rgba(201,162,39,0.08) 50%, rgba(196,92,74,0.06) 100%)`,
+                                    background: `linear-gradient(145deg, rgba(95,143,114,0.1) 0%, rgba(201,162,39,0.07) 50%, rgba(196,92,74,0.05) 100%)`,
                                 }}
                             >
-                                <Box
-                                    sx={{
-                                        borderRadius: 2,
-                                        minHeight: 280,
-                                        bgcolor: 'rgba(244,240,232,0.06)',
-                                        border: `1px dashed ${m.line}`,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: 'column',
-                                        gap: 1,
-                                        py: 6,
-                                        px: 3,
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            display: 'grid',
-                                            gridTemplateColumns: '1fr 1fr',
-                                            gap: 1,
-                                            maxWidth: 200,
-                                            width: '100%',
-                                        }}
-                                    >
-                                        {[m.coral, m.accent, m.sage, m.inkSubtle].map((c, i) => (
-                                            <Box
-                                                key={i}
-                                                sx={{
-                                                    aspectRatio: '1',
-                                                    borderRadius: 1.5,
-                                                    bgcolor: `${c}22`,
-                                                    border: `1px solid ${c}44`,
-                                                }}
-                                            />
-                                        ))}
-                                    </Box>
-                                    <Typography sx={{ color: m.inkSubtle, fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.06em', mt: 1 }}>
-                                        MATRIX PREVIEW
+                                {/* Axis labels */}
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+                                    <Typography sx={{ color: m.inkSubtle, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+                                        ← Not urgent · Urgent →
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.25 }}>
+                                    {[
+                                        { label: 'Do first', color: m.coral, tasks: ['Launch beta signup', 'Fix auth bug'], axis: 'Urgent + Important' },
+                                        { label: 'Schedule', color: m.accent, tasks: ['Write docs', 'Refactor API'], axis: 'Not urgent + Important' },
+                                        { label: 'Delegate', color: m.sage, tasks: ['Update README', 'Book travel'], axis: 'Urgent + Not important' },
+                                        { label: 'Eliminate', color: m.inkSubtle, tasks: ['Old meeting notes', 'Dead feature'], axis: 'Not urgent + Not important' },
+                                    ].map((q) => (
+                                        <Box
+                                            key={q.label}
+                                            sx={{
+                                                borderRadius: 2,
+                                                p: 1.5,
+                                                bgcolor: `${q.color}0f`,
+                                                border: `1px solid ${q.color}33`,
+                                                borderTop: `3px solid ${q.color}`,
+                                            }}
+                                        >
+                                            <Typography sx={{ color: q.color, fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', mb: 0.75 }}>
+                                                {q.label}
+                                            </Typography>
+                                            {q.tasks.map((t) => (
+                                                <Box key={t} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+                                                    <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: `${q.color}99`, flexShrink: 0 }} />
+                                                    <Typography sx={{ color: m.surface, fontSize: '0.7rem', fontWeight: 500, lineHeight: 1.3, opacity: 0.8 }}>
+                                                        {t}
+                                                    </Typography>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    ))}
+                                </Box>
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                                    <Typography sx={{ color: m.inkSubtle, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+                                        ↑ Not important · Important ↑
                                     </Typography>
                                 </Box>
                             </Box>

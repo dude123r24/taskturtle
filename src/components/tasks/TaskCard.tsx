@@ -23,7 +23,7 @@ import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 import EventIcon from '@mui/icons-material/Event';
 import { type Task, useTaskStore } from '@/store/taskStore';
 import { formatMinutes, HORIZON_LABELS, QUADRANT_LABELS } from '@/lib/utils';
-import { useEffect, useState, memo, useCallback } from 'react';
+import { useEffect, useState, useRef, memo, useCallback } from 'react';
 
 let settingsCache: { flashOnDue: boolean; fetchedAt: number } | null = null;
 const SETTINGS_CACHE_TTL = 60_000;
@@ -61,6 +61,8 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
     const accentColor = isDone ? theme.palette.text.disabled : quadrantInfo.color;
 
     const [flashColor, setFlashColor] = useState<string | null>(null);
+    const [checkAnimating, setCheckAnimating] = useState(false);
+    const prevDoneRef = useRef(isDone);
 
     useEffect(() => {
         if (!task.dueDate || isDone) return;
@@ -104,6 +106,14 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
             cancelled = true;
         };
     }, [task.dueDate, task.id, isDone]);
+
+    // Trigger check animation when task transitions to done
+    useEffect(() => {
+        if (!prevDoneRef.current && isDone) {
+            setCheckAnimating(true);
+        }
+        prevDoneRef.current = isDone;
+    }, [isDone]);
 
     const toggleDone = useCallback(
         (e: React.MouseEvent) => {
@@ -153,10 +163,10 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
 
     const metaIconSx = comfortable
         ? { fontSize: '1.05rem' }
-        : { fontSize: '0.75rem' };
+        : { fontSize: '0.8rem' };
     const metaTextSx = comfortable
         ? { fontSize: '0.875rem', fontWeight: 500 }
-        : { fontSize: '0.75rem', fontWeight: 500 };
+        : { fontSize: '0.8rem', fontWeight: 500 };
 
     const cardBg = flashColor
         ? flashColor
@@ -238,7 +248,11 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             }}
                         >
                             {isDone ? (
-                                <CheckCircleIcon sx={{ fontSize: comfortable ? '1.35rem' : compact ? '1.1rem' : '1.25rem' }} />
+                                <CheckCircleIcon
+                                    className={checkAnimating ? 'task-check-animate' : undefined}
+                                    onAnimationEnd={() => setCheckAnimating(false)}
+                                    sx={{ fontSize: comfortable ? '1.35rem' : compact ? '1.1rem' : '1.25rem' }}
+                                />
                             ) : (
                                 <CheckCircleOutlineIcon sx={{ fontSize: comfortable ? '1.35rem' : compact ? '1.1rem' : '1.25rem' }} />
                             )}
@@ -263,7 +277,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                 {...(comfortable ? {} : { noWrap: true })}
                                 sx={{
                                     fontWeight: comfortable ? 600 : compact ? 500 : 600,
-                                    fontSize: comfortable ? '1rem' : compact ? '0.8rem' : '0.9rem',
+                                    fontSize: comfortable ? '1rem' : compact ? '0.875rem' : '0.9rem',
                                     textDecoration: isDone ? 'line-through' : 'none',
                                     color: isDone ? 'text.secondary' : 'text.primary',
                                     flex: comfortable ? '1 1 100%' : compact ? 1 : 'unset',
@@ -285,14 +299,14 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                     sx={{
                                         height: 26,
                                         fontWeight: 700,
-                                        fontSize: '0.72rem',
+                                        fontSize: '0.75rem',
                                         bgcolor: alpha(accentColor, 0.2),
                                         color: accentColor,
                                         border: `1px solid ${alpha(accentColor, 0.35)}`,
                                     }}
                                 />
                             )}
-                            {task.isChase && (
+                            {comfortable && task.isChase && (
                                 <Tooltip title="Chasing">
                                     <Chip
                                         label="🏃 Chase"
@@ -300,7 +314,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                         sx={{
                                             height: 26,
                                             fontWeight: 700,
-                                            fontSize: '0.72rem',
+                                            fontSize: '0.75rem',
                                             bgcolor: alpha('#ff9800', 0.2),
                                             color: 'warning.dark',
                                             border: `1px solid ${alpha('#ff9800', 0.35)}`,
@@ -325,7 +339,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                 sx={{
                                     mt: comfortable ? 0.75 : 0.25,
                                     display: 'block',
-                                    fontSize: comfortable ? '0.8rem' : '0.7rem',
+                                    fontSize: comfortable ? '0.8rem' : '0.75rem',
                                     lineHeight: 1.45,
                                     ...(comfortable && {
                                         display: '-webkit-box',

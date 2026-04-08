@@ -401,7 +401,7 @@ function TaskRow({
                         sx={{
                             height: 22,
                             fontWeight: 700,
-                            fontSize: '0.7rem',
+                            fontSize: '0.75rem',
                             bgcolor: `${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}18`,
                             color: QUADRANT_META[task.quadrant]?.color || '#9E9E9E',
                             flexShrink: 0,
@@ -414,7 +414,7 @@ function TaskRow({
                             sx={{
                                 height: 22,
                                 fontWeight: 700,
-                                fontSize: '0.7rem',
+                                fontSize: '0.75rem',
                                 bgcolor: 'rgba(201, 162, 39, 0.2)',
                                 color: 'secondary.dark',
                                 flexShrink: 0,

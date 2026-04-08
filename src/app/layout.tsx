@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Figtree } from 'next/font/google';
+import { Figtree, Instrument_Serif } from 'next/font/google';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import Providers from '@/components/Providers';
 import { ThemeContextProvider } from '@/components/ThemeContext';
@@ -10,6 +10,14 @@ const figtree = Figtree({
     subsets: ['latin'],
     weight: ['400', '500', '600', '700', '800'],
     variable: '--font-sans',
+    display: 'swap',
+});
+
+const instrumentSerif = Instrument_Serif({
+    subsets: ['latin'],
+    weight: '400',
+    style: ['normal', 'italic'],
+    variable: '--font-display',
     display: 'swap',
 });
 
@@ -40,7 +48,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" className={cn('antialiased', figtree.variable)}>
+        <html lang="en" className={cn('antialiased', figtree.variable, instrumentSerif.variable)}>
             <head>
                 <link rel="icon" href="/icons/icon-192.png" type="image/png" />
                 <link rel="apple-touch-icon" href="/icons/icon-192.png" />

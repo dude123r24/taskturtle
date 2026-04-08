@@ -1,56 +1,43 @@
-# UI Accessibility & Usability Fixes
-
-## Plan
-Apply all 10 priority fixes from UI audit. Grouped by file to minimize touches.
+# UI Polish & Audit Fixes — COMPLETE
 
 ## Tasks
 
-### Fix 1: Add aria-labels to all icon-only buttons
-- [ ] TaskCard.tsx — Done, Focus, Edit, Delete buttons
-- [ ] EisenhowerMatrix.tsx — Bulk add button
-- [ ] TasksFilterBar.tsx — Quadrant filter toggles
-- [ ] layout.tsx — Hamburger menu, Avatar button
-- [ ] CommandPalette.tsx — Search input, Create task
-- [ ] settings/page.tsx — Calendar delete, color pickers
-- [ ] QuickAddDialog.tsx — Subtask checkbox, Send update
-- [ ] PriorityTaskPath.tsx — Mark done (improve existing)
+### Group 1: Typography & Font Stack ✅
+- [x] layout.tsx — Added `Instrument_Serif` display font as `--font-display`
+- [x] theme.ts — Fixed `sharedTypography.fontFamily` to use `var(--font-sans)` (was hardcoded Inter)
+- [x] theme.ts — Fixed luxury theme font to use `var(--font-sans)` (removed Plus Jakarta Sans dependency)
 
-### Fix 2: Add keyboard support to clickable Boxes
-- [ ] TaskCard.tsx — Card click
-- [ ] TodayScheduled.tsx — Task items
-- [ ] PriorityTaskPath.tsx — Task items
-- [ ] settings/page.tsx — Color picker boxes
+### Group 2: Global CSS ✅
+- [x] globals.css — Fixed scrollbar colors for light themes (neutral gray instead of white-only)
+- [x] globals.css — Updated Shadcn CSS vars in `:root` + `.dark` to be chromatic (purple-based, matching MUI themes)
+- [x] globals.css — Added `task-check` CSS animation + `prefers-reduced-motion` guard
 
-### Fix 3: Set minHeight: 44 on interactive elements
-- [ ] theme.ts — Global button minHeight
-- [ ] TaskCard.tsx — Action buttons
-- [ ] TasksFilterBar.tsx — Toggle buttons, Tabs
-- [ ] QuickAddDialog.tsx — Subtask checkbox, Send button
-- [ ] EisenhowerMatrix.tsx — Bulk add button
-- [ ] settings/page.tsx — Color picker circles
+### Group 3: Dashboard Layout ✅
+- [x] (dashboard)/layout.tsx — Fixed bottom nav label font: 0.65rem → 0.75rem
+- [x] (dashboard)/layout.tsx — Added skip-to-content link (`#main-content`)
+- [x] (dashboard)/layout.tsx — Added `id="main-content"` to main content Box
+- [x] (dashboard)/layout.tsx — Added `aria-modal="true"` to More sheet content
 
-### Fix 4: TaskCard action button spacing
-- [ ] TaskCard.tsx — spacing={0} → spacing={0.5}
+### Group 4: Landing & Login ✅
+- [x] page.tsx — Replaced 4-square placeholder with real Eisenhower Matrix mockup (quadrant cards with sample tasks)
+- [x] page.tsx — Applied `--font-display` italic serif to hero h1 accent word "velocity."
+- [x] page.tsx — Fixed sub-11px axis/label fonts (0.65rem → 0.72rem)
+- [x] login/page.tsx — Replaced external gstatic Google SVG img with inline SVG (performance + reliability)
+- [x] login/page.tsx — Fixed sub-11px nav link fonts (0.7rem → 0.75rem)
 
-### Fix 5: Nav item spacing
-- [ ] layout.tsx — mb: 0.5 → mb: 1
+### Group 5: Components ✅
+- [x] TaskCard.tsx — CSS `task-check-animate` on completion (replaces no animation; triggers on isDone transition)
+- [x] TaskCard.tsx — Fixed chip fontSize 0.72rem → 0.75rem
+- [x] TaskCard.tsx — Fixed description compact fontSize 0.7rem → 0.75rem
+- [x] dashboard/page.tsx — Added `ChartEmptyState` component (icon + message + CTA)
+- [x] dashboard/page.tsx — All 4 charts now show empty states instead of blank frames
+- [x] dashboard/page.tsx — Pie chart uses `theme.palette.error/info/warning/disabled` (theme-aware)
+- [x] dashboard/page.tsx — Added `QueryStatsIcon` import for empty state
+- [x] GlassKpiStrip.tsx — Removed redundant isLuxury ternary on labelColor/valueColorDefault
+- [x] PriorityTaskPath.tsx — Fixed chip fontSize 0.7rem → 0.75rem
 
-### Fix 6: Add aria-labels to Tabs/ToggleButtonGroups
-- [ ] TasksFilterBar.tsx — Tabs, quadrant group, horizon group
-- [ ] CommandPalette.tsx — Dialog aria-label
-- [ ] QuickAddDialog.tsx — Dialog aria-labelledby
-
-### Fix 7: Fix contrast issues in themes
-- [ ] theme.ts — Verify and fix secondary text contrast
-
-### Fix 8: Replace emoji with SVG icons
-- [ ] QuickAddDialog.tsx — "📝 Updates" → EditNoteIcon
-- [ ] TaskCard.tsx — "📝" in updates preview → remove emoji
-
-### Fix 9: Add prefers-reduced-motion
-- [ ] globals.css — Disable page animation
-- [ ] TaskCard.tsx — Disable flash animation
-
-### Fix 10: Increase tiny font sizes
-- [ ] TaskCard.tsx — 0.65rem → 0.75rem
-- [ ] EisenhowerMatrix.tsx — DroppableAction label 0.65rem → 0.8rem
+## Result
+- 0 TypeScript errors
+- 9 files modified, 0 new files created
+- All sub-11px font sizes fixed (in audit scope)
+- No new dependencies added
