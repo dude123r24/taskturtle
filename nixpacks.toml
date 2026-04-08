@@ -1,10 +1,16 @@
 # Tailwind CSS v4 uses @tailwindcss/oxide which requires a platform-specific native
 # binary. npm has a bug (npm/cli#4828) where optional deps for the target platform
 # are skipped when the lockfile was generated on a different OS.
-# Fix: run npm install, then explicitly install the linux-x64-gnu binding that
-# matches the Nixpacks Debian build container.
+# Fix: override install to use npm install (not npm ci), and explicitly install
+# the Linux oxide bindings for both glibc and musl environments.
 [phases.install]
 cmds = [
-  "npm install --no-audit --no-fund",
-  "npm install @tailwindcss/oxide-linux-x64-gnu@4.2.2 --no-audit --no-fund",
+  "npm install --include=optional --no-audit --no-fund",
+  "npm install @tailwindcss/oxide-linux-x64-gnu@4.2.2 @tailwindcss/oxide-linux-x64-musl@4.2.2 --no-save --no-audit --no-fund || true",
+]
+
+[phases.build]
+cmds = [
+  "npm install @tailwindcss/oxide-linux-x64-gnu@4.2.2 @tailwindcss/oxide-linux-x64-musl@4.2.2 --no-save --no-audit --no-fund || true",
+  "npm run build",
 ]
