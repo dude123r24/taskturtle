@@ -328,8 +328,8 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
 
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, alignContent: 'start' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 3 }, width: '100%' }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 3, md: 2 }, alignContent: 'start' }}>
                     {quadrantOrder.map((quadrant) => (
                         <MatrixQuadrant key={quadrant} quadrant={quadrant} tasks={quadrantTasks[quadrant]} />
                     ))}
