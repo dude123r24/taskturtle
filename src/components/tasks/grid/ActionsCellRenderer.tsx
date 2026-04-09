@@ -44,15 +44,15 @@ export default function ActionsCellRenderer(props: CustomCellRendererProps<Task>
                     size="small"
                     onClick={handleEdit}
                     aria-label="Edit task"
-                    sx={{ color: 'text.secondary', minWidth: 36, minHeight: 36, '&:hover': { color: 'primary.main' } }}
+                    sx={{ color: 'text.secondary', minWidth: 44, minHeight: 44, '&:hover': { color: 'primary.main' } }}
                 >
                     <EditIcon fontSize="small" />
                 </IconButton>
                 <IconButton
                     size="small"
                     onClick={handleDeleteClick}
-                    aria-label="Delete task"
-                    sx={{ color: 'text.secondary', minWidth: 36, minHeight: 36, '&:hover': { color: 'error.main' } }}
+                    aria-label="Archive task"
+                    sx={{ color: 'text.secondary', minWidth: 44, minHeight: 44, '&:hover': { color: 'error.main' } }}
                 >
                     <DeleteOutlineIcon fontSize="small" />
                 </IconButton>

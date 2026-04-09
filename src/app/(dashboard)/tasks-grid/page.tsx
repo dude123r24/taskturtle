@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useTaskStore, type EisenhowerQuadrant, type TaskHorizon } from '@/store/taskStore';
 import { TaskGridFilterBar, type StatusFilter } from '@/components/tasks/TaskGridFilterBar';
 import TaskGridView from '@/components/tasks/TaskGridView';
@@ -30,8 +31,8 @@ function TasksGridContent() {
     useEffect(() => {
         const status = searchParams.get('status');
         if (status === 'done') setStatusFilter('DONE');
-        else if (status === 'active') setStatusFilter('ACTIVE');
-        else setStatusFilter('ALL');
+        else if (status === 'all') setStatusFilter('ALL');
+        else setStatusFilter('ACTIVE');
 
         setQuadrantFilter(parseQuadrantParam(searchParams.get('quadrant')));
     }, [searchParams]);
@@ -66,8 +67,9 @@ function TasksGridContent() {
                     <Typography variant="h5" fontWeight={700} letterSpacing="-0.02em">
                         Task Grid
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-                        Click any cell to edit · Click category chip to move · ✓ to complete
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        Click any cell to edit · Click category chip to move ·
+                        <CheckCircleOutlineIcon sx={{ fontSize: 14, verticalAlign: 'middle' }} /> to complete
                     </Typography>
                 </Box>
             </Stack>
@@ -92,7 +94,15 @@ function TasksGridContent() {
                     ))}
                 </Stack>
             ) : (
-                <TaskGridView tasks={filteredTasks} />
+                <TaskGridView
+                    tasks={filteredTasks}
+                    onClearFilters={() => {
+                        setSearch('');
+                        setStatusFilter('ACTIVE');
+                        setQuadrantFilter('ALL');
+                        setHorizonFilter('ALL');
+                    }}
+                />
             )}
         </Stack>
     );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo, useCallback, useMemo, useRef } from 'react';
+import React, { useState, memo, useCallback, useMemo, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -27,6 +27,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { type Task, type EisenhowerQuadrant, useTaskStore } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
+import { QUADRANT_ICONS } from '@/lib/quadrantIcons';
 import TaskCard from './TaskCard';
 import DraggableTaskCard from './DraggableTaskCard';
 import ListAltIcon from '@mui/icons-material/ListAlt';
@@ -179,6 +180,7 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
 const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadrant: EisenhowerQuadrant; tasks: Task[] }) {
     const { setNodeRef, isOver } = useDroppable({ id: quadrant });
     const q = QUADRANT_LABELS[quadrant];
+    const QIcon = QUADRANT_ICONS[quadrant];
     const { setQuickAddOpen } = useTaskStore();
     const didScrollRef = useRef(false);
     const touchStartY = useRef(0);
@@ -220,7 +222,8 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
         >
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: q.color, fontSize: '1rem' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: q.color, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        <QIcon sx={{ fontSize: 18, color: q.color }} />
                         {q.label}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -251,7 +254,7 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
     );
 });
 
-function DroppableAction({ id, icon: Icon, label, color }: { id: string; icon: any; label: string; color: string }) {
+function DroppableAction({ id, icon: Icon, label, color }: { id: string; icon: React.ElementType; label: string; color: string }) {
     const { setNodeRef, isOver } = useDroppable({ id });
 
     return (

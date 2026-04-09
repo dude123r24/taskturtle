@@ -64,7 +64,7 @@ export function TaskGridFilterBar({
     const btnBase = {
         border: 'none',
         borderRadius: 0,
-        minHeight: 40,
+        minHeight: 44,
         textTransform: 'none' as const,
         fontSize: '0.8125rem',
         px: 1.5,
@@ -89,9 +89,15 @@ export function TaskGridFilterBar({
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             {/* Search */}
+            <label
+                htmlFor="task-grid-search"
+                style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}
+            >
+                Search tasks
+            </label>
             <TextField
+                id="task-grid-search"
                 placeholder="Search tasks..."
-                aria-label="Search tasks"
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
                 variant="outlined"

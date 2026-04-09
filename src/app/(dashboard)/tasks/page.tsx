@@ -6,15 +6,20 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
+import Tooltip from '@mui/material/Tooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RestoreIcon from '@mui/icons-material/Restore';
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 import Link from 'next/link';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
+import { alpha, useTheme } from '@mui/material/styles';
 import { useTaskStore, type EisenhowerQuadrant, type TaskHorizon, type Task } from '@/store/taskStore';
 import EisenhowerMatrix from '@/components/tasks/EisenhowerMatrix';
 import { TaskGridFilterBar, type StatusFilter } from '@/components/tasks/TaskGridFilterBar';
@@ -29,112 +34,165 @@ function parseQuadrantParam(value: string | null): EisenhowerQuadrant | 'ALL' {
 }
 
 function RecycleBinDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+    const theme = useTheme();
     const { tasks, patchTask, deleteTask } = useTaskStore();
+    const [loadingId, setLoadingId] = useState<string | null>(null);
+    const [emptyBinConfirmOpen, setEmptyBinConfirmOpen] = useState(false);
 
     const archivedTasks = tasks
         .filter((t) => t.status === 'ARCHIVED')
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
     const handleRestore = async (task: Task) => {
+        setLoadingId(task.id);
         await patchTask(task.id, { status: 'TODO' });
+        setLoadingId(null);
     };
 
     const handlePermanentDelete = async (task: Task) => {
+        setLoadingId(task.id);
         await deleteTask(task.id, true);
+        setLoadingId(null);
     };
 
     const handleEmptyBin = async () => {
-        // Run deletions concurrently
+        setEmptyBinConfirmOpen(false);
         await Promise.all(archivedTasks.map(t => deleteTask(t.id, true)));
     };
 
     return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            maxWidth="md"
-            fullWidth
-            PaperProps={{
-                sx: {
-                    bgcolor: 'background.paper',
-                    border: '1px solid rgba(239, 83, 80, 0.3)',
-                    backdropFilter: 'blur(20px)',
-                },
-            }}
-        >
-            <DialogTitle sx={{ fontWeight: 600, color: 'error.main', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <DeleteIcon /> Recycle Bin
+        <>
+            <Dialog
+                open={open}
+                onClose={onClose}
+                maxWidth="md"
+                fullWidth
+                aria-labelledby="recycle-bin-title"
+                aria-modal="true"
+                PaperProps={{
+                    sx: {
+                        bgcolor: 'background.paper',
+                        border: `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
+                        backdropFilter: 'blur(20px)',
+                    },
+                }}
+            >
+                <DialogTitle
+                    id="recycle-bin-title"
+                    sx={{ fontWeight: 600, color: 'error.main', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <DeleteIcon /> Recycle Bin
+                    </Box>
+                    {archivedTasks.length > 0 && (
+                        <Button
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                            onClick={() => setEmptyBinConfirmOpen(true)}
+                        >
+                            Empty Bin
+                        </Button>
+                    )}
+                </DialogTitle>
+                <DialogContent>
+                    {archivedTasks.length === 0 ? (
+                        <Box sx={{ py: 5, textAlign: 'center', color: 'text.secondary', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+                            <DeleteOutlineIcon sx={{ fontSize: 40, opacity: 0.4 }} />
+                            <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                The recycle bin is empty.
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <Stack spacing={2} sx={{ mt: 1 }}>
+                            {archivedTasks.map((task) => (
+                                <Box
+                                    key={task.id}
+                                    sx={{
+                                        p: 2,
+                                        borderRadius: 2,
+                                        bgcolor: alpha(theme.palette.error.main, 0.05),
+                                        border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        gap: 2,
+                                    }}
+                                >
+                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                        <Tooltip title={task.title} placement="top-start">
+                                            <Typography variant="body1" fontWeight={500} noWrap sx={{ textDecoration: 'line-through', opacity: 0.7 }}>
+                                                {task.title}
+                                            </Typography>
+                                        </Tooltip>
+                                        <Typography variant="caption" color="text.secondary" noWrap>
+                                            Deleted: {new Date(task.archivedAt || task.updatedAt).toLocaleDateString()}
+                                            {' • '}
+                                            Auto-deletes in {Math.max(0, 400 - Math.floor((Date.now() - new Date(task.archivedAt || task.updatedAt).getTime()) / (1000 * 60 * 60 * 24)))} days
+                                        </Typography>
+                                    </Box>
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <Button
+                                            size="small"
+                                            startIcon={loadingId === task.id ? <CircularProgress size={14} /> : <RestoreIcon />}
+                                            onClick={() => handleRestore(task)}
+                                            disabled={loadingId === task.id}
+                                            sx={{ color: 'success.main', minHeight: 44 }}
+                                        >
+                                            Restore
+                                        </Button>
+                                        <IconButton
+                                            size="small"
+                                            color="error"
+                                            onClick={() => handlePermanentDelete(task)}
+                                            disabled={loadingId === task.id}
+                                            aria-label={`Permanently delete "${task.title}"`}
+                                            sx={{ minWidth: 44, minHeight: 44 }}
+                                        >
+                                            {loadingId === task.id ? (
+                                                <CircularProgress size={16} color="error" />
+                                            ) : (
+                                                <DeleteIcon fontSize="small" />
+                                            )}
+                                        </IconButton>
+                                    </Stack>
+                                </Box>
+                            ))}
+                        </Stack>
+                    )}
+                </DialogContent>
+                <Box sx={{ p: 2, pt: 0, textAlign: 'right' }}>
+                    <Button onClick={onClose} color="inherit">Close</Button>
                 </Box>
-                {archivedTasks.length > 0 && (
-                    <Button
-                        size="small"
-                        color="error"
-                        variant="outlined"
-                        onClick={handleEmptyBin}
-                    >
+            </Dialog>
+
+            {/* Empty bin confirmation */}
+            <Dialog
+                open={emptyBinConfirmOpen}
+                onClose={() => setEmptyBinConfirmOpen(false)}
+                maxWidth="xs"
+                fullWidth
+                aria-labelledby="empty-bin-confirm-title"
+                aria-modal="true"
+            >
+                <DialogTitle id="empty-bin-confirm-title" sx={{ fontWeight: 600 }}>
+                    Empty recycle bin?
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" color="text.secondary">
+                        All {archivedTasks.length} archived task{archivedTasks.length !== 1 ? 's' : ''} will be permanently deleted. This cannot be undone.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button onClick={() => setEmptyBinConfirmOpen(false)} color="inherit" autoFocus>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleEmptyBin} color="error" variant="contained">
                         Empty Bin
                     </Button>
-                )}
-            </DialogTitle>
-            <DialogContent>
-                {archivedTasks.length === 0 ? (
-                    <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center', fontStyle: 'italic' }}>
-                        The recycle bin is empty.
-                    </Typography>
-                ) : (
-                    <Stack spacing={2} sx={{ mt: 1 }}>
-                        {archivedTasks.map((task) => (
-                            <Box
-                                key={task.id}
-                                sx={{
-                                    p: 2,
-                                    borderRadius: 2,
-                                    bgcolor: 'rgba(239, 83, 80, 0.05)',
-                                    border: '1px solid rgba(239, 83, 80, 0.2)',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    gap: 2,
-                                }}
-                            >
-                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                    <Typography variant="body1" fontWeight={500} noWrap sx={{ textDecoration: 'line-through', opacity: 0.7 }}>
-                                        {task.title}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary" noWrap>
-                                        Deleted: {new Date(task.archivedAt || task.updatedAt).toLocaleDateString()}
-                                        {' • '}
-                                        Auto-deletes in {Math.max(0, 400 - Math.floor((Date.now() - new Date(task.archivedAt || task.updatedAt).getTime()) / (1000 * 60 * 60 * 24)))} days
-                                    </Typography>
-                                </Box>
-                                <Stack direction="row" spacing={1}>
-                                    <Button
-                                        size="small"
-                                        startIcon={<RestoreIcon />}
-                                        onClick={() => handleRestore(task)}
-                                        sx={{ color: 'success.main' }}
-                                    >
-                                        Restore
-                                    </Button>
-                                    <IconButton
-                                        size="small"
-                                        color="error"
-                                        onClick={() => handlePermanentDelete(task)}
-                                        title="Permanently Delete"
-                                    >
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                </Stack>
-                            </Box>
-                        ))}
-                    </Stack>
-                )}
-            </DialogContent>
-            <Box sx={{ p: 2, pt: 0, textAlign: 'right' }}>
-                <Button onClick={onClose} color="inherit">Close</Button>
-            </Box>
-        </Dialog>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 }
 
@@ -144,6 +202,25 @@ const SAMPLE_TASKS: { title: string; quadrant: EisenhowerQuadrant }[] = [
     { title: 'Reply to low-priority emails', quadrant: 'DELEGATE' },
     { title: 'Browse social media', quadrant: 'ELIMINATE' },
 ];
+
+function StepDots({ total, current }: { total: number; current: number }) {
+    return (
+        <Stack direction="row" spacing={0.75} justifyContent="center" aria-label={`Step ${current + 1} of ${total}`}>
+            {Array.from({ length: total }).map((_, i) => (
+                <Box
+                    key={i}
+                    sx={{
+                        width: i === current ? 20 : 8,
+                        height: 8,
+                        borderRadius: 100,
+                        bgcolor: i === current ? 'primary.main' : 'action.disabled',
+                        transition: 'width 0.2s ease, background-color 0.2s ease',
+                    }}
+                />
+            ))}
+        </Stack>
+    );
+}
 
 function OnboardingWalkthroughDialog({
     open,
@@ -171,6 +248,8 @@ function OnboardingWalkthroughDialog({
             onClose={handleClose}
             maxWidth="sm"
             fullWidth
+            aria-labelledby="onboarding-title"
+            aria-modal="true"
             PaperProps={{
                 sx: {
                     borderRadius: 3,
@@ -180,7 +259,7 @@ function OnboardingWalkthroughDialog({
                 },
             }}
         >
-            <DialogTitle sx={{ fontWeight: 700, pb: 0 }}>
+            <DialogTitle id="onboarding-title" sx={{ fontWeight: 700, pb: 0 }}>
                 {steps[step].title}
             </DialogTitle>
             <DialogContent>
@@ -188,23 +267,26 @@ function OnboardingWalkthroughDialog({
                     {steps[step].body}
                 </Typography>
             </DialogContent>
-            <Stack direction="row" justifyContent="space-between" sx={{ px: 3, pb: 2 }}>
-                <Button
-                    color="inherit"
-                    onClick={() => setStep((s) => Math.max(0, s - 1))}
-                    disabled={step === 0}
-                >
-                    Back
-                </Button>
-                {step < steps.length - 1 ? (
-                    <Button variant="contained" onClick={() => setStep((s) => s + 1)}>
-                        Next
+            <Stack spacing={2} sx={{ px: 3, pb: 2 }}>
+                <StepDots total={steps.length} current={step} />
+                <Stack direction="row" justifyContent="space-between">
+                    <Button
+                        color="inherit"
+                        onClick={() => setStep((s) => Math.max(0, s - 1))}
+                        disabled={step === 0}
+                    >
+                        Back
                     </Button>
-                ) : (
-                    <Button variant="contained" onClick={handleClose}>
-                        Got it
-                    </Button>
-                )}
+                    {step < steps.length - 1 ? (
+                        <Button variant="contained" onClick={() => setStep((s) => s + 1)}>
+                            Next
+                        </Button>
+                    ) : (
+                        <Button variant="contained" onClick={handleClose}>
+                            Got it
+                        </Button>
+                    )}
+                </Stack>
             </Stack>
         </Dialog>
     );
@@ -275,7 +357,7 @@ function TasksPageContent() {
         } catch { /* ignore */ }
     };
 
-    const filteredTasks = tasks.filter((t) => {
+    const filteredTasks = useMemo(() => tasks.filter((t) => {
         if (t.status === 'ARCHIVED') return false;
         if (statusFilter === 'ACTIVE' && t.status === 'DONE') return false;
         if (statusFilter === 'DONE' && t.status !== 'DONE') return false;
@@ -286,7 +368,7 @@ function TasksPageContent() {
             return t.title.toLowerCase().includes(s) || t.description?.toLowerCase().includes(s);
         }
         return true;
-    });
+    }), [tasks, statusFilter, quadrantFilter, horizonFilter, search]);
 
     const activeCount = useMemo(
         () => tasks.filter((t) => t.status !== 'DONE' && t.status !== 'ARCHIVED').length,

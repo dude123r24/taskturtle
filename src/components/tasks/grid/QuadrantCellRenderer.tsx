@@ -1,32 +1,19 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import Chip from '@mui/material/Chip';
 import Popover from '@mui/material/Popover';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Box from '@mui/material/Box';
 import CheckIcon from '@mui/icons-material/Check';
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import GroupsIcon from '@mui/icons-material/Groups';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import type { SvgIconComponent } from '@mui/icons-material';
+import Tooltip from '@mui/material/Tooltip';
 import type { CustomCellRendererProps } from 'ag-grid-react';
 import { useTaskStore, type EisenhowerQuadrant, type Task } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
+import { QUADRANT_ICONS } from '@/lib/quadrantIcons';
 
 const QUADRANT_ORDER: EisenhowerQuadrant[] = ['DO_FIRST', 'SCHEDULE', 'DELEGATE', 'ELIMINATE', 'UNASSIGNED'];
-
-const QUADRANT_ICONS: Record<EisenhowerQuadrant, SvgIconComponent> = {
-    DO_FIRST: FiberManualRecordIcon,
-    SCHEDULE: CalendarMonthIcon,
-    DELEGATE: GroupsIcon,
-    ELIMINATE: DeleteOutlineIcon,
-    UNASSIGNED: ListAltIcon,
-};
 
 export default function QuadrantCellRenderer(props: CustomCellRendererProps<Task>) {
     const { patchTask } = useTaskStore();
@@ -50,23 +37,18 @@ export default function QuadrantCellRenderer(props: CustomCellRendererProps<Task
 
     return (
         <>
-            <Chip
-                icon={<Icon sx={{ fontSize: '14px !important', color: `${meta.color} !important` }} />}
-                label={meta.label}
-                size="small"
-                onClick={handleOpen}
-                aria-label={`Category: ${meta.label}. Click to change.`}
-                sx={{
-                    bgcolor: `${meta.color}18`,
-                    color: meta.color,
-                    fontWeight: 600,
-                    fontSize: '0.75rem',
-                    border: `1px solid ${meta.color}35`,
-                    cursor: 'pointer',
-                    '& .MuiChip-icon': { ml: 0.75 },
-                    '&:hover': { bgcolor: `${meta.color}30` },
-                }}
-            />
+            <Tooltip title={meta.label} placement="top">
+                <Box
+                    onClick={handleOpen}
+                    aria-label={`Category: ${meta.label}. Click to change.`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpen(e as any); }}
+                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', p: 0.5, borderRadius: 1, '&:hover': { bgcolor: `${meta.color}18` } }}
+                >
+                    <Icon sx={{ fontSize: 20, color: meta.color }} />
+                </Box>
+            </Tooltip>
             <Popover
                 open={Boolean(anchor)}
                 anchorEl={anchor}
@@ -77,7 +59,7 @@ export default function QuadrantCellRenderer(props: CustomCellRendererProps<Task
                     sx: { borderRadius: 2, border: '1px solid', borderColor: 'divider', minWidth: 180, mt: 0.5 },
                 }}
             >
-                <List dense disablePadding sx={{ py: 0.5 }}>
+                <List dense disablePadding role="listbox" aria-label="Select category" sx={{ py: 0.5 }}>
                     {QUADRANT_ORDER.map((q) => {
                         const m = QUADRANT_LABELS[q];
                         const QIcon = QUADRANT_ICONS[q];
@@ -85,6 +67,8 @@ export default function QuadrantCellRenderer(props: CustomCellRendererProps<Task
                         return (
                             <ListItemButton
                                 key={q}
+                                role="option"
+                                aria-selected={selected}
                                 onClick={() => handleSelect(q)}
                                 selected={selected}
                                 sx={{
