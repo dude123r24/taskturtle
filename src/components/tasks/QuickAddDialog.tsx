@@ -379,7 +379,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                                         },
                                     }}
                                 >
-                                    {q.icon} {q.label}
+                                    {q.label}
                                 </ToggleButton>
                             ))}
                         </ToggleButtonGroup>

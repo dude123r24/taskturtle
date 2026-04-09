@@ -294,7 +294,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             </Typography>
                             {comfortable && (
                                 <Chip
-                                    label={`${quadrantInfo.icon} ${quadrantInfo.label}`}
+                                    label={quadrantInfo.label}
                                     size="small"
                                     sx={{
                                         height: 26,

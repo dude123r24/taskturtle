@@ -221,7 +221,7 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Box>
                     <Typography variant="h6" sx={{ fontWeight: 600, color: q.color, fontSize: '1rem' }}>
-                        {q.icon} {q.label}
+                        {q.label}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                         {quadrantDescriptions[quadrant]}

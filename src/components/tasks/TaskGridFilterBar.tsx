@@ -17,6 +17,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import DateRangeIcon from '@mui/icons-material/DateRange';
+import DensityMediumIcon from '@mui/icons-material/DensityMedium';
 import type { EisenhowerQuadrant, TaskHorizon } from '@/store/taskStore';
 
 export type StatusFilter = 'ALL' | 'ACTIVE' | 'DONE';
@@ -123,19 +124,23 @@ export function TaskGridFilterBar({
                         exclusive
                         aria-label="Filter by status"
                         onChange={(_, val: StatusFilter | null) => val != null && onStatusChange(val)}
-                        sx={{ '& .MuiToggleButtonGroup-grouped': btnBase }}
+                        sx={{ '& .MuiToggleButtonGroup-grouped': { ...btnBase, px: 1.25, minWidth: 40 } }}
                     >
-                        <ToggleButton value="ACTIVE" aria-label="Active tasks" sx={{ gap: 0.75, px: 1.75 }}>
-                            <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
-                            Active ({activeCount})
-                        </ToggleButton>
-                        <ToggleButton value="DONE" aria-label="Completed tasks" sx={{ gap: 0.75, px: 1.75 }}>
-                            <CheckCircleOutlineIcon sx={{ fontSize: 16 }} />
-                            Done ({doneCount})
-                        </ToggleButton>
-                        <ToggleButton value="ALL" aria-label="All tasks" sx={{ px: 1.75 }}>
-                            All
-                        </ToggleButton>
+                        <Tooltip title={`Active (${activeCount})`}>
+                            <ToggleButton value="ACTIVE" aria-label={`Active tasks (${activeCount})`}>
+                                <RadioButtonUncheckedIcon sx={{ fontSize: 18 }} />
+                            </ToggleButton>
+                        </Tooltip>
+                        <Tooltip title={`Done (${doneCount})`}>
+                            <ToggleButton value="DONE" aria-label={`Done tasks (${doneCount})`}>
+                                <CheckCircleOutlineIcon sx={{ fontSize: 18 }} />
+                            </ToggleButton>
+                        </Tooltip>
+                        <Tooltip title="All tasks">
+                            <ToggleButton value="ALL" aria-label="All tasks">
+                                <DensityMediumIcon sx={{ fontSize: 18 }} />
+                            </ToggleButton>
+                        </Tooltip>
                     </ToggleButtonGroup>
                 </Box>
 
