@@ -67,7 +67,7 @@ function TasksGridContent() {
                     <Typography variant="h5" fontWeight={700} letterSpacing="-0.02em">
                         Task Grid
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 0.5 }}>
                         Click any cell to edit · Click category chip to move ·
                         <CheckCircleOutlineIcon sx={{ fontSize: 14, verticalAlign: 'middle' }} /> to complete
                     </Typography>
@@ -88,9 +88,9 @@ function TasksGridContent() {
             />
 
             {isLoading ? (
-                <Stack spacing={1}>
+                <Stack spacing={0}>
                     {[...Array(6)].map((_, i) => (
-                        <Skeleton key={i} variant="rounded" height={52} sx={{ borderRadius: 1 }} />
+                        <Skeleton key={i} variant="rounded" height={64} sx={{ borderRadius: 0, borderBottom: '1px solid', borderColor: 'divider' }} />
                     ))}
                 </Stack>
             ) : (
@@ -113,9 +113,9 @@ function TasksGridFallback() {
         <Stack spacing={3}>
             <Skeleton variant="text" width={200} height={44} sx={{ borderRadius: 1 }} />
             <Skeleton variant="rounded" height={100} sx={{ borderRadius: 2 }} />
-            <Stack spacing={1}>
+            <Stack spacing={0}>
                 {[...Array(6)].map((_, i) => (
-                    <Skeleton key={i} variant="rounded" height={52} sx={{ borderRadius: 1 }} />
+                    <Skeleton key={i} variant="rounded" height={64} sx={{ borderRadius: 0, borderBottom: '1px solid', borderColor: 'divider' }} />
                 ))}
             </Stack>
         </Stack>

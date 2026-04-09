@@ -8,8 +8,8 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import SearchIcon from '@mui/icons-material/Search';
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GroupsIcon from '@mui/icons-material/Groups';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -18,7 +18,9 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import DensityMediumIcon from '@mui/icons-material/DensityMedium';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import type { EisenhowerQuadrant, TaskHorizon } from '@/store/taskStore';
+import { QUADRANT_LABELS } from '@/lib/utils';
 
 export type StatusFilter = 'ALL' | 'ACTIVE' | 'DONE';
 
@@ -49,6 +51,7 @@ export function TaskGridFilterBar({
 }: TaskGridFilterBarProps) {
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const pillSx = {
         display: 'inline-flex',
@@ -68,7 +71,7 @@ export function TaskGridFilterBar({
         textTransform: 'none' as const,
         fontSize: '0.8125rem',
         px: 1.5,
-        minWidth: 40,
+        minWidth: 44,
         '&.Mui-selected': {
             bgcolor: `${theme.palette.primary.main}18 !important`,
             color: 'primary.main',
@@ -120,17 +123,30 @@ export function TaskGridFilterBar({
                 sx={{ width: '100%', maxWidth: 480 }}
             />
 
-            {/* Single unified filter row */}
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.25 }}>
-
-                {/* Status: Active | Done (deselect = all) */}
+            {/* Filter row — scrolls horizontally on mobile to avoid wrapping chaos */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexWrap: { xs: 'nowrap', sm: 'wrap' },
+                    alignItems: 'center',
+                    gap: 1.25,
+                    overflowX: { xs: 'auto', sm: 'visible' },
+                    // Prevent scrollbar from eating layout space on iOS
+                    WebkitOverflowScrolling: 'touch',
+                    pb: { xs: 0.5, sm: 0 },
+                    // Hide scrollbar visually while keeping scroll functional
+                    scrollbarWidth: 'none',
+                    '&::-webkit-scrollbar': { display: 'none' },
+                }}
+            >
+                {/* Status: Active | Done | All */}
                 <Box sx={pillSx}>
                     <ToggleButtonGroup
                         value={statusFilter}
                         exclusive
                         aria-label="Filter by status"
                         onChange={(_, val: StatusFilter | null) => val != null && onStatusChange(val)}
-                        sx={{ '& .MuiToggleButtonGroup-grouped': { ...btnBase, px: 1.25, minWidth: 40 } }}
+                        sx={{ '& .MuiToggleButtonGroup-grouped': { ...btnBase, px: 1.25, minWidth: 44 } }}
                     >
                         <Tooltip title={`Active (${activeCount})`}>
                             <ToggleButton value="ACTIVE" aria-label={`Active tasks (${activeCount})`}>
@@ -152,7 +168,7 @@ export function TaskGridFilterBar({
 
                 <Divider orientation="vertical" flexItem sx={{ my: 0.5, display: { xs: 'none', sm: 'block' } }} />
 
-                {/* Quadrant icons (deselect = all categories) */}
+                {/* Quadrant icons — colors from QUADRANT_LABELS for consistency */}
                 <Box sx={pillSx}>
                     <ToggleButtonGroup
                         value={quadrantFilter === 'ALL' ? null : quadrantFilter}
@@ -163,27 +179,27 @@ export function TaskGridFilterBar({
                     >
                         <Tooltip title="Do First — urgent & important">
                             <ToggleButton value="DO_FIRST" aria-label="Do First">
-                                <FiberManualRecordIcon sx={{ color: '#E53935', fontSize: 18 }} />
+                                <FiberManualRecordIcon sx={{ fontSize: 18, color: QUADRANT_LABELS.DO_FIRST.color }} />
                             </ToggleButton>
                         </Tooltip>
                         <Tooltip title="Schedule — important, not urgent">
                             <ToggleButton value="SCHEDULE" aria-label="Schedule">
-                                <CalendarMonthIcon sx={{ fontSize: 18, color: '#1E88E5' }} />
+                                <CalendarMonthIcon sx={{ fontSize: 18, color: QUADRANT_LABELS.SCHEDULE.color }} />
                             </ToggleButton>
                         </Tooltip>
                         <Tooltip title="Delegate — urgent, not important">
                             <ToggleButton value="DELEGATE" aria-label="Delegate">
-                                <GroupsIcon sx={{ fontSize: 18, color: '#FB8C00' }} />
+                                <GroupsIcon sx={{ fontSize: 18, color: QUADRANT_LABELS.DELEGATE.color }} />
                             </ToggleButton>
                         </Tooltip>
                         <Tooltip title="Eliminate — neither urgent nor important">
                             <ToggleButton value="ELIMINATE" aria-label="Eliminate">
-                                <DeleteOutlineIcon sx={{ fontSize: 18, color: '#757575' }} />
+                                <DeleteOutlineIcon sx={{ fontSize: 18, color: QUADRANT_LABELS.ELIMINATE.color }} />
                             </ToggleButton>
                         </Tooltip>
                         <Tooltip title="Backlog — not yet prioritised">
                             <ToggleButton value="UNASSIGNED" aria-label="Backlog">
-                                <ListAltIcon sx={{ fontSize: 18, color: '#9E9E9E' }} />
+                                <ListAltIcon sx={{ fontSize: 18, color: QUADRANT_LABELS.UNASSIGNED.color }} />
                             </ToggleButton>
                         </Tooltip>
                     </ToggleButtonGroup>
@@ -191,19 +207,19 @@ export function TaskGridFilterBar({
 
                 <Divider orientation="vertical" flexItem sx={{ my: 0.5, display: { xs: 'none', sm: 'block' } }} />
 
-                {/* Horizon: This Week toggle (off = all time) */}
+                {/* Horizon — icon-only on mobile, icon+label on desktop */}
                 <Box sx={pillSx}>
                     <ToggleButtonGroup
                         value={horizonFilter === 'ALL' ? null : horizonFilter}
                         exclusive
                         aria-label="Filter by time horizon"
                         onChange={handleHorizon}
-                        sx={{ '& .MuiToggleButtonGroup-grouped': { ...btnBase, px: 1.75, gap: 0.75 } }}
+                        sx={{ '& .MuiToggleButtonGroup-grouped': { ...btnBase, px: isMobile ? 1.25 : 1.75, gap: isMobile ? 0 : 0.75 } }}
                     >
                         <Tooltip title="Short-term tasks only">
                             <ToggleButton value="SHORT_TERM" aria-label="This Week">
-                                <DateRangeIcon sx={{ fontSize: 16 }} />
-                                This Week
+                                <DateRangeIcon sx={{ fontSize: 18 }} />
+                                {!isMobile && 'This Week'}
                             </ToggleButton>
                         </Tooltip>
                     </ToggleButtonGroup>

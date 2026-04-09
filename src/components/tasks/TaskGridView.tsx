@@ -36,37 +36,40 @@ function quadrantComparator(a: EisenhowerQuadrant, b: EisenhowerQuadrant) {
     return QUADRANT_ORDER[a] - QUADRANT_ORDER[b];
 }
 
-/** Mobile-only title cell: shows task title + due date + time estimate stacked */
+/** Mobile-only title cell: task title + due date + time + chase badge stacked */
 function MobileTitleCellRenderer(props: ICellRendererParams<Task>) {
     const task = props.data;
     if (!task) return null;
 
     const isDone = task.status === 'DONE';
     const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !isDone;
-    const hasMeta = task.dueDate || task.estimatedMinutes;
+    const hasMeta = task.dueDate || task.estimatedMinutes || task.isChase;
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', py: 0.75, gap: 0.25, width: '100%' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', py: 0.75, gap: 0.375, width: '100%' }}>
             <Typography
                 variant="body2"
                 sx={{
                     fontWeight: task.quadrant === 'DO_FIRST' ? 600 : 400,
                     textDecoration: isDone ? 'line-through' : 'none',
-                    opacity: isDone ? 0.5 : 1,
+                    opacity: isDone ? 0.45 : 1,
                     lineHeight: 1.35,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
+                    // Animate completion state
+                    transition: 'opacity 0.2s ease',
                 }}
             >
                 {task.title}
             </Typography>
             {hasMeta && (
-                <Stack direction="row" spacing={1.5}>
+                <Stack direction="row" spacing={1.25} alignItems="center">
                     {task.dueDate && (
                         <Typography
                             variant="caption"
                             sx={{
+                                fontSize: '0.8125rem',
                                 color: isOverdue ? 'error.main' : 'text.secondary',
                                 fontWeight: isOverdue ? 600 : 400,
                             }}
@@ -75,14 +78,16 @@ function MobileTitleCellRenderer(props: ICellRendererParams<Task>) {
                         </Typography>
                     )}
                     {task.estimatedMinutes != null && (
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        <Typography variant="caption" sx={{ fontSize: '0.8125rem', color: 'text.secondary' }}>
                             {formatMinutes(task.estimatedMinutes)}
                         </Typography>
                     )}
                     {task.isChase && (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                            <GpsFixedIcon sx={{ fontSize: 12, color: 'error.main' }} />
-                            <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 600 }}>Chase</Typography>
+                            <GpsFixedIcon sx={{ fontSize: 11, color: 'error.main' }} />
+                            <Typography variant="caption" sx={{ fontSize: '0.8125rem', color: 'error.main', fontWeight: 600 }}>
+                                Chase
+                            </Typography>
                         </Box>
                     )}
                 </Stack>
@@ -108,7 +113,8 @@ export default function TaskGridView({ tasks, onClearFilters }: TaskGridViewProp
         const color = QUADRANT_LABELS[q].color;
         return {
             borderLeft: `4px solid ${color}`,
-            background: `${color}10`,
+            // Increased tint from 10 → 1A for clearer quadrant scanability
+            background: `${color}1A`,
         };
     }, []);
 
@@ -132,9 +138,9 @@ export default function TaskGridView({ tasks, onClearFilters }: TaskGridViewProp
         const statusCol: ColDef<Task> = {
             field: 'status',
             headerName: '',
-            width: 52,
-            minWidth: 52,
-            maxWidth: 52,
+            width: isMobile ? 56 : 52,
+            minWidth: isMobile ? 56 : 52,
+            maxWidth: isMobile ? 56 : 52,
             cellRenderer: StatusCellRenderer,
             sortable: false,
             filter: false,
@@ -152,7 +158,7 @@ export default function TaskGridView({ tasks, onClearFilters }: TaskGridViewProp
                 editable: false,
                 sortable: true,
                 cellRenderer: MobileTitleCellRenderer,
-                cellStyle: { display: 'flex', alignItems: 'center', padding: '4px 12px' } as any,
+                cellStyle: { display: 'flex', alignItems: 'center', padding: '4px 8px' } as any,
             }
             : {
                 field: 'title',
@@ -163,18 +169,21 @@ export default function TaskGridView({ tasks, onClearFilters }: TaskGridViewProp
                 cellStyle: (params) => ({
                     fontWeight: params.data?.quadrant === 'DO_FIRST' ? '600' : '400',
                     textDecoration: params.data?.status === 'DONE' ? 'line-through' : 'none',
-                    opacity: params.data?.status === 'DONE' ? '0.5' : '1',
+                    opacity: params.data?.status === 'DONE' ? '0.45' : '1',
                     display: 'flex',
                     alignItems: 'center',
                     cursor: 'text',
+                    // Animate completion fade
+                    transition: 'opacity 0.2s ease',
                 }),
             };
 
         const quadrantCol: ColDef<Task> = {
             field: 'quadrant',
-            headerName: 'Cat.',
-            width: isMobile ? 60 : 80,
-            minWidth: isMobile ? 60 : 80,
+            // No header label — icon column is self-explanatory
+            headerName: '',
+            width: isMobile ? 56 : 72,
+            minWidth: isMobile ? 56 : 72,
             cellRenderer: QuadrantCellRenderer,
             comparator: quadrantComparator,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' },
@@ -255,7 +264,8 @@ export default function TaskGridView({ tasks, onClearFilters }: TaskGridViewProp
         ];
     }, [isMobile, theme, patchTask]);
 
-    const rowHeight = isMobile ? 64 : 88;
+    // Unified 64px row height — comfortable on both desktop and mobile
+    const rowHeight = 64;
 
     const bgColor = theme.palette.background.default;
     const borderColor = theme.palette.divider;
@@ -273,8 +283,8 @@ export default function TaskGridView({ tasks, onClearFilters }: TaskGridViewProp
         '--ag-row-height': `${rowHeight}px`,
         '--ag-header-height': isMobile ? '40px' : '44px',
         '--ag-cell-horizontal-padding': isMobile ? '8px' : '12px',
-        '--ag-row-hover-color': isDark ? 'rgba(108,99,255,0.06)' : 'rgba(80,70,229,0.04)',
-        '--ag-selected-row-background-color': isDark ? 'rgba(108,99,255,0.1)' : 'rgba(80,70,229,0.07)',
+        '--ag-row-hover-color': isDark ? 'rgba(108,99,255,0.08)' : 'rgba(80,70,229,0.05)',
+        '--ag-selected-row-background-color': isDark ? 'rgba(108,99,255,0.12)' : 'rgba(80,70,229,0.08)',
         '--ag-header-foreground-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
         '--ag-foreground-color': theme.palette.text.primary,
         '--ag-secondary-foreground-color': theme.palette.text.secondary,
@@ -312,6 +322,11 @@ export default function TaskGridView({ tasks, onClearFilters }: TaskGridViewProp
                 '& .ag-root-wrapper': { borderRadius: '8px !important', border: 'none !important' },
                 '& .ag-header': { borderBottom: `1px solid ${borderColor}` },
                 '& .ag-row': { borderBottom: `1px solid ${borderColor}` },
+                // Tap press feedback — immediate visual response on touch
+                '& .ag-row:active': {
+                    opacity: 0.82,
+                    transition: 'opacity 0s',
+                },
                 '& .ag-cell-inline-editing': {
                     boxShadow: `0 0 0 2px ${theme.palette.primary.main}`,
                     borderRadius: 1,
