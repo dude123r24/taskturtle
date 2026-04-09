@@ -23,7 +23,7 @@ function TasksGridContent() {
     const searchParams = useSearchParams();
     const { tasks, isLoading, fetchTasks } = useTaskStore();
     const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>('ACTIVE');
     const [quadrantFilter, setQuadrantFilter] = useState<EisenhowerQuadrant | 'ALL'>('ALL');
     const [horizonFilter, setHorizonFilter] = useState<TaskHorizon | 'ALL'>('ALL');
 

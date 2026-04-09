@@ -78,10 +78,6 @@ export function TaskGridFilterBar({
         },
     };
 
-    // Clicking the already-selected value deselects (goes back to ALL)
-    const handleStatus = (_: React.MouseEvent, val: StatusFilter | null) => {
-        onStatusChange(val ?? 'ALL');
-    };
     const handleQuadrant = (_: React.MouseEvent, val: EisenhowerQuadrant | null) => {
         onQuadrantChange(val ?? 'ALL');
     };
@@ -123,24 +119,23 @@ export function TaskGridFilterBar({
                 {/* Status: Active | Done (deselect = all) */}
                 <Box sx={pillSx}>
                     <ToggleButtonGroup
-                        value={statusFilter === 'ALL' ? null : statusFilter}
+                        value={statusFilter}
                         exclusive
                         aria-label="Filter by status"
-                        onChange={handleStatus}
+                        onChange={(_, val: StatusFilter | null) => val != null && onStatusChange(val)}
                         sx={{ '& .MuiToggleButtonGroup-grouped': btnBase }}
                     >
-                        <Tooltip title={`Active tasks (${activeCount})`}>
-                            <ToggleButton value="ACTIVE" aria-label="Active tasks" sx={{ gap: 0.75, pr: 1.75 }}>
-                                <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
-                                Active ({activeCount})
-                            </ToggleButton>
-                        </Tooltip>
-                        <Tooltip title={`Completed tasks (${doneCount})`}>
-                            <ToggleButton value="DONE" aria-label="Completed tasks" sx={{ gap: 0.75, pr: 1.75 }}>
-                                <CheckCircleOutlineIcon sx={{ fontSize: 16 }} />
-                                Done ({doneCount})
-                            </ToggleButton>
-                        </Tooltip>
+                        <ToggleButton value="ACTIVE" aria-label="Active tasks" sx={{ gap: 0.75, px: 1.75 }}>
+                            <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
+                            Active ({activeCount})
+                        </ToggleButton>
+                        <ToggleButton value="DONE" aria-label="Completed tasks" sx={{ gap: 0.75, px: 1.75 }}>
+                            <CheckCircleOutlineIcon sx={{ fontSize: 16 }} />
+                            Done ({doneCount})
+                        </ToggleButton>
+                        <ToggleButton value="ALL" aria-label="All tasks" sx={{ px: 1.75 }}>
+                            All
+                        </ToggleButton>
                     </ToggleButtonGroup>
                 </Box>
 

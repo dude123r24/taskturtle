@@ -202,7 +202,10 @@ export default function TaskGridView({ tasks }: TaskGridViewProps) {
                 },
                 // Prevent AG Grid from overriding our left-border row style
                 '& .ag-row:focus': { outline: 'none' },
+                // Prevent AG Grid's nested wrappers from clipping cell renderer content
                 '& .ag-cell': { overflow: 'visible' },
+                '& .ag-cell-wrapper': { overflow: 'visible', height: '100%' },
+                '& .ag-react-container': { overflow: 'visible', height: '100%', width: '100%', display: 'flex', alignItems: 'center' },
             }}
         >
             <AgGridReact<Task>
