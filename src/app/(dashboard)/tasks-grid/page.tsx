@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 import { useTaskStore, type EisenhowerQuadrant, type TaskHorizon } from '@/store/taskStore';
-import { TasksFilterBar } from '@/components/tasks/TasksFilterBar';
+import { TaskGridFilterBar } from '@/components/tasks/TaskGridFilterBar';
 import TaskGridView from '@/components/tasks/TaskGridView';
 
 const QUADRANT_PARAM_VALUES: EisenhowerQuadrant[] = ['DO_FIRST', 'SCHEDULE', 'DELEGATE', 'ELIMINATE', 'UNASSIGNED'];
@@ -96,7 +96,7 @@ function TasksGridContent() {
                 </Box>
             </Stack>
 
-            <TasksFilterBar
+            <TaskGridFilterBar
                 search={search}
                 onSearchChange={setSearch}
                 quadrantFilter={quadrantFilter}

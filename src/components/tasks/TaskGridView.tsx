@@ -2,7 +2,10 @@
 
 import { useCallback, useMemo, useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+import { ModuleRegistry, ClientSideRowModelModule } from 'ag-grid-community';
 import type { ColDef, CellValueChangedEvent, RowClassParams, RowStyle } from 'ag-grid-community';
+
+ModuleRegistry.registerModules([ClientSideRowModelModule]);
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
@@ -192,7 +195,7 @@ export default function TaskGridView({ tasks }: TaskGridViewProps) {
         '--ag-row-border-color': borderColor,
         '--ag-font-family': fontFamily,
         '--ag-font-size': '14px',
-        '--ag-row-height': '52px',
+        '--ag-row-height': '64px',
         '--ag-header-height': '44px',
         '--ag-cell-horizontal-padding': '12px',
         '--ag-row-hover-color': isDark ? 'rgba(108,99,255,0.06)' : 'rgba(80,70,229,0.04)',
