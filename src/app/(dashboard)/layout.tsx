@@ -38,8 +38,10 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import { useTaskStore } from '@/store/taskStore';
 import QuickAddDialog from '@/components/tasks/QuickAddDialog';
 import CommandPalette from '@/components/layout/CommandPalette';
+import ShareModal from '@/components/ShareModal';
 import { useThemeMode } from '@/components/ThemeContext';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import { getPageTitle, getBottomNavValue } from '@/lib/navConfig';
 import { isPlatformAdmin } from '@/lib/taskDeepLinks';
 
@@ -79,6 +81,7 @@ export default function DashboardLayout({
     });
     const [mobileOpen, setMobileOpen] = useState(false);
     const [moreSheetOpen, setMoreSheetOpen] = useState(false);
+    const [shareOpen, setShareOpen] = useState(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const { quickAddOpen, setQuickAddOpen } = useTaskStore();
 
@@ -92,6 +95,15 @@ export default function DashboardLayout({
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [setQuickAddOpen]);
+
+    // Redeem pending invite token stored by login page
+    useEffect(() => {
+        if (status !== 'authenticated') return;
+        const pendingToken = localStorage.getItem('pendingInviteToken');
+        if (!pendingToken) return;
+        localStorage.removeItem('pendingInviteToken');
+        fetch(`/api/invite/${pendingToken}`, { method: 'POST' }).catch(() => {});
+    }, [status]);
     const { resolvedMode } = useThemeMode();
     const isGoogle = resolvedMode === 'google';
     const isLuxury = resolvedMode === 'luxury';
@@ -298,6 +310,18 @@ export default function DashboardLayout({
             <Divider sx={{ borderColor: 'divider', mt: 'auto' }} />
             <List sx={{ px: 1, py: 1 }}>
                 <ListItem disablePadding>
+                    <ListItemButton
+                        onClick={() => { setShareOpen(true); closeMobile(); }}
+                        sx={{ borderRadius: 2 }}
+                        aria-label="Invite friends"
+                    >
+                        <ListItemIcon sx={{ minWidth: 44 }}>
+                            <PersonAddAltIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Invite friends" primaryTypographyProps={{ fontSize: '0.9rem' }} />
+                    </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
                     <ListItemButton component={Link} href="/settings" onClick={closeMobile} sx={{ borderRadius: 2 }}>
                         <ListItemIcon sx={{ minWidth: 44 }}>
                             <SettingsIcon />
@@ -371,6 +395,18 @@ export default function DashboardLayout({
                         </ListItemButton>
                     </ListItem>
                 )}
+                <ListItem disablePadding>
+                    <ListItemButton
+                        onClick={() => { setShareOpen(true); closeMore(); }}
+                        sx={{ borderRadius: 2, py: 1.25 }}
+                        aria-label="Invite friends"
+                    >
+                        <ListItemIcon sx={{ minWidth: 44 }}>
+                            <PersonAddAltIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Invite friends" primaryTypographyProps={{ fontWeight: 600 }} />
+                    </ListItemButton>
+                </ListItem>
                 <ListItem disablePadding>
                     <ListItemButton component={Link} href="/settings" onClick={closeMore} sx={{ borderRadius: 2, py: 1.25 }}>
                         <ListItemIcon sx={{ minWidth: 44 }}>
@@ -620,6 +656,8 @@ export default function DashboardLayout({
             </Fab>
 
             <QuickAddDialog open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
+
+            <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} />
 
             <CommandPalette />
         </Box>

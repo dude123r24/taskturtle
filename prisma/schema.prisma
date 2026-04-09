@@ -24,6 +24,8 @@ model User {
   settings         UserSettings?
   calendarAccounts CalendarAccount[]
   featureRequests  FeatureRequest[]
+  invitesSent      Invite[]          @relation("InviteSender")
+  referredById     String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -256,6 +258,22 @@ enum FeatureRequestStatus {
   IN_PROGRESS
   COMPLETED
   REJECTED
+}
+
+// ─── Invites ─────────────────────────────────────────────────────────
+
+model Invite {
+  id           String    @id @default(cuid())
+  token        String    @unique @default(cuid())
+  inviterId    String
+  inviter      User      @relation("InviteSender", fields: [inviterId], references: [id], onDelete: Cascade)
+  usedAt       DateTime?
+  usedByUserId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([inviterId])
+  @@index([token])
 }
 
 // ─── Ideas / Feature Requests ────────────────────────────────────────

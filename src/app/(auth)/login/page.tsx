@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
 import Link from 'next/link';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
@@ -14,9 +16,32 @@ import { marketingPalette as m } from '@/lib/marketingPalette';
 
 const fontStack = 'var(--font-sans), ui-sans-serif, system-ui, sans-serif';
 
-export default function LoginPage() {
+interface InviterInfo {
+    inviterName: string | null;
+    inviterImage: string | null;
+}
+
+function LoginPageContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [inviter, setInviter] = useState<InviterInfo | null>(null);
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const token = searchParams.get('invite');
+        if (!token) return;
+
+        // Persist token so layout can redeem it post-auth (survives OAuth redirect)
+        localStorage.setItem('pendingInviteToken', token);
+
+        // Fetch inviter info to show on login page
+        fetch(`/api/invite/${token}`)
+            .then((r) => r.ok ? r.json() : null)
+            .then((data: { inviterName: string | null; inviterImage: string | null } | null) => {
+                if (data) setInviter({ inviterName: data.inviterName, inviterImage: data.inviterImage });
+            })
+            .catch(() => {});
+    }, [searchParams]);
 
     async function handleGoogleSignIn() {
         setError(null);
@@ -237,6 +262,35 @@ export default function LoginPage() {
                                 </Typography>
                             </Box>
 
+                            {inviter && (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1.5,
+                                        p: 1.5,
+                                        borderRadius: 2,
+                                        bgcolor: `${m.sage}18`,
+                                        border: `1px solid ${m.sage}44`,
+                                    }}
+                                    role="status"
+                                >
+                                    {inviter.inviterImage && (
+                                        <Avatar
+                                            src={inviter.inviterImage}
+                                            alt={inviter.inviterName ?? 'Inviter'}
+                                            sx={{ width: 32, height: 32, flexShrink: 0 }}
+                                        />
+                                    )}
+                                    <Typography sx={{ fontSize: '0.875rem', color: m.ink, lineHeight: 1.4 }}>
+                                        <Box component="span" sx={{ fontWeight: 700 }}>
+                                            {inviter.inviterName ?? 'Someone'}
+                                        </Box>{' '}
+                                        invited you to TaskTurtle
+                                    </Typography>
+                                </Box>
+                            )}
+
                             {error && (
                                 <Alert severity="error" sx={{ width: '100%' }} onClose={() => setError(null)}>
                                     {error}
@@ -318,5 +372,13 @@ export default function LoginPage() {
                 </Grid>
             </Grid>
         </Box>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense>
+            <LoginPageContent />
+        </Suspense>
     );
 }
