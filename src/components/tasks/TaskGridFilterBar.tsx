@@ -6,6 +6,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
@@ -13,65 +14,79 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GroupsIcon from '@mui/icons-material/Groups';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import DateRangeIcon from '@mui/icons-material/DateRange';
 import type { EisenhowerQuadrant, TaskHorizon } from '@/store/taskStore';
+
+export type StatusFilter = 'ALL' | 'ACTIVE' | 'DONE';
 
 export interface TaskGridFilterBarProps {
     search: string;
     onSearchChange: (value: string) => void;
+    statusFilter: StatusFilter;
+    onStatusChange: (value: StatusFilter) => void;
     quadrantFilter: EisenhowerQuadrant | 'ALL';
     onQuadrantChange: (value: EisenhowerQuadrant | 'ALL') => void;
     horizonFilter: TaskHorizon | 'ALL';
     onHorizonChange: (value: TaskHorizon | 'ALL') => void;
-    statusTab: number;
-    onStatusTabChange: (value: number) => void;
     activeCount: number;
     doneCount: number;
-    allCount: number;
 }
-
-const STATUS_VALUES = ['active', 'done', 'all'] as const;
 
 export function TaskGridFilterBar({
     search,
     onSearchChange,
+    statusFilter,
+    onStatusChange,
     quadrantFilter,
     onQuadrantChange,
     horizonFilter,
     onHorizonChange,
-    statusTab,
-    onStatusTabChange,
     activeCount,
     doneCount,
-    allCount,
 }: TaskGridFilterBarProps) {
     const theme = useTheme();
+    const isDark = theme.palette.mode === 'dark';
 
-    const pillGroup = {
+    const pillSx = {
         display: 'inline-flex',
-        alignItems: 'stretch',
+        alignItems: 'center',
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: 100,
         overflow: 'hidden',
         bgcolor: theme.palette.background.paper,
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+        boxShadow: isDark ? 'none' : '0 1px 2px rgba(0,0,0,0.04)',
         flexShrink: 0,
     } as const;
 
-    const toggleBaseSx = {
+    const btnBase = {
         border: 'none',
         borderRadius: 0,
         minHeight: 40,
         textTransform: 'none' as const,
-        fontWeight: 500,
         fontSize: '0.8125rem',
+        px: 1.5,
+        minWidth: 40,
         '&.Mui-selected': {
-            bgcolor: 'rgba(117, 104, 192, 0.15) !important',
+            bgcolor: `${theme.palette.primary.main}18 !important`,
             color: 'primary.main',
             fontWeight: 700,
         },
         '&:not(:first-of-type)': {
             borderLeft: `1px solid ${theme.palette.divider}`,
         },
+    };
+
+    // Clicking the already-selected value deselects (goes back to ALL)
+    const handleStatus = (_: React.MouseEvent, val: StatusFilter | null) => {
+        onStatusChange(val ?? 'ALL');
+    };
+    const handleQuadrant = (_: React.MouseEvent, val: EisenhowerQuadrant | null) => {
+        onQuadrantChange(val ?? 'ALL');
+    };
+    const handleHorizon = (_: React.MouseEvent, val: TaskHorizon | null) => {
+        onHorizonChange(val ?? 'ALL');
     };
 
     return (
@@ -95,98 +110,96 @@ export function TaskGridFilterBar({
                         bgcolor: theme.palette.background.paper,
                         pl: 1,
                         '& fieldset': { borderColor: theme.palette.divider },
-                        '&:hover fieldset': { borderColor: 'rgba(117, 104, 192, 0.35)' },
+                        '&:hover fieldset': { borderColor: `${theme.palette.primary.main}60` },
                         '&.Mui-focused fieldset': { borderColor: 'primary.main' },
                     },
                 }}
                 sx={{ width: '100%', maxWidth: 480 }}
             />
 
-            {/* Unified filter row */}
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    gap: 1.5,
-                }}
-            >
-                {/* Status: Active / Done / All */}
-                <Box sx={pillGroup}>
+            {/* Single unified filter row */}
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.25 }}>
+
+                {/* Status: Active | Done (deselect = all) */}
+                <Box sx={pillSx}>
                     <ToggleButtonGroup
-                        value={STATUS_VALUES[statusTab]}
+                        value={statusFilter === 'ALL' ? null : statusFilter}
                         exclusive
                         aria-label="Filter by status"
-                        onChange={(_, val: typeof STATUS_VALUES[number] | null) => {
-                            if (val != null) onStatusTabChange(STATUS_VALUES.indexOf(val));
-                        }}
-                        sx={{ '& .MuiToggleButtonGroup-grouped': toggleBaseSx }}
+                        onChange={handleStatus}
+                        sx={{ '& .MuiToggleButtonGroup-grouped': btnBase }}
                     >
-                        <ToggleButton value="active" sx={{ px: 2 }}>
-                            Active ({activeCount})
-                        </ToggleButton>
-                        <ToggleButton value="done" sx={{ px: 2 }}>
-                            Done ({doneCount})
-                        </ToggleButton>
-                        <ToggleButton value="all" sx={{ px: 2 }}>
-                            All ({allCount})
-                        </ToggleButton>
+                        <Tooltip title={`Active tasks (${activeCount})`}>
+                            <ToggleButton value="ACTIVE" aria-label="Active tasks" sx={{ gap: 0.75, pr: 1.75 }}>
+                                <RadioButtonUncheckedIcon sx={{ fontSize: 16 }} />
+                                Active ({activeCount})
+                            </ToggleButton>
+                        </Tooltip>
+                        <Tooltip title={`Completed tasks (${doneCount})`}>
+                            <ToggleButton value="DONE" aria-label="Completed tasks" sx={{ gap: 0.75, pr: 1.75 }}>
+                                <CheckCircleOutlineIcon sx={{ fontSize: 16 }} />
+                                Done ({doneCount})
+                            </ToggleButton>
+                        </Tooltip>
                     </ToggleButtonGroup>
                 </Box>
 
-                {/* Quadrant: All | 🔴 | 📅 | 👥 | 🗑️ | 📋 */}
-                <Box sx={pillGroup}>
+                <Divider orientation="vertical" flexItem sx={{ my: 0.5, display: { xs: 'none', sm: 'block' } }} />
+
+                {/* Quadrant icons (deselect = all categories) */}
+                <Box sx={pillSx}>
                     <ToggleButtonGroup
-                        value={quadrantFilter}
+                        value={quadrantFilter === 'ALL' ? null : quadrantFilter}
                         exclusive
-                        aria-label="Filter by quadrant"
-                        onChange={(_, val: EisenhowerQuadrant | 'ALL' | null) => val != null && onQuadrantChange(val)}
-                        sx={{ '& .MuiToggleButtonGroup-grouped': { ...toggleBaseSx, px: 1.25, minWidth: 40 } }}
+                        aria-label="Filter by category"
+                        onChange={handleQuadrant}
+                        sx={{ '& .MuiToggleButtonGroup-grouped': { ...btnBase, px: 1.25 } }}
                     >
-                        <Tooltip title="All categories">
-                            <ToggleButton value="ALL" aria-label="All categories" sx={{ px: 1.5, fontWeight: 600, fontSize: '0.8rem' }}>
-                                All
-                            </ToggleButton>
-                        </Tooltip>
-                        <Tooltip title="Do First">
+                        <Tooltip title="Do First — urgent & important">
                             <ToggleButton value="DO_FIRST" aria-label="Do First">
                                 <FiberManualRecordIcon sx={{ color: '#E53935', fontSize: 18 }} />
                             </ToggleButton>
                         </Tooltip>
-                        <Tooltip title="Schedule">
+                        <Tooltip title="Schedule — important, not urgent">
                             <ToggleButton value="SCHEDULE" aria-label="Schedule">
-                                <CalendarMonthIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                                <CalendarMonthIcon sx={{ fontSize: 18, color: '#1E88E5' }} />
                             </ToggleButton>
                         </Tooltip>
-                        <Tooltip title="Delegate">
+                        <Tooltip title="Delegate — urgent, not important">
                             <ToggleButton value="DELEGATE" aria-label="Delegate">
-                                <GroupsIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                                <GroupsIcon sx={{ fontSize: 18, color: '#FB8C00' }} />
                             </ToggleButton>
                         </Tooltip>
-                        <Tooltip title="Eliminate">
+                        <Tooltip title="Eliminate — neither urgent nor important">
                             <ToggleButton value="ELIMINATE" aria-label="Eliminate">
-                                <DeleteOutlineIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                                <DeleteOutlineIcon sx={{ fontSize: 18, color: '#757575' }} />
                             </ToggleButton>
                         </Tooltip>
-                        <Tooltip title="Backlog">
+                        <Tooltip title="Backlog — not yet prioritised">
                             <ToggleButton value="UNASSIGNED" aria-label="Backlog">
-                                <ListAltIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                                <ListAltIcon sx={{ fontSize: 18, color: '#9E9E9E' }} />
                             </ToggleButton>
                         </Tooltip>
                     </ToggleButtonGroup>
                 </Box>
 
-                {/* Horizon: All | This Week */}
-                <Box sx={pillGroup}>
+                <Divider orientation="vertical" flexItem sx={{ my: 0.5, display: { xs: 'none', sm: 'block' } }} />
+
+                {/* Horizon: This Week toggle (off = all time) */}
+                <Box sx={pillSx}>
                     <ToggleButtonGroup
-                        value={horizonFilter}
+                        value={horizonFilter === 'ALL' ? null : horizonFilter}
                         exclusive
                         aria-label="Filter by time horizon"
-                        onChange={(_, val: TaskHorizon | 'ALL' | null) => val != null && onHorizonChange(val)}
-                        sx={{ '& .MuiToggleButtonGroup-grouped': { ...toggleBaseSx, px: 1.75 } }}
+                        onChange={handleHorizon}
+                        sx={{ '& .MuiToggleButtonGroup-grouped': { ...btnBase, px: 1.75, gap: 0.75 } }}
                     >
-                        <ToggleButton value="ALL">All time</ToggleButton>
-                        <ToggleButton value="SHORT_TERM">This Week</ToggleButton>
+                        <Tooltip title="Short-term tasks only">
+                            <ToggleButton value="SHORT_TERM" aria-label="This Week">
+                                <DateRangeIcon sx={{ fontSize: 16 }} />
+                                This Week
+                            </ToggleButton>
+                        </Tooltip>
                     </ToggleButtonGroup>
                 </Box>
             </Box>

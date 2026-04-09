@@ -136,39 +136,6 @@ export default function TaskGridView({ tasks }: TaskGridViewProps) {
             },
         },
         {
-            field: 'isChase',
-            headerName: '🎯',
-            width: 56,
-            minWidth: 56,
-            maxWidth: 56,
-            sortable: false,
-            filter: false,
-            resizable: false,
-            cellRenderer: (p: { data?: Task }) => {
-                const task = p.data;
-                if (!task) return null;
-                return (
-                    <Box
-                        onClick={(e) => { e.stopPropagation(); patchTask(task.id, { isChase: !task.isChase }); }}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={task.isChase ? 'Remove chase flag' : 'Mark as chase'}
-                        aria-pressed={task.isChase}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); patchTask(task.id, { isChase: !task.isChase }); } }}
-                        sx={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%',
-                            cursor: 'pointer', fontSize: '1rem', opacity: task.isChase ? 1 : 0.25,
-                            transition: 'opacity 0.15s',
-                            '&:hover': { opacity: task.isChase ? 0.7 : 0.6 },
-                        }}
-                    >
-                        🎯
-                    </Box>
-                );
-            },
-            cellStyle: { padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center' } as any,
-        },
-        {
             headerName: '',
             width: 84,
             minWidth: 84,
@@ -195,7 +162,7 @@ export default function TaskGridView({ tasks }: TaskGridViewProps) {
         '--ag-row-border-color': borderColor,
         '--ag-font-family': fontFamily,
         '--ag-font-size': '14px',
-        '--ag-row-height': '64px',
+        '--ag-row-height': '72px',
         '--ag-header-height': '44px',
         '--ag-cell-horizontal-padding': '12px',
         '--ag-row-hover-color': isDark ? 'rgba(108,99,255,0.06)' : 'rgba(80,70,229,0.04)',
@@ -235,6 +202,7 @@ export default function TaskGridView({ tasks }: TaskGridViewProps) {
                 },
                 // Prevent AG Grid from overriding our left-border row style
                 '& .ag-row:focus': { outline: 'none' },
+                '& .ag-cell': { overflow: 'visible' },
             }}
         >
             <AgGridReact<Task>

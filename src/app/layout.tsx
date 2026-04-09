@@ -52,6 +52,9 @@ export default function RootLayout({
             <head>
                 <link rel="icon" href="/icons/icon-192.png" type="image/png" />
                 <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+                <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:ital,opsz,wght@0,6..144,100..700;1,6..144,100..700&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
             </head>
             <body>
                 <Providers>
