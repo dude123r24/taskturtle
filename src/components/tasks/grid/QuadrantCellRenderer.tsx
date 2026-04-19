@@ -44,7 +44,7 @@ export default function QuadrantCellRenderer(props: CustomCellRendererProps<Task
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleOpen(e as any); }}
-                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', p: 0.5, borderRadius: 1, '&:hover': { bgcolor: `${meta.color}18` } }}
+                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', p: 0.5, borderRadius: 1, '&:hover': { bgcolor: `${meta.color}18` }, '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 } }}
                 >
                     <Icon sx={{ fontSize: 20, color: meta.color }} />
                 </Box>

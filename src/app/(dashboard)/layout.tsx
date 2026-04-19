@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Z } from '@/lib/zIndex';
 import { usePathname, useRouter } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { serverSignOut } from '@/lib/authActions';
 import Link from 'next/link';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -73,12 +75,13 @@ export default function DashboardLayout({
 }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { data: session, status } = useSession({
-        required: true,
-        onUnauthenticated() {
-            signOut({ callbackUrl: '/login' });
-        },
-    });
+    const { data: session, status } = useSession();
+
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+            router.replace('/login');
+        }
+    }, [status, router]);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [moreSheetOpen, setMoreSheetOpen] = useState(false);
     const [shareOpen, setShareOpen] = useState(false);
@@ -129,17 +132,7 @@ export default function DashboardLayout({
                     },
                 }
                 : isLuxury
-                    ? {
-                        '&.Mui-selected': {
-                            bgcolor: 'rgba(117, 104, 192, 0.12)',
-                        },
-                        '& .MuiListItemIcon-root': {
-                            color: routeSelected(pathname, href) ? 'primary.main' : 'text.secondary',
-                        },
-                        '&:hover': {
-                            bgcolor: 'rgba(117, 104, 192, 0.08)',
-                        },
-                    }
+                    ? {} // MuiListItemButton theme override handles yellow selected state
                     : {
                         '&.Mui-selected': {
                             bgcolor: (theme: { palette: { primary: { main: string } } }) => `${theme.palette.primary.main}15`,
@@ -173,7 +166,7 @@ export default function DashboardLayout({
                         <Box component="span" sx={{ color: '#EA4335' }}>e</Box>
                     </Typography>
                 ) : isLuxury ? (
-                    <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '-0.03em' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'text.primary', letterSpacing: '-0.02em', border: '2px solid', borderColor: 'text.primary', px: 1, py: 0.25, bgcolor: 'primary.main' }}>
                         TaskTurtle
                     </Typography>
                 ) : (
@@ -429,8 +422,8 @@ export default function DashboardLayout({
 
     if (status === 'loading') {
         return (
-            <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-                <CircularProgress />
+            <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
+                <CircularProgress sx={{ color: 'text.primary' }} />
             </Box>
         );
     }
@@ -445,7 +438,7 @@ export default function DashboardLayout({
                     position: 'absolute',
                     top: -60,
                     left: 8,
-                    zIndex: 9999,
+                    zIndex: Z.skipLink,
                     px: 2,
                     py: 1,
                     borderRadius: 1,
@@ -501,7 +494,7 @@ export default function DashboardLayout({
                 anchor="bottom"
                 open={moreSheetOpen}
                 onClose={closeMore}
-                sx={{ display: { xs: 'block', md: 'none' }, zIndex: 1300 }}
+                sx={{ display: { xs: 'block', md: 'none' }, zIndex: Z.bottomSheet }}
                 PaperProps={{
                     sx: {
                         borderTopLeftRadius: 16,
@@ -581,7 +574,16 @@ export default function DashboardLayout({
                             <MenuItem component={Link} href="/settings" onClick={() => setAnchorEl(null)}>
                                 Settings
                             </MenuItem>
-                            <MenuItem onClick={() => signOut()}>Sign out</MenuItem>
+                            <Box component="form" action={serverSignOut} sx={{ m: 0 }}>
+                                <MenuItem
+                                    component="button"
+                                    type="submit"
+                                    onClick={() => setAnchorEl(null)}
+                                    sx={{ width: '100%', border: 0, bgcolor: 'transparent', font: 'inherit', textAlign: 'left' }}
+                                >
+                                    Sign out
+                                </MenuItem>
+                            </Box>
                         </Menu>
                     </Toolbar>
                 </AppBar>
@@ -613,7 +615,7 @@ export default function DashboardLayout({
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    zIndex: 1100,
+                    zIndex: Z.bottomNav,
                     pb: 'env(safe-area-inset-bottom)',
                     borderTop: 1,
                     borderColor: 'divider',
@@ -649,7 +651,7 @@ export default function DashboardLayout({
                         md: 'calc(24px + env(safe-area-inset-bottom))',
                     },
                     right: 'calc(24px + env(safe-area-inset-right))',
-                    zIndex: 1200,
+                    zIndex: Z.fab,
                 }}
             >
                 <AddIcon />

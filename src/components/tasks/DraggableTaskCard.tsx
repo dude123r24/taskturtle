@@ -7,6 +7,8 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import TaskCard from './TaskCard';
 import { type Task, useTaskStore } from '@/store/taskStore';
 import { useRef, useCallback, memo } from 'react';
+import { useTheme } from '@mui/material/styles';
+import { Z } from '@/lib/zIndex';
 
 interface DraggableTaskCardProps {
     task: Task;
@@ -30,7 +32,7 @@ function DraggableTaskCardInner({ task, compact, disableSwipe = false }: Draggab
     const style: React.CSSProperties = {
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
         opacity: isDnDDragging ? 0.3 : 1,
-        zIndex: isDnDDragging ? 999 : 'auto' as any,
+        zIndex: isDnDDragging ? Z.dragging : 'auto' as any,
         willChange: isDnDDragging ? 'transform' : undefined,
     };
 
@@ -118,11 +120,14 @@ function SwipeableDraggableCard({
     patchTask: (id: string, data: Partial<Task>) => Promise<void>;
     suppressClickAfterDrag: (e: React.MouseEvent) => void;
 }) {
+    const theme = useTheme();
     const x = useMotionValue(0);
+    const errorColor = theme.palette.error.main;
+    const successColor = theme.palette.success.main;
     const backgroundArgs = useTransform(x, [-100, 0, 100], [
-        'linear-gradient(90deg, #ef5350 0%, #ef5350 100%)',
+        `linear-gradient(90deg, ${errorColor} 0%, ${errorColor} 100%)`,
         'transparent',
-        'linear-gradient(90deg, #66bb6a 0%, #66bb6a 100%)',
+        `linear-gradient(90deg, ${successColor} 0%, ${successColor} 100%)`,
     ]);
     const opacity = useTransform(x, [-100, -50, 0, 50, 100], [1, 0.5, 0, 0.5, 1]);
 
@@ -148,7 +153,7 @@ function SwipeableDraggableCard({
                     position: 'absolute',
                     top: 0, left: 0, right: 0, bottom: 0,
                     background: backgroundArgs,
-                    borderRadius: 12,
+                    borderRadius: theme.shape.borderRadius,
                     zIndex: 0,
                     opacity,
                     pointerEvents: 'none',

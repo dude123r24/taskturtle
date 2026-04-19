@@ -208,6 +208,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                 boxShadow: idleShadows.length ? idleShadows.join(', ') : undefined,
                 transition: flashColor ? 'none' : 'background-color 0.2s ease, box-shadow 0.2s ease',
                 opacity: isDone ? 0.72 : 1,
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 },
                 '&:hover': {
                     backgroundColor: flashColor || alpha(accentColor, theme.palette.mode === 'dark' ? 0.18 : 0.14),
                     boxShadow:

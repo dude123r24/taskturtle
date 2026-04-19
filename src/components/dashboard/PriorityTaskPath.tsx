@@ -311,9 +311,7 @@ function TaskRow({
                     width: 28,
                     height: 28,
                     borderRadius: 1,
-                    bgcolor: isLuxury ? 'rgba(255, 252, 247, 0.72)' : 'background.paper',
-                    backdropFilter: isLuxury ? 'blur(8px)' : undefined,
-                    WebkitBackdropFilter: isLuxury ? 'blur(8px)' : undefined,
+                    bgcolor: 'background.paper',
                     border: '2px solid',
                     borderColor: task.isChase ? 'secondary.main' : 'primary.main',
                     display: 'flex',
@@ -354,6 +352,7 @@ function TaskRow({
                     borderLeft: `6px solid ${QUADRANT_META[task.quadrant]?.color || '#9E9E9E'}`,
                     cursor: 'pointer',
                     transition: 'background 0.18s, box-shadow 0.18s',
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 },
                     ...(isLuxury
                         ? {
                               ...frostedLuxury.panelDense,

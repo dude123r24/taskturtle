@@ -263,7 +263,7 @@ function SettingsContent() {
                             Dubai Gold
                         </ToggleButton>
                         <ToggleButton value="luxury" sx={{ gap: 1, color: 'text.primary' }}>
-                            Luxury minimal
+                            Neo-brutalism
                         </ToggleButton>
                         <ToggleButton value="system" sx={{ gap: 1, color: 'text.primary' }}>
                             <SettingsBrightnessIcon fontSize="small" /> System
@@ -331,7 +331,7 @@ function SettingsContent() {
                                                 label={account.googleEmail}
                                                 size="small"
                                                 variant="outlined"
-                                                sx={{ fontSize: '0.7rem' }}
+                                                sx={{ fontSize: '0.75rem' }}
                                             />
                                         </Stack>
                                     </Box>

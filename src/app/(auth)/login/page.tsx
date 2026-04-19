@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { serverGoogleSignIn } from '@/lib/authActions';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -12,6 +12,9 @@ import Link from 'next/link';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Grid from '@mui/material/Grid';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { darkTheme } from '@/lib/theme';
 import { marketingPalette as m } from '@/lib/marketingPalette';
 
 const fontStack = 'var(--font-sans), ui-sans-serif, system-ui, sans-serif';
@@ -23,18 +26,21 @@ interface InviterInfo {
 
 function LoginPageContent() {
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [inviter, setInviter] = useState<InviterInfo | null>(null);
     const searchParams = useSearchParams();
+    const errorParam = searchParams.get('error');
+    const error = errorParam
+        ? errorParam === 'Configuration'
+            ? 'Auth configuration error. Check AUTH_URL and NEXTAUTH_URL.'
+            : `Sign-in failed: ${errorParam}`
+        : null;
 
     useEffect(() => {
         const token = searchParams.get('invite');
         if (!token) return;
 
-        // Persist token so layout can redeem it post-auth (survives OAuth redirect)
         localStorage.setItem('pendingInviteToken', token);
 
-        // Fetch inviter info to show on login page
         fetch(`/api/invite/${token}`)
             .then((r) => r.ok ? r.json() : null)
             .then((data: { inviterName: string | null; inviterImage: string | null } | null) => {
@@ -42,47 +48,6 @@ function LoginPageContent() {
             })
             .catch(() => {});
     }, [searchParams]);
-
-    async function handleGoogleSignIn() {
-        setError(null);
-        setLoading(true);
-        try {
-            const result = await signIn('google', {
-                callbackUrl: '/dashboard',
-                redirect: false,
-            });
-
-            if (!result) {
-                setError('No response from the sign-in service. Is the dev server running?');
-                return;
-            }
-
-            if (result.error) {
-                setError(
-                    result.error === 'Configuration'
-                        ? 'Auth configuration error. Set AUTH_URL and NEXTAUTH_URL to this site’s URL (e.g. https://localhost:3000) and restart the server.'
-                        : `Sign-in failed: ${result.error}`,
-                );
-                return;
-            }
-
-            if (result.url) {
-                window.location.assign(result.url);
-                return;
-            }
-
-            setError('Sign-in did not return a redirect URL. Check the browser console and server logs.');
-        } catch (e) {
-            console.error(e);
-            setError(
-                e instanceof Error
-                    ? e.message
-                    : 'Sign-in failed (network or server error). If you use HTTPS locally, open the app at the exact URL in NEXTAUTH_URL.',
-            );
-        } finally {
-            setLoading(false);
-        }
-    }
 
     return (
         <Box
@@ -292,19 +257,19 @@ function LoginPageContent() {
                             )}
 
                             {error && (
-                                <Alert severity="error" sx={{ width: '100%' }} onClose={() => setError(null)}>
+                                <Alert severity="error" sx={{ width: '100%' }}>
                                     {error}
                                 </Alert>
                             )}
 
+                            <Box component="form" action={serverGoogleSignIn} onSubmit={() => setLoading(true)} sx={{ m: 0 }}>
                             <Button
-                                type="button"
+                                type="submit"
                                 variant="contained"
                                 size="large"
                                 fullWidth
                                 disableElevation
                                 disabled={loading}
-                                onClick={() => void handleGoogleSignIn()}
                                 sx={{
                                     py: 1.35,
                                     fontSize: '0.95rem',
@@ -333,6 +298,7 @@ function LoginPageContent() {
                                     </>
                                 )}
                             </Button>
+                            </Box>
 
                             <Typography variant="caption" sx={{ color: m.inkSubtle, textAlign: 'center', display: 'block' }}>
                                 By continuing you agree to our policies below.
@@ -377,8 +343,11 @@ function LoginPageContent() {
 
 export default function LoginPage() {
     return (
-        <Suspense>
-            <LoginPageContent />
-        </Suspense>
+        <MuiThemeProvider theme={darkTheme}>
+            <CssBaseline />
+            <Suspense>
+                <LoginPageContent />
+            </Suspense>
+        </MuiThemeProvider>
     );
 }

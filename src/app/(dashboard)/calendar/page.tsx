@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTheme, alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -28,6 +29,7 @@ interface CalendarEvent {
 }
 
 export default function CalendarPage() {
+    const theme = useTheme();
     const [selectedDate, setSelectedDate] = useState(
         new Date().toISOString().split('T')[0]
     );
@@ -178,13 +180,13 @@ export default function CalendarPage() {
                                                             label={`${formatTime(event.start?.dateTime)} - ${formatTime(event.end?.dateTime)}`}
                                                             size="small"
                                                             variant="outlined"
-                                                            sx={{ fontSize: '0.65rem' }}
+                                                            sx={{ fontSize: '0.7rem' }}
                                                         />
                                                         {getDuration(event.start?.dateTime, event.end?.dateTime) && (
                                                             <Chip
                                                                 label={getDuration(event.start?.dateTime, event.end?.dateTime)}
                                                                 size="small"
-                                                                sx={{ fontSize: '0.65rem', bgcolor: 'rgba(30,136,229,0.15)' }}
+                                                                sx={{ fontSize: '0.7rem', bgcolor: alpha(theme.palette.primary.main, 0.15) }}
                                                             />
                                                         )}
                                                     </Stack>

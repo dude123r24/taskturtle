@@ -27,6 +27,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { type Task, type EisenhowerQuadrant, useTaskStore } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
+import { Z } from '@/lib/zIndex';
 import { QUADRANT_ICONS } from '@/lib/quadrantIcons';
 import TaskCard from './TaskCard';
 import DraggableTaskCard from './DraggableTaskCard';
@@ -273,7 +274,7 @@ function DroppableAction({ id, icon: Icon, label, color }: { id: string; icon: R
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 cursor: 'pointer',
                 transform: isOver ? 'scale(1.15)' : 'scale(1)',
-                zIndex: 1000,
+                zIndex: Z.overlay,
             }}
         >
             <Icon sx={{ fontSize: 32, color: isOver ? color : 'text.secondary' }} />

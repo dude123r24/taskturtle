@@ -342,7 +342,7 @@ export default function QuickAddDialog({ open, onClose }: QuickAddDialogProps) {
                                     />
                                 }
                                 label={
-                                    <Stack direction="row" spacing={0.35} alignItems="center" sx={{ ml: -0.25 }}>
+                                    <Stack direction="row" spacing={0.5} alignItems="center">
                                         <DirectionsRunIcon sx={{ fontSize: '0.95rem', color: isChase ? '#FF6D00' : 'text.secondary' }} />
                                         <Typography variant="caption" sx={{ color: isChase ? '#FF6D00' : 'text.secondary', fontWeight: isChase ? 700 : 500, lineHeight: 1.2 }}>
                                             Chase

@@ -13,7 +13,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             clientSecret: process.env.AUTH_GOOGLE_SECRET!,
             authorization: {
                 params: {
-                    prompt: 'consent',
+                    prompt: 'select_account consent',
                     access_type: 'offline',
                     response_type: 'code',
                     scope:

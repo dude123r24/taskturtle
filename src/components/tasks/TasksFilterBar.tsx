@@ -14,6 +14,8 @@ import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import GroupsIcon from '@mui/icons-material/Groups';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import CalendarViewWeekIcon from '@mui/icons-material/CalendarViewWeek';
 import type { EisenhowerQuadrant, TaskHorizon } from '@/store/taskStore';
 
 export interface TasksFilterBarProps {
@@ -30,13 +32,6 @@ export interface TasksFilterBarProps {
     allCount: number;
 }
 
-const toggleSelected = {
-    '&.Mui-selected': {
-        bgcolor: 'rgba(117, 104, 192, 0.16) !important',
-        color: 'primary.dark',
-    },
-} as const;
-
 export function TasksFilterBar({
     search,
     onSearchChange,
@@ -52,14 +47,24 @@ export function TasksFilterBar({
 }: TasksFilterBarProps) {
     const theme = useTheme();
 
+    const toggleSelected = {
+        '&.Mui-selected': {
+            bgcolor: `${theme.palette.primary.main} !important`,
+            color: '#000000 !important',
+        },
+        '&.Mui-selected:hover': {
+            bgcolor: `${theme.palette.primary.main} !important`,
+        },
+    } as const;
+
     const shell = {
         display: 'inline-flex',
         alignItems: 'stretch',
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: 100,
+        border: '2px solid #000000',
+        borderRadius: '4px',
         overflow: 'hidden',
         bgcolor: theme.palette.background.paper,
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+        boxShadow: '3px 3px 0px #000000',
     } as const;
 
     const horizonToggleSx = {
@@ -67,7 +72,7 @@ export function TasksFilterBar({
         py: 1,
         minHeight: 44,
         textTransform: 'none' as const,
-        fontWeight: 600,
+        fontWeight: 700,
         fontSize: '0.8125rem',
     };
 
@@ -97,17 +102,25 @@ export function TasksFilterBar({
                             </InputAdornment>
                         ),
                         sx: {
-                            borderRadius: 999,
+                            borderRadius: '4px',
                             bgcolor: theme.palette.background.paper,
                             pl: 1,
+                            boxShadow: '3px 3px 0px #000000',
+                            transition: 'box-shadow 0.15s ease',
                             '& fieldset': {
-                                borderColor: theme.palette.divider,
+                                borderColor: '#000000',
+                                borderWidth: '2px',
                             },
                             '&:hover fieldset': {
-                                borderColor: 'rgba(117, 104, 192, 0.35)',
+                                borderColor: '#000000 !important',
+                                borderWidth: '2px !important',
                             },
                             '&.Mui-focused fieldset': {
-                                borderColor: 'primary.main',
+                                borderColor: '#000000 !important',
+                                borderWidth: '2px !important',
+                            },
+                            '&.Mui-focused': {
+                                boxShadow: '4px 4px 0px #000000',
                             },
                         },
                     }}
@@ -136,14 +149,13 @@ export function TasksFilterBar({
                                     ...toggleSelected,
                                 },
                                 '& .MuiToggleButtonGroup-grouped:not(:first-of-type)': {
-                                    borderLeft: '1px solid',
-                                    borderColor: 'divider',
+                                    borderLeft: '1px solid #000000',
                                 },
                             }}
                         >
                             <Tooltip title="All quadrants">
                                 <ToggleButton value="ALL" aria-label="All quadrants">
-                                    All
+                                    <ViewListIcon sx={{ fontSize: 22 }} />
                                 </ToggleButton>
                             </Tooltip>
                             <Tooltip title="Do First">
@@ -183,16 +195,16 @@ export function TasksFilterBar({
                                     ...toggleSelected,
                                 },
                                 '& .MuiToggleButtonGroup-grouped:not(:first-of-type)': {
-                                    borderLeft: '1px solid',
-                                    borderColor: 'divider',
+                                    borderLeft: '1px solid #000000',
                                 },
                             }}
                         >
-                            <ToggleButton value="ALL">
-                                All
+                            <ToggleButton value="ALL" aria-label="All time horizons">
+                                All time
                             </ToggleButton>
-                            <ToggleButton value="SHORT_TERM">
-                                This Week
+                            <ToggleButton value="SHORT_TERM" aria-label="This week">
+                                <CalendarViewWeekIcon sx={{ fontSize: 18, mr: 0.75 }} />
+                                This week
                             </ToggleButton>
                         </ToggleButtonGroup>
                     </Box>
@@ -208,16 +220,19 @@ export function TasksFilterBar({
                 aria-label="Filter tasks by status"
                 sx={{
                     minHeight: 44,
-                    '& .MuiTabs-indicator': { height: 3 },
+                    '& .MuiTabs-indicator': {
+                        height: 3,
+                        backgroundColor: '#000000',
+                    },
                     '& .MuiTab-root': {
                         textTransform: 'none',
-                        fontWeight: 600,
+                        fontWeight: 700,
                         fontSize: '0.9375rem',
                         minHeight: 44,
                         color: 'text.secondary',
                         '&.Mui-selected': {
-                            color: 'primary.main',
-                            fontWeight: 700,
+                            color: '#000000',
+                            fontWeight: 800,
                         },
                     },
                 }}

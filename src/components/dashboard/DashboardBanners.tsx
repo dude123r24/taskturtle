@@ -1,6 +1,7 @@
 'use client';
 
 import Box from '@mui/material/Box';
+import { useTheme, alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
@@ -16,14 +17,15 @@ interface DashboardBannersProps {
 
 export function DashboardBanners({ showWelcome, onDismissWelcome, overload }: DashboardBannersProps) {
     const isLuxury = useLuxuryDashboard();
+    const theme = useTheme();
 
     const glassBanner = isLuxury
         ? {
             backdropFilter: 'blur(18px)',
             WebkitBackdropFilter: 'blur(18px)',
-            backgroundColor: 'rgba(255, 252, 247, 0.4)',
-            border: '1px solid rgba(255, 255, 255, 0.65)',
-            boxShadow: '0 4px 20px rgba(48, 32, 90, 0.06)',
+            backgroundColor: alpha(theme.palette.background.paper, 0.4),
+            border: `1px solid ${alpha(theme.palette.common.white, 0.65)}`,
+            boxShadow: `0 4px 20px ${alpha(theme.palette.primary.dark, 0.06)}`,
         }
         : {};
 
@@ -73,8 +75,8 @@ export function DashboardBanners({ showWelcome, onDismissWelcome, overload }: Da
                         ...(isLuxury
                             ? {
                                 ...glassBanner,
-                                backgroundColor: 'rgba(255, 250, 235, 0.45)',
-                                border: '1px solid rgba(214, 158, 46, 0.4)',
+                                backgroundColor: alpha(theme.palette.warning.light, 0.45),
+                                border: `1px solid ${alpha(theme.palette.warning.main, 0.4)}`,
                             }
                             : {
                                 border: '1px solid rgba(214, 158, 46, 0.35)',
@@ -106,8 +108,8 @@ export function DashboardBanners({ showWelcome, onDismissWelcome, overload }: Da
                         ...(isLuxury
                             ? {
                                 ...glassBanner,
-                                backgroundColor: 'rgba(255, 245, 245, 0.48)',
-                                border: '1px solid rgba(197, 48, 48, 0.35)',
+                                backgroundColor: alpha(theme.palette.error.light, 0.48),
+                                border: `1px solid ${alpha(theme.palette.error.main, 0.35)}`,
                             }
                             : {
                                 border: '1px solid rgba(197, 48, 48, 0.3)',

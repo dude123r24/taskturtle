@@ -65,12 +65,7 @@ export function TodayScheduled({ planTasks, onSelectTask }: TodayScheduledProps)
                         px: 2,
                         borderRadius: 2,
                         ...(isLuxury
-                            ? {
-                                ...frostedLuxury.panelDense,
-                                borderStyle: 'dashed',
-                                borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(26, 26, 26, 0.14)',
-                                backgroundColor: isDark ? 'rgba(30, 30, 40, 0.5)' : 'rgba(255, 252, 247, 0.4)',
-                            }
+                            ? frostedLuxury.panelDense
                             : {
                                 bgcolor: isDark ? 'action.hover' : 'rgba(249, 245, 235, 0.9)',
                                 border: '1px dashed',
@@ -129,10 +124,9 @@ function StackedPlan({
                             ...(isLuxury
                                 ? {
                                     ...frostedLuxury.panelDense,
-                                    backgroundColor: `${QUADRANT_LABELS[t.quadrant]?.color || '#9E9E9E'}0A`,
                                     '&:hover': {
-                                        backgroundColor: `${QUADRANT_LABELS[t.quadrant]?.color || '#9E9E9E'}14`,
-                                        boxShadow: '0 6px 18px rgba(48, 32, 90, 0.07)',
+                                        transform: 'translate(-1px, -1px)',
+                                        boxShadow: '4px 4px 0px #000000',
                                     },
                                 }
                                 : {

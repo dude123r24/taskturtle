@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import { Z } from '@/lib/zIndex';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -194,7 +195,7 @@ function FocusContent() {
                     color: 'text.secondary',
                     width: { xs: 48, md: 40 },
                     height: { xs: 48, md: 40 },
-                    zIndex: 10,
+                    zIndex: Z.floating,
                     bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
                     '&:hover': {
                         bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',

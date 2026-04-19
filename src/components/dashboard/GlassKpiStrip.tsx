@@ -24,13 +24,12 @@ export function GlassKpiStrip({ items }: { items: GlassKpiItem[] }) {
     const embedded = isLuxury
         ? {
               position: 'relative' as const,
-              borderRadius: 3,
-              overflow: 'hidden',
+              borderRadius: 1,
+              overflow: 'visible',
               ...frostedLuxury.panel,
               py: { xs: 2.5, md: 3 },
               px: { xs: 2, md: 2.5 },
               mb: 0,
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(26,26,26,0.08)'}`,
           }
         : {
               position: 'relative' as const,
@@ -66,38 +65,6 @@ export function GlassKpiStrip({ items }: { items: GlassKpiItem[] }) {
                         opacity: 0.55,
                     }}
                 />
-            )}
-            {isLuxury && (
-                <>
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: '-35%',
-                            right: '-6%',
-                            width: { xs: 200, md: 280 },
-                            height: { xs: 200, md: 280 },
-                            borderRadius: '50%',
-                            background: glassBand.blobTeal,
-                            filter: 'blur(72px)',
-                            pointerEvents: 'none',
-                            opacity: 0.35,
-                        }}
-                    />
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            bottom: '-40%',
-                            left: '-8%',
-                            width: { xs: 160, md: 220 },
-                            height: { xs: 160, md: 220 },
-                            borderRadius: '50%',
-                            background: glassBand.blobBlue,
-                            filter: 'blur(64px)',
-                            pointerEvents: 'none',
-                            opacity: 0.3,
-                        }}
-                    />
-                </>
             )}
             <Box
                 sx={{
@@ -144,12 +111,7 @@ export function GlassKpiStrip({ items }: { items: GlassKpiItem[] }) {
                         borderRadius: 2.5,
                         p: 2,
                         ...(isLuxury
-                            ? {
-                                  background: glassBand.glassBg,
-                                  backdropFilter: 'blur(12px)',
-                                  WebkitBackdropFilter: 'blur(12px)',
-                                  border: `1px solid ${glassBand.glassBorder}`,
-                              }
+                            ? frostedLuxury.tile
                             : {
                                   bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
                                   border: `1px solid ${theme.palette.divider}`,
@@ -161,10 +123,9 @@ export function GlassKpiStrip({ items }: { items: GlassKpiItem[] }) {
                                   textDecoration: 'none',
                                   display: 'block',
                                   color: 'inherit',
-                                  '&:hover': {
-                                      transform: 'translateY(-1px)',
-                                      boxShadow: isDark ? '0 6px 20px rgba(0,0,0,0.35)' : '0 6px 20px rgba(0,0,0,0.07)',
-                                  },
+                                  '&:hover': isLuxury
+                                      ? { transform: 'translate(-1px, -1px)', boxShadow: '5px 5px 0px #000000' }
+                                      : { transform: 'translateY(-1px)', boxShadow: isDark ? '0 6px 20px rgba(0,0,0,0.35)' : '0 6px 20px rgba(0,0,0,0.07)' },
                               }
                             : {}),
                     };

@@ -196,12 +196,7 @@ export default function DashboardPage() {
 
     const completedOverTime = useMemo(() => buildCompletedOverTimeSeries(tasks), [tasks]);
 
-    const insightCardSx = isLuxury
-        ? {
-            ...frostedLuxury.panelDense,
-            backgroundColor: 'rgba(255, 252, 247, 0.42)',
-        }
-        : {};
+    const insightCardSx = isLuxury ? frostedLuxury.panelDense : {};
 
     if (isLoading) {
         const skeleton = (

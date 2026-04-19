@@ -55,7 +55,7 @@ export function DashboardQuickStats({ tasks, plannedTodayCount }: DashboardQuick
                 p: { xs: 2.5, md: 3 },
                 borderRadius: 3,
                 ...(isLuxury
-                    ? { ...frostedLuxury.panelDense, backgroundColor: 'rgba(255, 252, 247, 0.5)' }
+                    ? frostedLuxury.panelDense
                     : {
                           bgcolor: 'background.paper',
                           border: '1px solid',

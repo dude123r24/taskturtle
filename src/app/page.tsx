@@ -9,6 +9,9 @@ import {
     CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import { Box, Container, Typography, Button, Stack, Grid } from '@mui/material';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { darkTheme } from '@/lib/theme';
 import { marketingPalette as m } from '@/lib/marketingPalette';
 
 const fontStack = 'var(--font-sans), ui-sans-serif, system-ui, sans-serif';
@@ -36,6 +39,8 @@ const LandingPage = () => {
     ];
 
     return (
+        <MuiThemeProvider theme={darkTheme}>
+            <CssBaseline />
         <Box
             component="main"
             sx={{
@@ -427,6 +432,7 @@ const LandingPage = () => {
                 </Container>
             </Box>
         </Box>
+        </MuiThemeProvider>
     );
 };
 

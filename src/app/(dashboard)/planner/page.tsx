@@ -606,8 +606,8 @@ function TimeSlot({
                                 <Typography variant="caption" sx={{ color: 'primary.main' }}>
                                     ⏱️ {formatTime(taskMap[task.id].timeSlotStart)} - {formatTime(taskMap[task.id].timeSlotEnd)} ({durationMins}m)
                                 </Typography>
-                                <Button size="small" variant="text" sx={{ minWidth: 0, p: 0.5, fontSize: '0.7rem' }} onClick={() => onUpdateDuration(task.id, -15)}>-15m</Button>
-                                <Button size="small" variant="text" sx={{ minWidth: 0, p: 0.5, fontSize: '0.7rem' }} onClick={() => onUpdateDuration(task.id, 15)}>+15m</Button>
+                                <Button size="small" variant="text" sx={{ minWidth: 0, p: 0.5, fontSize: '0.75rem' }} onClick={() => onUpdateDuration(task.id, -15)}>-15m</Button>
+                                <Button size="small" variant="text" sx={{ minWidth: 0, p: 0.5, fontSize: '0.75rem' }} onClick={() => onUpdateDuration(task.id, 15)}>+15m</Button>
                             </Stack>
                         </Box>
                     );

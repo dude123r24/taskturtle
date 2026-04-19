@@ -111,7 +111,7 @@ export default function ChatPage() {
                     sx={{
                         bgcolor: (theme) => `${theme.palette.primary.main}26`,
                         color: 'primary.main',
-                        fontSize: '0.7rem',
+                        fontSize: '0.75rem',
                     }}
                 />
             </Stack>
