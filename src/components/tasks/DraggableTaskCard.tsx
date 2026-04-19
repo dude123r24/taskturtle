@@ -67,13 +67,14 @@ function DraggableTaskCardInner({ task, compact, disableSwipe = false }: Draggab
                 style={{ ...style, touchAction: 'auto', display: 'flex', alignItems: 'stretch' }}
                 onClickCapture={suppressClickAfterDrag}
             >
-                {/* Drag handle — only this initiates drag, so the rest of the card can scroll naturally */}
+                {/* Drag handle — only this initiates drag, so the rest of the card can scroll naturally.
+                    Hidden on mobile to recover horizontal space; touch reorder isn't a primary mobile flow. */}
                 <Box
                     ref={setActivatorNodeRef}
                     {...attributes}
                     {...wrappedListeners}
                     sx={{
-                        display: 'flex',
+                        display: { xs: 'none', md: 'flex' },
                         alignItems: 'center',
                         px: 0.5,
                         cursor: isDnDDragging ? 'grabbing' : 'grab',

@@ -93,10 +93,10 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                 background: isOver
                     ? 'rgba(158, 158, 158, 0.12)'
                     : 'linear-gradient(180deg, rgba(158, 158, 158, 0.08) 0%, rgba(158, 158, 158, 0.03) 40%, transparent 100%)',
-                height: { xs: 200, md: 'calc(40vh - 100px)' },
-                minHeight: 180,
-                maxHeight: 500,
-                overflowY: 'auto',
+                height: { xs: 'auto', md: 'calc(40vh - 100px)' },
+                minHeight: { xs: 120, md: 180 },
+                maxHeight: { xs: 'none', md: 500 },
+                overflowY: { xs: 'visible', md: 'auto' },
                 transition: 'all 0.2s',
                 cursor: 'pointer',
                 display: 'flex',
@@ -212,10 +212,10 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
                 background: isOver
                     ? `${q.color}18`
                     : `linear-gradient(180deg, ${q.color}14 0%, ${q.color}08 40%, transparent 100%)`,
-                height: { xs: 200, md: 'calc(45vh - 100px)' },
-                minHeight: 180,
-                maxHeight: 500,
-                overflowY: 'auto',
+                height: { xs: 'auto', md: 'calc(45vh - 100px)' },
+                minHeight: { xs: 120, md: 180 },
+                maxHeight: { xs: 'none', md: 500 },
+                overflowY: { xs: 'visible', md: 'auto' },
                 transition: 'all 0.2s',
                 cursor: 'pointer',
                 '&:hover': { borderColor: `${q.color}55`, background: `linear-gradient(180deg, ${q.color}1A 0%, ${q.color}0C 40%, transparent 100%)` },

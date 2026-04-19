@@ -174,7 +174,17 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
             ? alpha(theme.palette.success.main, theme.palette.mode === 'dark' ? 0.08 : 0.06)
             : alpha(accentColor, theme.palette.mode === 'dark' ? 0.12 : 0.08);
 
-    const idleShadows: string[] = [];
+    // Pull the active theme's MuiCard default shadow so every task card gets
+    // the same baseline (e.g. neo-brutal hard shadow), regardless of whether
+    // we layer on chase/do-first decorations.
+    const themeCardOverrides = theme.components?.MuiCard?.styleOverrides?.root;
+    const baseCardShadow =
+        themeCardOverrides && typeof themeCardOverrides === 'object'
+            ? ((themeCardOverrides as { boxShadow?: string }).boxShadow)
+            : undefined;
+    const baseShadows = baseCardShadow && baseCardShadow !== 'none' ? [baseCardShadow] : [];
+
+    const idleShadows: string[] = [...baseShadows];
     if (task.isChase && !isDone) {
         idleShadows.push(`inset 0 3px 0 0 ${alpha('#ff9800', 0.95)}`);
     }
@@ -183,7 +193,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
         idleShadows.push(`0 6px 20px ${alpha(accentColor, 0.12)}`);
     }
 
-    const hoverShadows: string[] = [];
+    const hoverShadows: string[] = [...baseShadows];
     if (task.isChase && !isDone) {
         hoverShadows.push(`inset 0 3px 0 0 ${alpha('#ff9800', 0.95)}`);
     }
@@ -293,24 +303,11 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             >
                                 {task.title}
                             </Typography>
-                            {comfortable && (
-                                <Chip
-                                    label={quadrantInfo.label}
-                                    size="small"
-                                    sx={{
-                                        height: 26,
-                                        fontWeight: 700,
-                                        fontSize: '0.75rem',
-                                        bgcolor: alpha(accentColor, 0.2),
-                                        color: accentColor,
-                                        border: `1px solid ${alpha(accentColor, 0.35)}`,
-                                    }}
-                                />
-                            )}
                             {comfortable && task.isChase && (
                                 <Tooltip title="Chasing">
                                     <Chip
-                                        label="🏃 Chase"
+                                        icon={<DirectionsRunIcon sx={{ fontSize: '0.95rem !important', color: 'warning.dark' }} />}
+                                        label="Chase"
                                         size="small"
                                         sx={{
                                             height: 26,
@@ -319,6 +316,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                             bgcolor: alpha('#ff9800', 0.2),
                                             color: 'warning.dark',
                                             border: `1px solid ${alpha('#ff9800', 0.35)}`,
+                                            '& .MuiChip-icon': { ml: 0.5, mr: -0.25 },
                                         }}
                                     />
                                 </Tooltip>

@@ -379,14 +379,19 @@ function TasksPageContent() {
     return (
         <Stack spacing={3}>
             <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
-                <Typography variant="h5" fontWeight={700} letterSpacing="-0.02em">
+                <Typography
+                    variant="h4"
+                    fontWeight={800}
+                    letterSpacing="-0.02em"
+                    sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }}
+                >
                     All Tasks
                 </Typography>
                 <Stack direction="row" spacing={1.5}>
                     <Button
                         component={Link}
                         href="/planner"
-                        variant="contained"
+                        variant="outlined"
                         color="primary"
                         startIcon={<ViewTimelineIcon />}
                         size="medium"
