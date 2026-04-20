@@ -232,9 +232,9 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
         >
             <CardContent
                 sx={{
-                    p: comfortable ? 2 : compact ? 1 : 1.5,
-                    py: comfortable ? 2 : undefined,
-                    '&:last-child': { pb: comfortable ? 2 : compact ? 1 : 1.5 },
+                    p: comfortable ? { xs: 1.25, md: 2 } : compact ? 1 : 1.5,
+                    py: comfortable ? { xs: 1.25, md: 2 } : undefined,
+                    '&:last-child': { pb: comfortable ? { xs: 1.25, md: 2 } : compact ? 1 : 1.5 },
                     display: 'flex',
                     alignItems: comfortable ? 'flex-start' : compact ? 'center' : 'flex-start',
                 }}
@@ -253,8 +253,8 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             sx={{
                                 p: comfortable ? 1 : compact ? 0.5 : 0.75,
                                 mt: comfortable ? 0.25 : compact ? 0 : -0.25,
-                                minWidth: 48,
-                                minHeight: 48,
+                                minWidth: 44,
+                                minHeight: 44,
                                 color: isDone ? 'success.main' : 'text.secondary',
                             }}
                         >
@@ -379,7 +379,7 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                             direction="row"
                             spacing={comfortable ? 1.5 : 1}
                             sx={{
-                                mt: comfortable ? 1.25 : compact ? 0 : 0.75,
+                                mt: comfortable ? { xs: 0.75, md: 1.25 } : compact ? 0 : 0.75,
                                 ...(compact && !comfortable ? { width: '100%', minWidth: 0 } : {}),
                             }}
                             alignItems="center"
@@ -469,8 +469,8 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                     sx={{
                                         color: accentColor,
                                         p: comfortable ? 1 : 0.75,
-                                        minWidth: 48,
-                                        minHeight: 48,
+                                        minWidth: 44,
+                                        minHeight: 44,
                                         '&:hover': { bgcolor: alpha(accentColor, 0.12) },
                                     }}
                                 >
@@ -488,8 +488,8 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                         sx={{
                                             color: 'text.secondary',
                                             p: comfortable ? 1 : 0.75,
-                                            minWidth: 48,
-                                            minHeight: 48,
+                                            minWidth: 44,
+                                            minHeight: 44,
                                         }}
                                     >
                                         <EditIcon sx={{ fontSize: comfortable ? '1.2rem' : '1rem' }} />
@@ -503,8 +503,8 @@ function TaskCardInner({ task, compact = false }: TaskCardProps) {
                                         sx={{
                                             color: 'text.secondary',
                                             p: comfortable ? 1 : 0.75,
-                                            minWidth: 48,
-                                            minHeight: 48,
+                                            minWidth: 44,
+                                            minHeight: 44,
                                             '&:hover': { color: 'error.main' },
                                         }}
                                     >

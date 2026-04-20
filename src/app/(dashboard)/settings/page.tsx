@@ -27,7 +27,6 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -237,9 +236,6 @@ function SettingsContent() {
                             flexWrap: 'wrap',
                         }}
                     >
-                        <ToggleButton value="light" sx={{ gap: 1, color: 'text.primary' }}>
-                            <LightModeIcon fontSize="small" /> Light
-                        </ToggleButton>
                         <ToggleButton value="dark" sx={{ gap: 1, color: 'text.primary' }}>
                             <DarkModeIcon fontSize="small" /> Dark
                         </ToggleButton>
@@ -259,14 +255,8 @@ function SettingsContent() {
                         <ToggleButton value="midnight" sx={{ gap: 1, color: 'text.primary' }}>
                             Midnight
                         </ToggleButton>
-                        <ToggleButton value="dubai" sx={{ gap: 1, color: 'text.primary' }}>
-                            Dubai Gold
-                        </ToggleButton>
                         <ToggleButton value="luxury" sx={{ gap: 1, color: 'text.primary' }}>
                             Neo-brutalism
-                        </ToggleButton>
-                        <ToggleButton value="system" sx={{ gap: 1, color: 'text.primary' }}>
-                            <SettingsBrightnessIcon fontSize="small" /> System
                         </ToggleButton>
                     </ToggleButtonGroup>
                 </CardContent>

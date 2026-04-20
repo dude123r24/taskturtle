@@ -376,36 +376,72 @@ function TasksPageContent() {
     );
     const doneCount = useMemo(() => tasks.filter((t) => t.status === 'DONE').length, [tasks]);
 
+    // Higher-specificity selector needed to beat neo-brutal theme's
+    // MuiButton root override (border: 2px solid #000, boxShadow: 3px 3px 0 #000).
+    const ghostBtnSx = {
+        '&.MuiButton-root': {
+            minHeight: 44,
+            px: 1.5,
+            borderRadius: '10px',
+            border: 'none',
+            boxShadow: 'none',
+            bgcolor: 'transparent',
+            color: 'rgba(17,17,17,0.7)',
+            fontWeight: 500,
+            fontSize: '0.84375rem',
+            textTransform: 'none' as const,
+        },
+        '&.MuiButton-root:hover': {
+            bgcolor: 'rgba(17,17,17,0.05)',
+            color: 'rgba(17,17,17,0.95)',
+            boxShadow: 'none',
+        },
+        '&.MuiButton-root:active': {
+            boxShadow: 'none',
+            transform: 'none',
+        },
+    };
+
     return (
-        <Stack spacing={3}>
+        <Stack spacing={2.5}>
             <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
-                <Typography
-                    variant="h4"
-                    fontWeight={800}
-                    letterSpacing="-0.02em"
-                    sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }}
-                >
-                    All Tasks
-                </Typography>
-                <Stack direction="row" spacing={1.5}>
+                <Box>
+                    <Typography
+                        sx={{
+                            fontSize: '0.78125rem',
+                            color: 'rgba(17,17,17,0.42)',
+                            letterSpacing: '0.02em',
+                            mb: 0.5,
+                            display: { xs: 'none', md: 'block' },
+                        }}
+                    >
+                        Workspace · Personal
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontSize: { xs: '1.5rem', md: '1.875rem' },
+                            fontWeight: 600,
+                            letterSpacing: '-0.02em',
+                            color: 'rgba(17,17,17,0.95)',
+                            lineHeight: 1.15,
+                        }}
+                    >
+                        Tasks
+                    </Typography>
+                </Box>
+                <Stack direction="row" spacing={0.5} alignItems="center">
                     <Button
                         component={Link}
                         href="/planner"
-                        variant="outlined"
-                        color="primary"
-                        startIcon={<ViewTimelineIcon />}
-                        size="medium"
-                        sx={{ borderRadius: 100, px: 2.5, fontWeight: 600 }}
+                        startIcon={<ViewTimelineIcon sx={{ fontSize: 16 }} />}
+                        sx={ghostBtnSx}
                     >
                         Plan timeline
                     </Button>
                     <Button
-                        color="error"
-                        variant="outlined"
-                        startIcon={<DeleteIcon />}
+                        startIcon={<DeleteIcon sx={{ fontSize: 16 }} />}
                         onClick={() => setRecycleBinOpen(true)}
-                        size="medium"
-                        sx={{ borderRadius: 100, px: 2.5, fontWeight: 600 }}
+                        sx={ghostBtnSx}
                     >
                         Recycle bin
                     </Button>

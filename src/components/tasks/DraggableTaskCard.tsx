@@ -5,6 +5,7 @@ import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import Box from '@mui/material/Box';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import TaskCard from './TaskCard';
+import TaskRow from './TaskRow';
 import { type Task, useTaskStore } from '@/store/taskStore';
 import { useRef, useCallback, memo } from 'react';
 import { useTheme } from '@mui/material/styles';
@@ -14,9 +15,10 @@ interface DraggableTaskCardProps {
     task: Task;
     compact?: boolean;
     disableSwipe?: boolean;
+    variant?: 'card' | 'row';
 }
 
-function DraggableTaskCardInner({ task, compact, disableSwipe = false }: DraggableTaskCardProps) {
+function DraggableTaskCardInner({ task, compact, disableSwipe = false, variant = 'card' }: DraggableTaskCardProps) {
     const { patchTask } = useTaskStore();
     const dragOccurred = useRef(false);
 
@@ -67,28 +69,35 @@ function DraggableTaskCardInner({ task, compact, disableSwipe = false }: Draggab
                 style={{ ...style, touchAction: 'auto', display: 'flex', alignItems: 'stretch' }}
                 onClickCapture={suppressClickAfterDrag}
             >
-                {/* Drag handle — only this initiates drag, so the rest of the card can scroll naturally.
-                    Hidden on mobile to recover horizontal space; touch reorder isn't a primary mobile flow. */}
+                {/* Drag handle — only this initiates drag, so the rest of the card can scroll/tap naturally.
+                    On mobile, long-press (500ms) activates drag; on desktop, grab-and-drop. */}
                 <Box
                     ref={setActivatorNodeRef}
                     {...attributes}
                     {...wrappedListeners}
                     sx={{
-                        display: { xs: 'none', md: 'flex' },
+                        display: 'flex',
                         alignItems: 'center',
-                        px: 0.5,
+                        justifyContent: 'center',
+                        px: { xs: 0.25, md: 0.5 },
+                        minWidth: { xs: 24, md: 28 },
                         cursor: isDnDDragging ? 'grabbing' : 'grab',
                         touchAction: 'none',
                         color: 'text.disabled',
                         flexShrink: 0,
                         '&:hover': { color: 'text.secondary' },
+                        '&:active': { color: 'text.secondary' },
                     }}
                     aria-label="Drag to reorder"
                 >
-                    <DragIndicatorIcon fontSize="small" />
+                    <DragIndicatorIcon sx={{ fontSize: { xs: 16, md: 20 } }} />
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <TaskCard task={task} compact={compact} />
+                    {variant === 'row' ? (
+                        <TaskRow task={task} compact={compact} />
+                    ) : (
+                        <TaskCard task={task} compact={compact} />
+                    )}
                 </Box>
             </Box>
         );
@@ -97,6 +106,7 @@ function DraggableTaskCardInner({ task, compact, disableSwipe = false }: Draggab
     return <SwipeableDraggableCard
         task={task}
         compact={compact}
+        variant={variant}
         setNodeRef={setNodeRef}
         style={style}
         attributes={attributes}
@@ -108,11 +118,12 @@ function DraggableTaskCardInner({ task, compact, disableSwipe = false }: Draggab
 }
 
 function SwipeableDraggableCard({
-    task, compact, setNodeRef, style, attributes, listeners,
+    task, compact, variant = 'card', setNodeRef, style, attributes, listeners,
     isDnDDragging, patchTask, suppressClickAfterDrag,
 }: {
     task: Task;
     compact?: boolean;
+    variant?: 'card' | 'row';
     setNodeRef: (node: HTMLElement | null) => void;
     style: React.CSSProperties;
     attributes: any;
@@ -167,7 +178,11 @@ function SwipeableDraggableCard({
                 onDragEnd={handleSwipeEnd}
                 style={{ x, cursor: isDnDDragging ? 'grabbing' : 'grab', position: 'relative', zIndex: 1 }}
             >
-                <TaskCard task={task} compact={compact} />
+                {variant === 'row' ? (
+                    <TaskRow task={task} compact={compact} />
+                ) : (
+                    <TaskCard task={task} compact={compact} />
+                )}
             </motion.div>
         </Box>
     );

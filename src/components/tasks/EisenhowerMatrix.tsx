@@ -4,14 +4,12 @@ import React, { useState, memo, useCallback, useMemo, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import Chip from '@mui/material/Chip';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import {
     DndContext,
@@ -25,13 +23,13 @@ import {
     type DragStartEvent,
 } from '@dnd-kit/core';
 import { motion, AnimatePresence } from 'framer-motion';
+import { alpha } from '@mui/material/styles';
 import { type Task, type EisenhowerQuadrant, useTaskStore } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
 import { Z } from '@/lib/zIndex';
 import { QUADRANT_ICONS } from '@/lib/quadrantIcons';
 import TaskCard from './TaskCard';
 import DraggableTaskCard from './DraggableTaskCard';
-import ListAltIcon from '@mui/icons-material/ListAlt';
 
 interface EisenhowerMatrixProps {
     tasks: Task[];
@@ -86,59 +84,91 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                 }
             }}
             sx={{
-                p: 2,
-                borderRadius: 3,
-                border: isOver ? '2px dashed rgba(255, 255, 255, 0.4)' : '1px solid rgba(158, 158, 158, 0.25)',
-                borderTop: isOver ? '2px dashed rgba(255, 255, 255, 0.4)' : '4px solid rgba(158, 158, 158, 0.5)',
-                background: isOver
-                    ? 'rgba(158, 158, 158, 0.12)'
-                    : 'linear-gradient(180deg, rgba(158, 158, 158, 0.08) 0%, rgba(158, 158, 158, 0.03) 40%, transparent 100%)',
+                p: { xs: 1.25, md: 2 },
+                borderRadius: '16px',
+                border: isOver
+                    ? '1.5px dashed rgba(17,17,17,0.35)'
+                    : '1px solid rgba(17,17,17,0.08)',
+                background: isOver ? 'rgba(17,17,17,0.03)' : '#FFFFFF',
+                boxShadow: '0 1px 2px rgba(17,17,17,0.04), 0 1px 0 rgba(17,17,17,0.02)',
                 height: { xs: 'auto', md: 'calc(40vh - 100px)' },
                 minHeight: { xs: 120, md: 180 },
                 maxHeight: { xs: 'none', md: 500 },
                 overflowY: { xs: 'visible', md: 'auto' },
-                transition: 'all 0.2s',
+                transition: 'background-color 120ms ease, border-color 120ms ease',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                '&:hover': { borderColor: 'rgba(158, 158, 158, 0.5)' },
+                '&:hover': { borderColor: 'rgba(17,17,17,0.14)' },
             }}
         >
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: { xs: 1, md: 1.25 } }}>
                 <Box>
+                    <Stack direction="row" alignItems="center" spacing={1.25}>
+                        <Box
+                            sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: '999px',
+                                bgcolor: 'rgba(17,17,17,0.4)',
+                                flexShrink: 0,
+                            }}
+                        />
+                        <Typography
+                            sx={{
+                                fontSize: '0.9375rem',
+                                fontWeight: 600,
+                                letterSpacing: '-0.005em',
+                                color: 'text.primary',
+                            }}
+                        >
+                            Backlog
+                        </Typography>
+                        <Box
+                            component="span"
+                            sx={{
+                                fontVariantNumeric: 'tabular-nums',
+                                fontSize: '0.78125rem',
+                                fontWeight: 500,
+                                color: 'rgba(17,17,17,0.5)',
+                                bgcolor: 'rgba(17,17,17,0.04)',
+                                px: 0.875,
+                                py: 0.125,
+                                borderRadius: '999px',
+                            }}
+                        >
+                            {tasks.length}
+                        </Box>
+                    </Stack>
                     <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 600, color: 'text.primary', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: 1 }}
+                        sx={{
+                            display: { xs: 'none', md: 'block' },
+                            mt: 0.5,
+                            fontSize: '0.75rem',
+                            color: 'rgba(17,17,17,0.42)',
+                        }}
                     >
-                        <ListAltIcon fontSize="small" sx={{ color: 'text.secondary' }} /> Backlog
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
                         Drag tasks into the Matrix to prioritize them.
                     </Typography>
                 </Box>
-                <Stack direction="row" spacing={0.5} alignItems="center">
-                    <Tooltip title="Bulk add tasks">
-                        <IconButton
-                            className="bulk-add-area"
-                            onClick={(e) => { e.stopPropagation(); setBulkMode(!bulkMode); }}
-                            aria-label="Bulk add tasks"
-                            sx={{
-                                color: bulkMode ? 'primary.main' : 'text.secondary',
-                                bgcolor: bulkMode ? 'rgba(108,99,255,0.1)' : 'transparent',
-                                minWidth: 44,
-                                minHeight: 44,
-                                '&:hover': { bgcolor: 'rgba(108,99,255,0.15)' },
-                            }}
-                        >
-                            <PlaylistAddIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Chip
-                        label={tasks.length}
+                <Tooltip title="Bulk add tasks">
+                    <IconButton
+                        className="bulk-add-area"
+                        onClick={(e) => { e.stopPropagation(); setBulkMode(!bulkMode); }}
+                        aria-label="Bulk add tasks"
                         size="small"
-                        sx={{ bgcolor: 'rgba(158, 158, 158, 0.2)', color: 'text.secondary', fontWeight: 600, fontSize: '0.75rem' }}
-                    />
-                </Stack>
+                        sx={{
+                            color: bulkMode ? 'rgba(17,17,17,0.85)' : 'rgba(17,17,17,0.45)',
+                            bgcolor: bulkMode ? 'rgba(17,17,17,0.06)' : 'transparent',
+                            minWidth: 32,
+                            minHeight: 32,
+                            borderRadius: '8px',
+                            '&:hover': { bgcolor: 'rgba(17,17,17,0.05)', color: 'rgba(17,17,17,0.85)' },
+                        }}
+                    >
+                        <PlaylistAddIcon sx={{ fontSize: 18 }} />
+                    </IconButton>
+                </Tooltip>
             </Stack>
 
             {bulkMode && (
@@ -165,15 +195,22 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                 </Box>
             )}
 
-            <Stack spacing={1} sx={{ flex: 1 }}>
+            <Box
+                sx={{
+                    flex: 1,
+                    '& > * + *': {
+                        borderTop: '1px solid rgba(17,17,17,0.06)',
+                    },
+                }}
+            >
                 {tasks.length === 0 && !bulkMode ? (
-                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3, fontStyle: 'italic', opacity: 0.5 }}>
+                    <Typography variant="body2" sx={{ textAlign: 'center', py: 3, color: 'rgba(17,17,17,0.4)' }}>
                         No tasks in backlog
                     </Typography>
                 ) : (
-                    tasks.map((task) => <DraggableTaskCard key={task.id} task={task} compact disableSwipe />)
+                    tasks.map((task) => <DraggableTaskCard key={task.id} task={task} compact disableSwipe variant="row" />)
                 )}
-            </Stack>
+            </Box>
         </Box>
     );
 });
@@ -205,52 +242,129 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
                 }
             }}
             sx={{
-                p: 2,
-                borderRadius: 3,
-                border: isOver ? `2px dashed ${q.color}` : `1px solid ${q.color}30`,
-                borderTop: isOver ? `2px dashed ${q.color}` : `4px solid ${q.color}`,
-                background: isOver
-                    ? `${q.color}18`
-                    : `linear-gradient(180deg, ${q.color}14 0%, ${q.color}08 40%, transparent 100%)`,
+                p: { xs: 1.25, md: 2 },
+                borderRadius: '16px',
+                border: isOver
+                    ? `1.5px dashed ${alpha(q.color, 0.55)}`
+                    : `1px solid ${alpha(q.color, 0.18)}`,
+                background: isOver ? alpha(q.color, 0.08) : alpha(q.color, 0.045),
+                boxShadow: '0 1px 2px rgba(17,17,17,0.04), 0 1px 0 rgba(17,17,17,0.02)',
                 height: { xs: 'auto', md: 'calc(45vh - 100px)' },
                 minHeight: { xs: 120, md: 180 },
                 maxHeight: { xs: 'none', md: 500 },
                 overflowY: { xs: 'visible', md: 'auto' },
-                transition: 'all 0.2s',
+                transition: 'background-color 120ms ease, border-color 120ms ease',
                 cursor: 'pointer',
-                '&:hover': { borderColor: `${q.color}55`, background: `linear-gradient(180deg, ${q.color}1A 0%, ${q.color}0C 40%, transparent 100%)` },
+                display: 'flex',
+                flexDirection: 'column',
+                '&:hover': { borderColor: alpha(q.color, 0.32) },
             }}
         >
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: q.color, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                        <QIcon sx={{ fontSize: 18, color: q.color }} />
+            <Box sx={{ mb: { xs: 1, md: 1.25 } }}>
+                <Stack direction="row" alignItems="center" spacing={1.25}>
+                    <Box
+                        sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '999px',
+                            bgcolor: q.color,
+                            flexShrink: 0,
+                        }}
+                    />
+                    <Typography
+                        sx={{
+                            fontSize: '0.9375rem',
+                            fontWeight: 600,
+                            letterSpacing: '-0.005em',
+                            color: q.color,
+                        }}
+                    >
                         {q.label}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        {quadrantDescriptions[quadrant]}
-                        {quadrant === 'ELIMINATE' && (
-                            <Box component="span" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>
-                                Tasks in this quadrant are auto-archived after 7 days.
-                            </Box>
-                        )}
+                    <Box
+                        component="span"
+                        sx={{
+                            fontVariantNumeric: 'tabular-nums',
+                            fontSize: '0.78125rem',
+                            fontWeight: 500,
+                            color: 'rgba(17,17,17,0.5)',
+                            bgcolor: 'rgba(17,17,17,0.04)',
+                            px: 0.875,
+                            py: 0.125,
+                            borderRadius: '999px',
+                        }}
+                    >
+                        {tasks.length}
+                    </Box>
+                </Stack>
+                <Typography
+                    sx={{
+                        display: { xs: 'none', md: 'block' },
+                        mt: 0.5,
+                        fontSize: '0.75rem',
+                        color: 'rgba(17,17,17,0.42)',
+                        letterSpacing: '0.01em',
+                    }}
+                >
+                    {quadrantDescriptions[quadrant]}
+                </Typography>
+                {quadrant === 'ELIMINATE' && (
+                    <Typography
+                        sx={{
+                            mt: 0.25,
+                            fontSize: '0.75rem',
+                            color: 'rgba(17,17,17,0.42)',
+                            fontStyle: 'italic',
+                        }}
+                    >
+                        Auto-archived after 7 days.
                     </Typography>
-                </Box>
-                <Chip
-                    label={tasks.length} size="small"
-                    sx={{ bgcolor: `${q.color}28`, color: q.color, fontWeight: 700, fontSize: '0.8rem', minWidth: 32 }}
-                />
-            </Stack>
-
-            <Stack spacing={1} sx={{ minHeight: 100 }}>
-                {tasks.length === 0 ? (
-                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3, fontStyle: 'italic', opacity: 0.5 }}>
-                        No tasks yet
-                    </Typography>
-                ) : (
-                    tasks.map((task) => <DraggableTaskCard key={task.id} task={task} compact disableSwipe />)
                 )}
-            </Stack>
+            </Box>
+
+            <Box
+                sx={{
+                    flex: 1,
+                    minHeight: 80,
+                    '& > * + *': {
+                        borderTop: '1px solid rgba(17,17,17,0.06)',
+                    },
+                }}
+            >
+                {tasks.length === 0 ? (
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            textAlign: 'center',
+                            py: 4,
+                            px: 2,
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: '999px',
+                                border: `1.5px dashed ${alpha(q.color, 0.4)}`,
+                                display: 'grid',
+                                placeItems: 'center',
+                                color: 'rgba(17,17,17,0.4)',
+                                mb: 1,
+                            }}
+                        >
+                            <QIcon sx={{ fontSize: 16, color: alpha(q.color, 0.6) }} />
+                        </Box>
+                        <Typography sx={{ fontSize: '0.84375rem', fontWeight: 500, color: 'rgba(17,17,17,0.6)' }}>
+                            No tasks yet
+                        </Typography>
+                    </Box>
+                ) : (
+                    tasks.map((task) => <DraggableTaskCard key={task.id} task={task} compact disableSwipe variant="row" />)
+                )}
+            </Box>
         </Box>
     );
 });
@@ -332,8 +446,8 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
 
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 3 }, width: '100%' }}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 3, md: 2 }, alignContent: 'start' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, width: '100%' }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 1.5, md: 2 }, alignContent: 'start' }}>
                     {quadrantOrder.map((quadrant) => (
                         <MatrixQuadrant key={quadrant} quadrant={quadrant} tasks={quadrantTasks[quadrant]} />
                     ))}

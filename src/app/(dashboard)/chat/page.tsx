@@ -105,15 +105,7 @@ export default function ChatPage() {
                 <Typography variant="h5" fontWeight={600}>
                     AI Assistant
                 </Typography>
-                <Chip
-                    label="Gemini 2.0"
-                    size="small"
-                    sx={{
-                        bgcolor: (theme) => `${theme.palette.primary.main}26`,
-                        color: 'primary.main',
-                        fontSize: '0.75rem',
-                    }}
-                />
+                <Chip label="Gemini 2.0" size="small" color="warning" />
             </Stack>
 
             {/* Messages Area */}

@@ -56,29 +56,40 @@ export function TaskGridFilterBar({
     const pillSx = {
         display: 'inline-flex',
         alignItems: 'center',
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: 100,
+        border: `1px solid rgba(17,17,17,0.08)`,
+        borderRadius: '10px',
         overflow: 'hidden',
-        bgcolor: theme.palette.background.paper,
-        boxShadow: isDark ? 'none' : '0 1px 2px rgba(0,0,0,0.04)',
+        bgcolor: '#FFFFFF',
+        boxShadow: isDark ? 'none' : '0 1px 2px rgba(17,17,17,0.04)',
         flexShrink: 0,
     } as const;
 
     const btnBase = {
-        border: 'none',
-        borderRadius: 0,
+        // Cancel theme's per-button heavy border (neobrutal theme sets 2px !important)
+        // so buttons fit seamlessly inside the pillSx wrapper.
+        border: 'none !important',
+        boxShadow: 'none !important',
+        borderRadius: '0 !important',
         minHeight: 44,
         textTransform: 'none' as const,
         fontSize: '0.8125rem',
         px: 1.5,
         minWidth: 44,
+        color: 'rgba(17,17,17,0.55)',
+        '&:hover': {
+            bgcolor: 'rgba(17,17,17,0.04)',
+            color: 'rgba(17,17,17,0.85)',
+            boxShadow: 'none !important',
+        },
         '&.Mui-selected': {
-            bgcolor: `${theme.palette.primary.main}18 !important`,
-            color: 'primary.main',
-            fontWeight: 700,
+            bgcolor: 'rgba(17,17,17,0.92) !important',
+            color: '#FFFFFF !important',
+            fontWeight: 600,
+            '& .MuiSvgIcon-root': { color: '#FFFFFF' },
+            '&:hover': { bgcolor: 'rgba(17,17,17,0.95) !important' },
         },
         '&:not(:first-of-type)': {
-            borderLeft: `1px solid ${theme.palette.divider}`,
+            borderLeft: `1px solid rgba(17,17,17,0.06) !important`,
         },
     };
 
@@ -112,15 +123,19 @@ export function TaskGridFilterBar({
                         </InputAdornment>
                     ),
                     sx: {
-                        borderRadius: 999,
-                        bgcolor: theme.palette.background.paper,
+                        borderRadius: '12px',
+                        bgcolor: '#FFFFFF',
                         pl: 1,
-                        '& fieldset': { borderColor: theme.palette.divider },
-                        '&:hover fieldset': { borderColor: `${theme.palette.primary.main}60` },
-                        '&.Mui-focused fieldset': { borderColor: 'primary.main' },
+                        boxShadow: '0 1px 2px rgba(17,17,17,0.04)',
+                        '& fieldset': { borderColor: 'rgba(17,17,17,0.08)' },
+                        '&:hover fieldset': { borderColor: 'rgba(17,17,17,0.18)' },
+                        '&.Mui-focused fieldset': {
+                            borderColor: 'rgba(17,17,17,0.32)',
+                            borderWidth: '1px',
+                        },
                     },
                 }}
-                sx={{ width: '100%', maxWidth: 480 }}
+                sx={{ width: '100%', maxWidth: 520 }}
             />
 
             {/* Filter row — scrolls horizontally on mobile to avoid wrapping chaos */}

@@ -2,8 +2,11 @@
 
 import { createTheme } from '@mui/material/styles';
 
+const FONT_FAMILY =
+    '"Google Sans Flex", "Google Sans", "Roboto", var(--font-sans), "Helvetica", "Arial", sans-serif';
+
 const sharedTypography = {
-    fontFamily: '"Google Sans Flex", "Google Sans", "Roboto", var(--font-sans), "Helvetica", "Arial", sans-serif',
+    fontFamily: FONT_FAMILY,
     h1: { fontWeight: 700, fontSize: '2.5rem' },
     h2: { fontWeight: 700, fontSize: '2rem' },
     h3: { fontWeight: 600, fontSize: '1.5rem' },
@@ -39,118 +42,6 @@ const sharedComponents = {
     },
 };
 
-export const darkTheme = createTheme({
-    palette: {
-        mode: 'dark',
-        primary: {
-            main: '#6C63FF',
-            light: '#9D97FF',
-            dark: '#4A42CC',
-        },
-        secondary: {
-            main: '#FF6584',
-            light: '#FF8FA3',
-            dark: '#CC4E69',
-        },
-        background: {
-            default: '#0F0E17',
-            paper: '#1A1929',
-        },
-        error: { main: '#E53935' },
-        warning: { main: '#FB8C00' },
-        info: { main: '#1E88E5' },
-        success: { main: '#43A047' },
-        text: {
-            primary: '#FFFFFE',
-            secondary: '#B5B7CC',
-        },
-    },
-    typography: sharedTypography,
-    shape: sharedShape,
-    components: {
-        ...sharedComponents,
-        MuiCard: {
-            styleOverrides: {
-                root: {
-                    backgroundImage: 'none',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(10px)',
-                },
-            },
-        },
-        MuiPaper: {
-            styleOverrides: {
-                root: {
-                    backgroundImage: 'none',
-                },
-            },
-        },
-        MuiFab: {
-            styleOverrides: {
-                root: {
-                    boxShadow: '0 4px 14px 0 rgba(108, 99, 255, 0.39)',
-                },
-            },
-        },
-    },
-});
-
-export const lightTheme = createTheme({
-    palette: {
-        mode: 'light',
-        primary: {
-            main: '#5046E5',
-            light: '#7C74FF',
-            dark: '#3730A3',
-        },
-        secondary: {
-            main: '#E8456B',
-            light: '#FF6584',
-            dark: '#BE3455',
-        },
-        background: {
-            default: '#F5F5FA',
-            paper: '#FFFFFF',
-        },
-        error: { main: '#D32F2F' },
-        warning: { main: '#ED6C02' },
-        info: { main: '#1565C0' },
-        success: { main: '#2E7D32' },
-        text: {
-            primary: '#1A1A2E',
-            secondary: '#64648B',
-        },
-    },
-    typography: sharedTypography,
-    shape: sharedShape,
-    components: {
-        ...sharedComponents,
-        MuiCard: {
-            styleOverrides: {
-                root: {
-                    backgroundImage: 'none',
-                    border: '1px solid rgba(0,0,0,0.08)',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                },
-            },
-        },
-        MuiPaper: {
-            styleOverrides: {
-                root: {
-                    backgroundImage: 'none',
-                },
-            },
-        },
-        MuiFab: {
-            styleOverrides: {
-                root: {
-                    boxShadow: '0 4px 14px 0 rgba(80, 70, 229, 0.25)',
-                },
-            },
-        },
-    },
-});
-
 export const googleTheme = createTheme({
     palette: {
         mode: 'light',
@@ -180,7 +71,6 @@ export const googleTheme = createTheme({
     },
     typography: {
         ...sharedTypography,
-        fontFamily: '"Google Sans", "Roboto", "Helvetica", "Arial", sans-serif',
         button: { textTransform: 'none' as const, fontWeight: 500 },
     },
     shape: { borderRadius: 8 },
@@ -405,7 +295,7 @@ export const midnightVioletTheme = createTheme({
     },
 });
 
-export const dubaiGoldTheme = createTheme({
+export const darkTheme = createTheme({
     palette: {
         mode: 'dark',
         primary: {
@@ -476,7 +366,7 @@ export const dubaiGoldTheme = createTheme({
 
 /** Neo-brutalism: heavy black borders, yellow accent, punchy flat design */
 const neoBrutalTypography = {
-    fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
+    fontFamily: FONT_FAMILY,
     h1: { fontWeight: 900, fontSize: '2.5rem', letterSpacing: '-0.02em' },
     h2: { fontWeight: 800, fontSize: '2rem', letterSpacing: '-0.02em' },
     h3: { fontWeight: 800, fontSize: '1.5rem', letterSpacing: '-0.01em' },
@@ -503,7 +393,7 @@ export const luxuryMinimalTheme = createTheme({
             contrastText: '#000000',
         },
         background: {
-            default: '#FDF0FF',
+            default: '#FAFAF7',
             paper: '#FFFFFF',
         },
         error: { main: '#FF3333' },
@@ -648,7 +538,7 @@ export const luxuryMinimalTheme = createTheme({
         MuiAppBar: {
             styleOverrides: {
                 root: {
-                    backgroundColor: '#FDF0FF',
+                    backgroundColor: '#FAFAF7',
                     color: '#000000',
                     boxShadow: 'none',
                     borderBottom: '2px solid #000000',
