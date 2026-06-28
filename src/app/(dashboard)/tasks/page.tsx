@@ -1,16 +1,21 @@
 'use client';
 
-import { Suspense, useEffect, useState, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState, useMemo, useCallback } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import Tooltip from '@mui/material/Tooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RestoreIcon from '@mui/icons-material/Restore';
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
+import GridViewIcon from '@mui/icons-material/GridView';
+import TableRowsIcon from '@mui/icons-material/TableRows';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Link from 'next/link';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -23,6 +28,13 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { useTaskStore, type EisenhowerQuadrant, type TaskHorizon, type Task } from '@/store/taskStore';
 import EisenhowerMatrix from '@/components/tasks/EisenhowerMatrix';
 import { TaskGridFilterBar, type StatusFilter } from '@/components/tasks/TaskGridFilterBar';
+import TaskGridView from '@/components/tasks/TaskGridView';
+
+type TaskView = 'matrix' | 'grid';
+
+function parseViewParam(value: string | null): TaskView {
+    return value === 'grid' ? 'grid' : 'matrix';
+}
 
 const QUADRANT_PARAM_VALUES: EisenhowerQuadrant[] = ['DO_FIRST', 'SCHEDULE', 'DELEGATE', 'ELIMINATE', 'UNASSIGNED'];
 
@@ -294,11 +306,14 @@ function OnboardingWalkthroughDialog({
 
 function TasksPageContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
     const { tasks, isLoading, fetchTasks, createTask } = useTaskStore();
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('ACTIVE');
     const [quadrantFilter, setQuadrantFilter] = useState<EisenhowerQuadrant | 'ALL'>('ALL');
     const [horizonFilter, setHorizonFilter] = useState<TaskHorizon | 'ALL'>('ALL');
+    const [view, setView] = useState<TaskView>('matrix');
     const [recycleBinOpen, setRecycleBinOpen] = useState(false);
     const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
     const [onboardingChecked, setOnboardingChecked] = useState(false);
@@ -310,7 +325,20 @@ function TasksPageContent() {
         else setStatusFilter('ACTIVE');
 
         setQuadrantFilter(parseQuadrantParam(searchParams.get('quadrant')));
+        setView(parseViewParam(searchParams.get('view')));
     }, [searchParams]);
+
+    const handleViewChange = useCallback(
+        (_: React.SyntheticEvent, next: TaskView) => {
+            setView(next);
+            const params = new URLSearchParams(searchParams.toString());
+            if (next === 'matrix') params.delete('view');
+            else params.set('view', next);
+            const qs = params.toString();
+            router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+        },
+        [pathname, router, searchParams]
+    );
 
     useEffect(() => {
         fetchTasks();
@@ -376,6 +404,7 @@ function TasksPageContent() {
     );
     const doneCount = useMemo(() => tasks.filter((t) => t.status === 'DONE').length, [tasks]);
 
+    const theme = useTheme();
     // Higher-specificity selector needed to beat neo-brutal theme's
     // MuiButton root override (border: 2px solid #000, boxShadow: 3px 3px 0 #000).
     const ghostBtnSx = {
@@ -386,14 +415,14 @@ function TasksPageContent() {
             border: 'none',
             boxShadow: 'none',
             bgcolor: 'transparent',
-            color: 'rgba(17,17,17,0.7)',
+            color: theme.palette.text.secondary,
             fontWeight: 500,
             fontSize: '0.84375rem',
             textTransform: 'none' as const,
         },
         '&.MuiButton-root:hover': {
-            bgcolor: 'rgba(17,17,17,0.05)',
-            color: 'rgba(17,17,17,0.95)',
+            bgcolor: theme.palette.action.hover,
+            color: theme.palette.text.primary,
             boxShadow: 'none',
         },
         '&.MuiButton-root:active': {
@@ -409,7 +438,7 @@ function TasksPageContent() {
                     <Typography
                         sx={{
                             fontSize: '0.78125rem',
-                            color: 'rgba(17,17,17,0.42)',
+                            color: 'text.secondary',
                             letterSpacing: '0.02em',
                             mb: 0.5,
                             display: { xs: 'none', md: 'block' },
@@ -422,7 +451,7 @@ function TasksPageContent() {
                             fontSize: { xs: '1.5rem', md: '1.875rem' },
                             fontWeight: 600,
                             letterSpacing: '-0.02em',
-                            color: 'rgba(17,17,17,0.95)',
+                            color: 'text.primary',
                             lineHeight: 1.15,
                         }}
                     >
@@ -448,6 +477,48 @@ function TasksPageContent() {
                 </Stack>
             </Stack>
 
+            <Tabs
+                value={view}
+                onChange={handleViewChange}
+                aria-label="Task view"
+                sx={{
+                    minHeight: 40,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    '& .MuiTab-root': {
+                        minHeight: 40,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                        gap: 0.75,
+                    },
+                }}
+            >
+                <Tab
+                    value="matrix"
+                    label="Matrix"
+                    icon={<GridViewIcon sx={{ fontSize: 18 }} />}
+                    iconPosition="start"
+                />
+                <Tab
+                    value="grid"
+                    label="Grid"
+                    icon={<TableRowsIcon sx={{ fontSize: 18 }} />}
+                    iconPosition="start"
+                />
+            </Tabs>
+
+            {view === 'grid' && (
+                <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 0.5, mt: -1 }}
+                >
+                    Click any cell to edit · Click category chip to move ·
+                    <CheckCircleOutlineIcon sx={{ fontSize: 14, verticalAlign: 'middle' }} /> to complete
+                </Typography>
+            )}
+
             <TaskGridFilterBar
                 search={search}
                 onSearchChange={setSearch}
@@ -461,9 +532,32 @@ function TasksPageContent() {
                 doneCount={doneCount}
             />
 
-            <Box sx={{ mt: 1 }}>
-                <EisenhowerMatrix tasks={filteredTasks} />
-            </Box>
+            {view === 'matrix' ? (
+                <Box sx={{ mt: 1 }}>
+                    <EisenhowerMatrix tasks={filteredTasks} quadrantFilter={quadrantFilter} />
+                </Box>
+            ) : isLoading ? (
+                <Stack spacing={0}>
+                    {[...Array(6)].map((_, i) => (
+                        <Skeleton
+                            key={i}
+                            variant="rounded"
+                            height={64}
+                            sx={{ borderRadius: 0, borderBottom: '1px solid', borderColor: 'divider' }}
+                        />
+                    ))}
+                </Stack>
+            ) : (
+                <TaskGridView
+                    tasks={filteredTasks}
+                    onClearFilters={() => {
+                        setSearch('');
+                        setStatusFilter('ACTIVE');
+                        setQuadrantFilter('ALL');
+                        setHorizonFilter('ALL');
+                    }}
+                />
+            )}
 
             <RecycleBinDialog open={recycleBinOpen} onClose={() => setRecycleBinOpen(false)} />
             <OnboardingWalkthroughDialog

@@ -1,31 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#0A0A14"/>
-  <g transform="translate(256,260)">
-    <!-- Turtle shell body -->
-    <ellipse rx="140" ry="115" fill="#6C63FF" opacity="0.9"/>
-    <!-- Shell pattern - hexagonal segments -->
-    <path d="M0,-80 L40,-40 L40,30 L0,65 L-40,30 L-40,-40 Z" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.5"/>
-    <path d="M40,-40 L100,-25 L100,35 L40,30" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.4"/>
-    <path d="M-40,-40 L-100,-25 L-100,35 L-40,30" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.4"/>
-    <path d="M0,-80 L-60,-95 L-100,-25" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.3"/>
-    <path d="M0,-80 L60,-95 L100,-25" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.3"/>
-    <path d="M0,65 L-60,90 L-100,35" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.3"/>
-    <path d="M0,65 L60,90 L100,35" fill="none" stroke="#0A0A14" stroke-width="4" opacity="0.3"/>
-    <!-- Head -->
-    <ellipse cx="0" cy="-130" rx="32" ry="28" fill="#6C63FF" opacity="0.85"/>
+  <!-- Warm cream background -->
+  <rect width="512" height="512" rx="114" fill="#F7F2E8"/>
+  <!-- Subtle grain texture hint -->
+  <rect width="512" height="512" rx="114" fill="url(#grain)" opacity="0.04"/>
+  <defs>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <!-- Turtle group, centered slightly below midpoint -->
+  <g transform="translate(256,272)">
+    <!-- Shadow under shell -->
+    <ellipse rx="128" ry="20" cy="96" fill="#1C1A17" opacity="0.07"/>
+    <!-- Shell body — terracotta -->
+    <ellipse rx="132" ry="108" fill="#C2511F"/>
+    <!-- Shell highlight top -->
+    <ellipse rx="80" ry="42" cy="-32" fill="#D4703C" opacity="0.45"/>
+    <!-- Shell scute pattern — warm ink lines -->
+    <!-- Centre pentagon -->
+    <polygon points="0,-62 52,-20 32,46 -32,46 -52,-20" fill="none" stroke="#1C1A17" stroke-width="5" stroke-linejoin="round" opacity="0.3"/>
+    <!-- Left panel -->
+    <path d="M-52,-20 L-110,-38 L-112,22 L-52,46" fill="none" stroke="#1C1A17" stroke-width="4" opacity="0.2"/>
+    <!-- Right panel -->
+    <path d="M52,-20 L110,-38 L112,22 L52,46" fill="none" stroke="#1C1A17" stroke-width="4" opacity="0.2"/>
+    <!-- Top left -->
+    <path d="M0,-62 L-40,-96" fill="none" stroke="#1C1A17" stroke-width="4" stroke-linecap="round" opacity="0.18"/>
+    <!-- Top right -->
+    <path d="M0,-62 L40,-96" fill="none" stroke="#1C1A17" stroke-width="4" stroke-linecap="round" opacity="0.18"/>
+    <!-- Head — warm mid-tone -->
+    <ellipse cx="0" cy="-136" rx="30" ry="26" fill="#D4703C"/>
+    <!-- Neck connector -->
+    <rect x="-14" y="-118" width="28" height="20" fill="#D4703C"/>
     <!-- Eyes -->
-    <circle cx="-10" cy="-136" r="5" fill="#0A0A14"/>
-    <circle cx="10" cy="-136" r="5" fill="#0A0A14"/>
-    <circle cx="-8" cy="-137" r="2" fill="white"/>
-    <circle cx="12" cy="-137" r="2" fill="white"/>
-    <!-- Legs -->
-    <ellipse cx="-120" cy="-50" rx="28" ry="18" fill="#6C63FF" opacity="0.7" transform="rotate(-30 -120 -50)"/>
-    <ellipse cx="120" cy="-50" rx="28" ry="18" fill="#6C63FF" opacity="0.7" transform="rotate(30 120 -50)"/>
-    <ellipse cx="-115" cy="60" rx="26" ry="16" fill="#6C63FF" opacity="0.7" transform="rotate(-20 -115 60)"/>
-    <ellipse cx="115" cy="60" rx="26" ry="16" fill="#6C63FF" opacity="0.7" transform="rotate(20 115 60)"/>
+    <circle cx="-10" cy="-140" r="7" fill="#1C1A17"/>
+    <circle cx="10" cy="-140" r="7" fill="#1C1A17"/>
+    <!-- Eye shine -->
+    <circle cx="-7" cy="-143" r="2.5" fill="#FFFBF2"/>
+    <circle cx="13" cy="-143" r="2.5" fill="#FFFBF2"/>
+    <!-- Front-left leg -->
+    <ellipse cx="-112" cy="-44" rx="32" ry="19" fill="#D4703C" transform="rotate(-30,-112,-44)"/>
+    <!-- Front-right leg -->
+    <ellipse cx="112" cy="-44" rx="32" ry="19" fill="#D4703C" transform="rotate(30,112,-44)"/>
+    <!-- Back-left leg -->
+    <ellipse cx="-108" cy="64" rx="30" ry="18" fill="#D4703C" transform="rotate(-18,-108,64)"/>
+    <!-- Back-right leg -->
+    <ellipse cx="108" cy="64" rx="30" ry="18" fill="#D4703C" transform="rotate(18,108,64)"/>
     <!-- Tail -->
-    <ellipse cx="0" cy="120" rx="12" ry="8" fill="#6C63FF" opacity="0.6"/>
+    <ellipse cx="0" cy="112" rx="14" ry="10" fill="#D4703C"/>
   </g>
-  <!-- Checkmark accent -->
-  <path d="M340,120 L365,150 L410,90" fill="none" stroke="#4CAF50" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  <!-- Checkmark — olive success accent, top-right -->
+  <path d="M342,118 L366,148 L410,92" fill="none" stroke="#5A7A3C" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

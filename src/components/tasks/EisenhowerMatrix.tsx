@@ -23,7 +23,7 @@ import {
     type DragStartEvent,
 } from '@dnd-kit/core';
 import { motion, AnimatePresence } from 'framer-motion';
-import { alpha } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import { type Task, type EisenhowerQuadrant, useTaskStore } from '@/store/taskStore';
 import { QUADRANT_LABELS } from '@/lib/utils';
 import { Z } from '@/lib/zIndex';
@@ -33,6 +33,7 @@ import DraggableTaskCard from './DraggableTaskCard';
 
 interface EisenhowerMatrixProps {
     tasks: Task[];
+    quadrantFilter?: EisenhowerQuadrant | 'ALL';
 }
 
 const quadrantOrder = ['DO_FIRST', 'SCHEDULE', 'DELEGATE', 'ELIMINATE'] as const;
@@ -47,6 +48,7 @@ const quadrantDescriptions: Record<string, string> = {
 const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
     const { setNodeRef, isOver } = useDroppable({ id: 'UNASSIGNED' });
     const { setQuickAddOpen, createTask } = useTaskStore();
+    const theme = useTheme();
     const [bulkMode, setBulkMode] = useState(false);
     const [bulkText, setBulkText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,10 +89,12 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                 p: { xs: 1.25, md: 2 },
                 borderRadius: '16px',
                 border: isOver
-                    ? '1.5px dashed rgba(17,17,17,0.35)'
-                    : '1px solid rgba(17,17,17,0.08)',
-                background: isOver ? 'rgba(17,17,17,0.03)' : '#FFFFFF',
-                boxShadow: '0 1px 2px rgba(17,17,17,0.04), 0 1px 0 rgba(17,17,17,0.02)',
+                    ? `1.5px dashed ${alpha(theme.palette.text.primary, 0.35)}`
+                    : `1px solid ${theme.palette.divider}`,
+                background: isOver ? theme.palette.action.hover : theme.palette.background.paper,
+                boxShadow: theme.palette.mode === 'dark'
+                    ? '0 2px 8px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.25)'
+                    : '0 2px 8px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04)',
                 height: { xs: 'auto', md: 'calc(40vh - 100px)' },
                 minHeight: { xs: 120, md: 180 },
                 maxHeight: { xs: 'none', md: 500 },
@@ -99,7 +103,7 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                '&:hover': { borderColor: 'rgba(17,17,17,0.14)' },
+                '&:hover': { borderColor: alpha(theme.palette.text.primary, 0.18) },
             }}
         >
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: { xs: 1, md: 1.25 } }}>
@@ -110,7 +114,7 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                                 width: 8,
                                 height: 8,
                                 borderRadius: '999px',
-                                bgcolor: 'rgba(17,17,17,0.4)',
+                                bgcolor: 'text.secondary',
                                 flexShrink: 0,
                             }}
                         />
@@ -130,8 +134,8 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                                 fontVariantNumeric: 'tabular-nums',
                                 fontSize: '0.78125rem',
                                 fontWeight: 500,
-                                color: 'rgba(17,17,17,0.5)',
-                                bgcolor: 'rgba(17,17,17,0.04)',
+                                color: 'text.secondary',
+                                bgcolor: theme.palette.action.hover,
                                 px: 0.875,
                                 py: 0.125,
                                 borderRadius: '999px',
@@ -145,7 +149,7 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                             display: { xs: 'none', md: 'block' },
                             mt: 0.5,
                             fontSize: '0.75rem',
-                            color: 'rgba(17,17,17,0.42)',
+                            color: 'text.secondary',
                         }}
                     >
                         Drag tasks into the Matrix to prioritize them.
@@ -158,12 +162,12 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                         aria-label="Bulk add tasks"
                         size="small"
                         sx={{
-                            color: bulkMode ? 'rgba(17,17,17,0.85)' : 'rgba(17,17,17,0.45)',
-                            bgcolor: bulkMode ? 'rgba(17,17,17,0.06)' : 'transparent',
+                            color: bulkMode ? 'text.primary' : 'text.secondary',
+                            bgcolor: bulkMode ? theme.palette.action.selected : 'transparent',
                             minWidth: 32,
                             minHeight: 32,
                             borderRadius: '8px',
-                            '&:hover': { bgcolor: 'rgba(17,17,17,0.05)', color: 'rgba(17,17,17,0.85)' },
+                            '&:hover': { bgcolor: theme.palette.action.hover, color: 'text.primary' },
                         }}
                     >
                         <PlaylistAddIcon sx={{ fontSize: 18 }} />
@@ -199,12 +203,12 @@ const BacklogList = memo(function BacklogList({ tasks }: { tasks: Task[] }) {
                 sx={{
                     flex: 1,
                     '& > * + *': {
-                        borderTop: '1px solid rgba(17,17,17,0.06)',
+                        borderTop: `1px solid ${theme.palette.divider}`,
                     },
                 }}
             >
                 {tasks.length === 0 && !bulkMode ? (
-                    <Typography variant="body2" sx={{ textAlign: 'center', py: 3, color: 'rgba(17,17,17,0.4)' }}>
+                    <Typography variant="body2" sx={{ textAlign: 'center', py: 3, color: 'text.secondary' }}>
                         No tasks in backlog
                     </Typography>
                 ) : (
@@ -220,6 +224,7 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
     const q = QUADRANT_LABELS[quadrant];
     const QIcon = QUADRANT_ICONS[quadrant];
     const { setQuickAddOpen } = useTaskStore();
+    const theme = useTheme();
     const didScrollRef = useRef(false);
     const touchStartY = useRef(0);
 
@@ -246,18 +251,20 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
                 borderRadius: '16px',
                 border: isOver
                     ? `1.5px dashed ${alpha(q.color, 0.55)}`
-                    : `1px solid ${alpha(q.color, 0.18)}`,
-                background: isOver ? alpha(q.color, 0.08) : alpha(q.color, 0.045),
-                boxShadow: '0 1px 2px rgba(17,17,17,0.04), 0 1px 0 rgba(17,17,17,0.02)',
+                    : `1px solid ${alpha(q.color, 0.22)}`,
+                background: isOver ? alpha(q.color, 0.1) : alpha(q.color, 0.055),
+                boxShadow: theme.palette.mode === 'dark'
+                    ? '0 4px 16px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3)'
+                    : '0 2px 12px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)',
                 height: { xs: 'auto', md: 'calc(45vh - 100px)' },
                 minHeight: { xs: 120, md: 180 },
                 maxHeight: { xs: 'none', md: 500 },
                 overflowY: { xs: 'visible', md: 'auto' },
-                transition: 'background-color 120ms ease, border-color 120ms ease',
+                transition: 'background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                '&:hover': { borderColor: alpha(q.color, 0.32) },
+                '&:hover': { borderColor: alpha(q.color, 0.4), boxShadow: theme.palette.mode === 'dark' ? '0 6px 20px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)' : '0 4px 16px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.05)' },
             }}
         >
             <Box sx={{ mb: { xs: 1, md: 1.25 } }}>
@@ -287,8 +294,8 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
                             fontVariantNumeric: 'tabular-nums',
                             fontSize: '0.78125rem',
                             fontWeight: 500,
-                            color: 'rgba(17,17,17,0.5)',
-                            bgcolor: 'rgba(17,17,17,0.04)',
+                            color: 'text.secondary',
+                            bgcolor: theme.palette.action.hover,
                             px: 0.875,
                             py: 0.125,
                             borderRadius: '999px',
@@ -302,7 +309,7 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
                         display: { xs: 'none', md: 'block' },
                         mt: 0.5,
                         fontSize: '0.75rem',
-                        color: 'rgba(17,17,17,0.42)',
+                        color: 'text.secondary',
                         letterSpacing: '0.01em',
                     }}
                 >
@@ -313,7 +320,7 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
                         sx={{
                             mt: 0.25,
                             fontSize: '0.75rem',
-                            color: 'rgba(17,17,17,0.42)',
+                            color: 'text.secondary',
                             fontStyle: 'italic',
                         }}
                     >
@@ -327,7 +334,7 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
                     flex: 1,
                     minHeight: 80,
                     '& > * + *': {
-                        borderTop: '1px solid rgba(17,17,17,0.06)',
+                        borderTop: `1px solid ${theme.palette.divider}`,
                     },
                 }}
             >
@@ -351,13 +358,13 @@ const MatrixQuadrant = memo(function MatrixQuadrant({ quadrant, tasks }: { quadr
                                 border: `1.5px dashed ${alpha(q.color, 0.4)}`,
                                 display: 'grid',
                                 placeItems: 'center',
-                                color: 'rgba(17,17,17,0.4)',
+                                color: 'text.disabled',
                                 mb: 1,
                             }}
                         >
                             <QIcon sx={{ fontSize: 16, color: alpha(q.color, 0.6) }} />
                         </Box>
-                        <Typography sx={{ fontSize: '0.84375rem', fontWeight: 500, color: 'rgba(17,17,17,0.6)' }}>
+                        <Typography sx={{ fontSize: '0.84375rem', fontWeight: 500, color: 'text.secondary' }}>
                             No tasks yet
                         </Typography>
                     </Box>
@@ -402,7 +409,7 @@ function DroppableAction({ id, icon: Icon, label, color }: { id: string; icon: R
     );
 }
 
-export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
+export default function EisenhowerMatrix({ tasks, quadrantFilter = 'ALL' }: EisenhowerMatrixProps) {
     const { patchTask } = useTaskStore();
     const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -444,18 +451,28 @@ export default function EisenhowerMatrix({ tasks }: EisenhowerMatrixProps) {
         return result;
     }, [tasks]);
 
+    const visibleQuadrants = quadrantFilter === 'ALL'
+        ? quadrantOrder
+        : quadrantOrder.filter((q) => q === quadrantFilter);
+    const showBacklog = quadrantFilter === 'ALL' || quadrantFilter === 'UNASSIGNED';
+    const singleColumn = quadrantFilter !== 'ALL';
+
     return (
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, width: '100%' }}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 1.5, md: 2 }, alignContent: 'start' }}>
-                    {quadrantOrder.map((quadrant) => (
-                        <MatrixQuadrant key={quadrant} quadrant={quadrant} tasks={quadrantTasks[quadrant]} />
-                    ))}
-                </Box>
+                {visibleQuadrants.length > 0 && (
+                    <Box sx={{ display: 'grid', gridTemplateColumns: singleColumn ? '1fr' : { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 2, md: 2.5 }, alignContent: 'start' }}>
+                        {visibleQuadrants.map((quadrant) => (
+                            <MatrixQuadrant key={quadrant} quadrant={quadrant} tasks={quadrantTasks[quadrant]} />
+                        ))}
+                    </Box>
+                )}
 
-                <Box>
-                    <BacklogList tasks={quadrantTasks['UNASSIGNED']} />
-                </Box>
+                {showBacklog && (
+                    <Box>
+                        <BacklogList tasks={quadrantTasks['UNASSIGNED']} />
+                    </Box>
+                )}
 
                 <AnimatePresence>
                     {activeId && (
