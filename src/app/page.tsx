@@ -13,6 +13,7 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { darkTheme } from '@/lib/theme';
 import { marketingPalette as m } from '@/lib/marketingPalette';
+import TurtleMark from '@/components/TurtleMark';
 
 const fontStack = 'var(--font-sans), ui-sans-serif, system-ui, sans-serif';
 
@@ -88,19 +89,26 @@ const LandingPage = () => {
             >
                 <Container maxWidth="lg">
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography
+                        <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1.1}
                             component={Link}
                             href="/"
-                            sx={{
-                                fontSize: '1.15rem',
-                                fontWeight: 800,
-                                letterSpacing: '-0.02em',
-                                color: m.surface,
-                                textDecoration: 'none',
-                            }}
+                            sx={{ textDecoration: 'none' }}
                         >
-                            Task<span style={{ color: m.accent }}>Turtle</span>
-                        </Typography>
+                            <TurtleMark size={28} color={m.accent} />
+                            <Typography
+                                sx={{
+                                    fontSize: '1.15rem',
+                                    fontWeight: 800,
+                                    letterSpacing: '-0.02em',
+                                    color: m.surface,
+                                }}
+                            >
+                                Task<span style={{ color: m.accent }}>Turtle</span>
+                            </Typography>
+                        </Stack>
                         <Button
                             component={Link}
                             href="/login"

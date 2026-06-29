@@ -1,54 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <!-- Warm cream background -->
-  <rect width="512" height="512" rx="114" fill="#F7F2E8"/>
-  <!-- Subtle grain texture hint -->
-  <rect width="512" height="512" rx="114" fill="url(#grain)" opacity="0.04"/>
-  <defs>
-    <filter id="grain">
-      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
-      <feColorMatrix type="saturate" values="0"/>
-    </filter>
-  </defs>
-  <!-- Turtle group, centered slightly below midpoint -->
-  <g transform="translate(256,272)">
-    <!-- Shadow under shell -->
-    <ellipse rx="128" ry="20" cy="96" fill="#1C1A17" opacity="0.07"/>
-    <!-- Shell body — terracotta -->
-    <ellipse rx="132" ry="108" fill="#C2511F"/>
-    <!-- Shell highlight top -->
-    <ellipse rx="80" ry="42" cy="-32" fill="#D4703C" opacity="0.45"/>
-    <!-- Shell scute pattern — warm ink lines -->
-    <!-- Centre pentagon -->
-    <polygon points="0,-62 52,-20 32,46 -32,46 -52,-20" fill="none" stroke="#1C1A17" stroke-width="5" stroke-linejoin="round" opacity="0.3"/>
-    <!-- Left panel -->
-    <path d="M-52,-20 L-110,-38 L-112,22 L-52,46" fill="none" stroke="#1C1A17" stroke-width="4" opacity="0.2"/>
-    <!-- Right panel -->
-    <path d="M52,-20 L110,-38 L112,22 L52,46" fill="none" stroke="#1C1A17" stroke-width="4" opacity="0.2"/>
-    <!-- Top left -->
-    <path d="M0,-62 L-40,-96" fill="none" stroke="#1C1A17" stroke-width="4" stroke-linecap="round" opacity="0.18"/>
-    <!-- Top right -->
-    <path d="M0,-62 L40,-96" fill="none" stroke="#1C1A17" stroke-width="4" stroke-linecap="round" opacity="0.18"/>
-    <!-- Head — warm mid-tone -->
-    <ellipse cx="0" cy="-136" rx="30" ry="26" fill="#D4703C"/>
-    <!-- Neck connector -->
-    <rect x="-14" y="-118" width="28" height="20" fill="#D4703C"/>
-    <!-- Eyes -->
-    <circle cx="-10" cy="-140" r="7" fill="#1C1A17"/>
-    <circle cx="10" cy="-140" r="7" fill="#1C1A17"/>
-    <!-- Eye shine -->
-    <circle cx="-7" cy="-143" r="2.5" fill="#FFFBF2"/>
-    <circle cx="13" cy="-143" r="2.5" fill="#FFFBF2"/>
-    <!-- Front-left leg -->
-    <ellipse cx="-112" cy="-44" rx="32" ry="19" fill="#D4703C" transform="rotate(-30,-112,-44)"/>
-    <!-- Front-right leg -->
-    <ellipse cx="112" cy="-44" rx="32" ry="19" fill="#D4703C" transform="rotate(30,112,-44)"/>
-    <!-- Back-left leg -->
-    <ellipse cx="-108" cy="64" rx="30" ry="18" fill="#D4703C" transform="rotate(-18,-108,64)"/>
-    <!-- Back-right leg -->
-    <ellipse cx="108" cy="64" rx="30" ry="18" fill="#D4703C" transform="rotate(18,108,64)"/>
-    <!-- Tail -->
-    <ellipse cx="0" cy="112" rx="14" ry="10" fill="#D4703C"/>
-  </g>
-  <!-- Checkmark — olive success accent, top-right -->
-  <path d="M342,118 L366,148 L410,92" fill="none" stroke="#5A7A3C" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none" stroke="#C2511F" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Rounded-shell geometric turtle (TaskTurtle mark) -->
+  <rect x="146" y="146" width="220" height="220" rx="70"/>
+  <polygon points="256,212 300,256 256,300 212,256"/>
+  <circle cx="256" cy="116" r="26"/>
+  <path d="M170,178 L132,140 M342,178 L380,140 M170,334 L132,372 M342,334 L380,372 M256,366 L256,396"/>
 </svg>
