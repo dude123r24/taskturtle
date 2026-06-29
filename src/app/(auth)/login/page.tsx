@@ -16,6 +16,7 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { darkTheme } from '@/lib/theme';
 import { marketingPalette as m } from '@/lib/marketingPalette';
+import TurtleMark from '@/components/TurtleMark';
 
 const fontStack = 'var(--font-sans), ui-sans-serif, system-ui, sans-serif';
 
@@ -211,6 +212,7 @@ function LoginPageContent() {
                                 >
                                     ← Home
                                 </Typography>
+                                <TurtleMark size={40} color={m.coral} sx={{ mb: 1.25 }} />
                                 <Typography
                                     sx={{
                                         fontSize: '1.75rem',

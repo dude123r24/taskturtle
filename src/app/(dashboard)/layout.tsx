@@ -45,6 +45,7 @@ import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import { getPageTitle, getBottomNavValue } from '@/lib/navConfig';
 import { isPlatformAdmin } from '@/lib/taskDeepLinks';
+import TurtleMark from '@/components/TurtleMark';
 
 const DRAWER_WIDTH = 260;
 
@@ -150,13 +151,7 @@ export default function DashboardLayout({
     const brandBlock = useMemo(
         () => (
             <Box sx={{ px: 2, display: 'flex', alignItems: 'center', gap: 1.25, minHeight: 56 }}>
-                <Box
-                    component="img"
-                    src="/icons/icon.svg"
-                    alt=""
-                    aria-hidden="true"
-                    sx={{ width: 30, height: 30, borderRadius: '9px', flexShrink: 0 }}
-                />
+                <TurtleMark size={30} color="#C2511F" />
                 {isGoogle ? (
                     <Typography variant="h5" sx={{ fontWeight: 700 }}>
                         <Box component="span" sx={{ color: '#4285F4' }}>T</Box>
